@@ -1,0 +1,39 @@
+<!-- 玩家充值　Start-->
+ <table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+        <tr>
+          <td height="30" colspan="13" bgcolor="#FFFFFF"><table width="100%" height="45" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td  align="left" bgcolor="#f9f0e1"><ul class="img">
+            <li>
+            <input 
+                  name="username" class="gray" id="username" style="WIDTH: 150px " />  </li>   
+             <li><a href="#" onclick="selectTab('/admin/recharge_records?action=search&flag=search&username='+$('#username').val())"><img src="/images/pic_23.gif" width="54" height="25" border="0" /></a></li></ul></td>
+          </tr>
+      </table></td>
+          </tr>
+        <tr>
+          <td height="30" align="left" bgcolor="#ac7e43" class="white_bc">　ID</td>
+          <td align="left" bgcolor="#ac7e43" class="white_bc">　用户名</td>
+          <td align="left" bgcolor="#ac7e43" class="white_bc">　充值平台币</td>
+          <td align="left" bgcolor="#ac7e43" class="white_bc">　充值游戏币</td>
+          <td align="left" bgcolor="#ac7e43" class="white_bc">　充值时间</td>
+          </tr>
+        %for item,user in c.data:
+        <tr>
+          <td height="30" align="left" bgcolor="#f9f0e1" class="gray">${item.id}</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray">${user.oid}</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray">${item.rmb}</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray">${item.gold}</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray">${readable_time(item.cz_time)}</td>
+        </tr>
+        %endfor
+        %if c.flag == "search":
+            <%namespace file="/admin/mypager.html" import="*" />
+            ${footer_page("/admin/recharge_records?action=search&flag=search&username="+c.search_content+"&page=")}
+        %else:
+            <%namespace file="/admin/mypager.html" import="*" />
+            ${footer_page("/admin/recharge_records?page=")}
+        %endif
+</table>
+<!-- 玩家充值　end-->
+

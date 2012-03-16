@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="130" height="24" fontSize="12" creationComplete="init();" xmlns:ns1="utils.components.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import net.tcp.TcpManager;
+			import utils.events.ConfirmEvent;
+			import wubao.model.User;
+			import utils.WinManager;
+			import utils.GameManager;
+			import mail.list.MailList;
+			
+			private var mailList:MailList = null;
+			
+			private function init():void
+			{
+				lblMail.addEventListener(MouseEvent.CLICK, mailClick);
+			}
+			
+			private function mailClick(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showMail();
+			}
+			
+			public function refresh():void
+			{
+				var gameUser:User = GameManager.gameMgr.user;
+				if (gameUser != null)
+				{
+					lblOrder.text = gameUser.leftOrder.toString();
+				}
+				
+				var mailLen:int = 0;
+				
+				mailList = GameManager.gameMgr.mailList;
+				mailLen = mailList.getNoReadMail().length;
+				
+				if (mailLen <= 0)
+				{
+					cvMail.visible = false;
+					cvMail.includeInLayout = false;
+				}
+				else
+				{
+					cvMail.visible = true;
+					cvMail.includeInLayout = true;
+					lblMail.text = mailLen.toString();
+				}
+
+			}
+			
+			private var winAsk:WinAsk = null;
+			private function buyOrder():void
+			{
+				var str:String = "确定花25金币购买5个军令吗？";
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+			}
+			
+			private function confirmBuy(evt:ConfirmEvent):void
+			{
+				TcpManager.tcpMgr.sendBuyOrder(null);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="0" y="0" width="74" height="24" backgroundImage="@Embed(source='../../images/assets/main/ling.png')">
+		<mx:Label id="lblOrder" height="20" width="30" textAlign="center" x="22" y="2"/>
+		<ns1:GameButton x="53" y="5" width="17" height="15" btnType="add" toolTip="购买军令" click="buyOrder();"/>
+	</mx:Canvas>
+	
+	<mx:Canvas id="cvMail" x="76" y="0" width="54" height="24" backgroundImage="@Embed(source='../../images/assets/main/you.png')">
+		<mx:Label id="lblMail" height="20" width="30" mouseChildren="false" useHandCursor="true" buttonMode="true" textAlign="center" x="22" y="2"/>
+	</mx:Canvas>
+	
+</mx:Canvas>

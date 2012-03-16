@@ -1,0 +1,31 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_top()">
+
+</%def>
+
+<%def name="get_content()">
+<div id="content" >
+% if c.reason:
+    <div style="color:#FF6666; width: 300px; font-size: 16px; margin: 0 auto 10px;">错误提示：${c.reason}</div>
+% endif
+<form action="/admin/do_login" method="post">
+<table width="300px" height="50px" style="margin: 0 auto;">
+	<tr>
+    	<td>用户名：</td>
+        <td><input class="text" name="username" type="text" value=""/></td>
+    </tr>
+	<tr>
+    	<td>密码：</td>
+        <td><input class="text" name="passwd" type="password" value="" /></td>
+	</tr>
+	<tr>
+    	<td></td>
+        <td><input type="submit" value="登 录" /></td>
+    </tr>
+</table>
+</form>
+</div>
+</%def>

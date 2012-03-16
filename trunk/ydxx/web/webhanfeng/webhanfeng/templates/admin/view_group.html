@@ -1,0 +1,247 @@
+<style type="text/css">
+table{width:100%;border-collapse:collapse;margin:1em 0;}
+th, td{text-align:left;padding:.5em;border:1px solid #ddc08f;
+		font-family:"宋体";
+	line-height:20px;
+	font-size:12px;
+	
+	}
+th{background:#ac7e43 repeat-x;color:#fff;}
+td{background:#f9f0e1;}
+</style>
+<table>
+    <tr> 
+        <td>运维组名称</td>
+        <td>
+            <input type="text" name="name" value="${c.group.name}" disabled="disabled">
+        </td>
+    </tr>
+    <tr> 
+        <td>运维组描述</td>
+        <td><input type="text" name="description" value="${c.group.description}" disabled="disabled"></td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <td colspan="4"><font color=red>用户权限管理</font></td>
+    </tr>
+    <tr>
+        %if c.authority.show_user == 1:
+        <td><input type="checkbox" name="show_user" checked="checked" id="show_user" disabled="disabled"/>查看用户</td>
+        %else:
+        <td><input type="checkbox" name="show_user" id="show_user" disabled="disabled"/>查看用户</td>
+        %endif
+        
+        %if c.authority.lock_user == 1:
+        <td><input type="checkbox" name="lock_user" checked="checked" id="lock_user" disabled="disabled"/>锁定用户</td>
+        %else:
+        <td><input type="checkbox" name="lock_user" id="lock_user" disabled="disabled"/>锁定用户</td>
+        %endif
+        
+        %if c.authority.show_pay_log == 1:
+        <td><input type="checkbox" name="show_pay_log" checked="checked" id="show_pay_log" disabled="disabled"/>查看购买记录</td>
+        %else:
+        <td><input type="checkbox" name="show_pay_log" id="show_pay_log" disabled="disabled"/>查看购买记录</td>
+        %endif
+        
+        %if c.authority.show_consume_log == 1:
+        <td><input type="checkbox" name="show_consume_log" id="show_consume_log" checked="checked" disabled="disabled"/>查看消费记录</td>
+        %else:
+        <td><input type="checkbox" name="show_consume_log" id="show_consume_log" disabled="disabled"/>查看消费记录</td>
+        %endif
+    </tr>
+    
+    <tr>
+        <td colspan="4"><font color=red>道具管理</font></td>
+    </tr>
+    <tr>
+        %if c.authority.show_treasure == 1:
+        <td><input type="checkbox" name="show_treasure" id="show_treasure" checked="checked" disabled="disabled"/>查看道具</td>
+        %else:
+        <td><input type="checkbox" name="show_treasure" id="show_treasure" disabled="disabled"/>查看道具</td>
+        %endif
+        
+        %if c.authority.edit_treasure == 1:
+        <td><input type="checkbox" name="edit_treasure" id="edit_treasure" checked="checked" disabled="disabled"/>编辑道具</td>
+        %else:
+        <td><input type="checkbox" name="edit_treasure" id="edit_treasure" disabled="disabled"/>编辑道具</td>
+        %endif
+        
+        %if c.authority.del_treasure == 1:
+        <td><input type="checkbox" name="del_treasure" id="del_treasure" checked="checked" disabled="disabled"/>删除道具</td>
+        %else:
+        <td><input type="checkbox" name="del_treasure" id="del_treasure" disabled="disabled"/>删除道具</td>
+        %endif
+        <td>&nbsp;</td>
+        
+    </tr>
+    
+    <tr>
+        <td colspan="4"><font color=red>副本管理</font></td>
+    </tr>
+    <tr>
+        %if c.authority.show_game == 1:
+        <td><input type="checkbox" name="show_game" id="show_game" checked="checked" disabled="disabled"/>查看副本</td>
+        %else:
+        <td><input type="checkbox" name="show_game" id="show_game" disabled="disabled"/>查看副本</td>
+        %endif
+        
+        %if c.authority.edit_game == 1:
+        <td><input type="checkbox" name="edit_game" id="edit_game" checked="checked" disabled="disabled" />编辑副本</td>
+        %else:
+        <td><input type="checkbox" name="edit_game" id="edit_game" disabled="disabled" />编辑副本</td>
+        %endif
+        
+        %if c.authority.del_game == 1:
+        <td><input type="checkbox" name="del_game" id="del_game" checked="checked" disabled="disabled"/>删除副本</td>
+        %else:
+        <td><input type="checkbox" name="del_game" id="del_game" disabled="disabled"/>删除副本</td>
+        %endif
+        <td>&nbsp;</td>
+        
+    </tr>
+    
+    <tr>
+        <td colspan="4"><font color=red>运维管理</font></td>
+    </tr
+    <tr>
+        
+        %if c.authority.show_maintainer == 1:
+        <td><input type="checkbox" name="show_maintainer" id="show_maintainer" checked="checked" disabled="disabled"/>查看运维</td>
+        %else:
+        <td><input type="checkbox" name="show_maintainer" id="show_maintainer" disabled="disabled"/>查看运维</td>
+        %endif
+        
+        %if c.authority.add_maintainer == 1:
+        <td><input type="checkbox" name="add_maintainer" id="add_maintainer" checked="checked" disabled="disabled"/>增加运维</td>
+        %else:
+        <td><input type="checkbox" name="add_maintainer" id="add_maintainer" disabled="disabled"/>增加运维</td>
+        %endif
+        
+        %if c.authority.del_maintainer == 1:
+        <td><input type="checkbox" name="del_maintainer" id="del_maintainer" checked="checked" disabled="disabled"/>删除运维</td>
+        %else:
+        <td><input type="checkbox" name="del_maintainer" id="del_maintainer" disabled="disabled"/>删除运维</td>
+        %endif
+        <td>&nbsp;</td>
+    </tr>
+        
+    <tr>
+        %if c.authority.show_server == 1:
+        <td><input type="checkbox" name="show_server" id="show_server" checked="checked" disabled="disabled"/>查看服务器</td>
+        %else:
+        <td><input type="checkbox" name="show_server" id="show_server" disabled="disabled"/>查看服务器</td>
+        %endif
+        
+        %if c.authority.add_server == 1:
+        <td><input type="checkbox" name="add_server" id="add_server" checked="checked" disabled="disabled"/>添加服务器</td>
+        %else:
+        <td><input type="checkbox" name="add_server" id="add_server" disabled="disabled"/>添加服务器</td>
+        %endif
+        
+        %if c.authority.edit_server == 1:
+        <td><input type="checkbox" name="edit_server" id="edit_server" checked="checked" disabled="disabled"/>编辑服务器</td>
+        %else:
+        <td><input type="checkbox" name="edit_server" id="edit_server" disabled="disabled"/>编辑服务器</td>
+        %endif
+        
+        %if c.authority.del_server == 1:
+        <td><input type="checkbox" name="del_server" id="del_server" checked="checked" disabled="disabled"/>删除服务器</td>
+        %else:
+        <td><input type="checkbox" name="del_server" id="del_server" disabled="disabled"/>删除服务器</td>
+        %endif
+    </tr> 
+    
+    <tr>
+        <td colspan="4"><font color=red>缓存管理</font></td>
+    </tr>
+    <tr>
+        %if c.authority.show_cache == 1:
+        <td><input type="checkbox" name="show_cache" id="show_cache" checked="checked" disabled="disabled"/>查看缓存</td>
+        %else:
+        <td><input type="checkbox" name="show_cache" id="show_cache" disabled="disabled"/>查看缓存</td>
+        %endif
+        
+        %if c.authority.del_cache == 1:
+        <td><input type="checkbox" name="del_cache" id="del_cache" checked="checked" disabled="disabled"/>删除缓存</td>
+        %else:
+        <td><input type="checkbox" name="del_cache" id="del_cache" disabled="disabled"/>删除缓存</td>
+        %endif
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    
+    <tr>
+        <td colspan="4"><font color=red>系统设置</font></td>
+    </tr>
+    <tr>
+        
+        %if c.authority.edit_resource == 1:
+        <td><input type="checkbox" name="edit_resource" id="edit_resource" checked="checked" disabled="disabled"/>资源服务器设置</td>
+        %else:
+        <td><input type="checkbox" name="edit_resource" id="edit_resource" disabled="disabled"/>资源服务器设置</td>
+        %endif
+        
+        %if c.authority.edit_memcached == 1:
+        <td><input type="checkbox" name="edit_memcached" id="edit_memcached" checked="checked" disabled="disabled"/>memcached服务器设置</td>
+        %else:
+        <td><input type="checkbox" name="edit_memcached" id="edit_memcached" disabled="disabled"/>memcached服务器设置</td>
+        %endif
+        
+        %if c.authority.edit_mail == 1:
+        <td><input type="checkbox" name="edit_mail" id="edit_mail" checked="checked" disabled="disabled"/>邮件设置</td>
+        %else:
+        <td><input type="checkbox" name="edit_mail" id="edit_mail" disabled="disabled"/>邮件设置</td>
+        %endif
+        <td>&nbsp;</td>
+        
+    </tr>
+    
+    <tr>
+        %if c.authority.edit_logsetting == 1:
+        <td><input type="checkbox" name="edit_logsetting" id="edit_logsetting" checked="checked" disabled="disabled"/>系统登录设置</td>
+        %else:
+        <td><input type="checkbox" name="edit_logsetting" id="edit_logsetting" disabled="disabled"/>系统登录设置</td>
+        %endif
+        
+        %if c.authority.edit_invite == 1:
+        <td><input type="checkbox" name="edit_invite" id="edit_invite" checked="checked" disabled="disabled"/>邀请设置</td>
+        %else:
+        <td><input type="checkbox" name="edit_invite" id="edit_invite" disabled="disabled"/>邀请设置</td>
+        %endif
+        
+        %if c.authority.edit_pay_key == 1:
+        <td><input type="checkbox" name="edit_pay_key" id="edit_pay_key" checked="checked" disabled="disabled"/>支付密钥设置</td>
+        %else:
+        <td><input type="checkbox" name="edit_pay_key" id="edit_pay_key" disabled="disabled"/>支付密钥设置</td>
+        %endif
+        <td>&nbsp;</td>
+        
+    </tr>
+    
+    <tr>
+        <td colspan="4"><font color=red>运维组管理</font></td>
+    </tr>
+    <tr>
+        %if c.authority.show_group == 1:
+        <td><input type="checkbox" name="show_group" id="show_group" checked="checked" disabled="disabled"/>查看运维组</td>
+        %else:
+        <td><input type="checkbox" name="show_group" id="show_group" disabled="disabled"/>查看运维组</td>
+        %endif
+        
+        %if c.authority.edit_group == 1:
+        <td><input type="checkbox" name="edit_group" id="edit_group" checked="checked" disabled="disabled"/>编辑运维组</td>
+        %else:
+        <td><input type="checkbox" name="edit_group" id="edit_group" disabled="disabled"/>编辑运维组</td>
+        %endif
+        
+        %if c.authority.edit_group == 1:
+        <td><input type="checkbox" name="del_group" id="del_group" checked="checked" disabled="disabled"/>删除运维组</td>
+        %else:
+        <td><input type="checkbox" name="del_group" id="del_group" disabled="disabled"/>删除运维组</td>
+        %endif
+        <td>&nbsp;</td>
+    </tr>
+    
+</table>

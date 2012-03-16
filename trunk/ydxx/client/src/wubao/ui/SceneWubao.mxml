@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1440" height="720" fontSize="12" color="0xFFFFFF" backgroundColor="0x000000" xmlns:ns1="utils.components.*"
+	 creationComplete="init();" xmlns:wb="wubao.ui.*" xmlns:ns2="utils.ui.*">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.SceneManager;
+			import city.list.AttackCityList;
+			import city.model.AttackCity;
+			import wubao.model.Tech;
+			import wubao.list.TechList;
+			import task.model.Task;
+			import mx.core.UIComponent;
+			import net.tcp.TcpManager;
+			import utils.TipInfo;
+			import wubao.model.User;
+			import wubao.model.Build;
+			import wubao.list.BuildList;
+			import utils.WinManager;
+			import utils.GameManager;
+			import utils.PubUnit;
+			import wubao.model.WuBao;
+			import mx.core.ScrollPolicy;
+			import images.AssetsManager;
+			
+			private var gameWubao:WuBao = null;
+			
+			private function init():void
+			{
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+			}
+			
+			public function initUI():void
+			{
+				sl1.source = AssetsManager.assetsMgr.WUBAO_CHUI;
+				sl2.source = AssetsManager.assetsMgr.WUBAO_CHUI;
+				sl1.visible = false;
+				sl1.includeInLayout = false;
+				sl2.visible = false;
+				sl2.includeInLayout = false;
+				
+				cvBG.progressHandle = loadProgress;
+				cvBG.addEventListener(GameImage.INIT_FINISH, loadBGFinish);
+				cvBG.imageName = "wubao_bg";
+				cvBG.imageURL = GameManager.gameMgr.resURL + "scene/wubao_bg.jpg";
+				hideAllBuildInfo();
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				
+				cvBG.width = 1440;
+				cvBG.height = 720;
+				cvBG.x = int((this.width - cvBG.width) / 2);
+				cvBG.y = int((this.height - cvBG.height) / 2);
+				
+				if (cvBG.width > this.width || cvBG.height > this.height)
+					cvBG.addEventListener(MouseEvent.MOUSE_DOWN, mapDown);
+			}
+			
+			private function mapDown(evt:MouseEvent):void
+			{
+				var maxWidth:int = this.width - cvBG.width;
+				var maxHeight:int = this.height - cvBG.height;
+				
+				var startX:int = int((this.width - cvBG.width) / 2);
+				
+				if (maxWidth > 0)
+				{
+					maxWidth = 0;
+				}
+				else
+					startX = 0;
+				
+				cvBG.startDrag(false, new Rectangle(startX, 0, maxWidth, maxHeight));
+				cvBG.addEventListener(MouseEvent.MOUSE_UP, mapUp);
+			}
+			
+			private function mapUp(evt:MouseEvent):void
+			{
+				cvBG.removeEventListener(MouseEvent.MOUSE_UP, mapUp);
+				cvBG.stopDrag();
+			}
+			
+			private function loadBGFinish(evt:Event):void
+			{
+				initImage();
+				WinManager.winMgr.winLoading.visible = false;
+				WinManager.winMgr.winLoading.includeInLayout = false;
+				swapChildIndex();
+				
+				//判断是否报名参加城战
+				var isAttackCity:Boolean = false;
+				var atkCityList:AttackCityList = GameManager.gameMgr.atkCityList;
+				var attackCity:AttackCity = null;
+				var i:int = 0;
+				
+				for (i = 0; i < atkCityList.length; i++)
+				{
+					attackCity = atkCityList.getObjByIndex(i) as AttackCity;
+					if (attackCity != null && attackCity.hasUser(GameManager.gameMgr.user.uniqID))
+					{
+						isAttackCity = true;
+						break;
+					}
+				} 
+				
+				if (isAttackCity)
+					SceneManager.sceneMgr.enterAttack(attackCity.uniqID);
+			
+			}
+			
+			private function loadProgress(evt:ProgressEvent):void
+			{
+				var info:String = "正在加载坞堡背景，请稍候... " + int(evt.bytesLoaded / evt.bytesTotal * 100).toString() + "%";
+				WinManager.winMgr.showLoadingIntf(info);
+			}
+			
+			private function initImage():void
+			{
+				//农田
+				var farmClass:Class = AssetsManager.assetsMgr.WUBAO_FARM;
+				var farmBitmap:Bitmap = new farmClass();
+				imgFarm.canSel = true;
+				imgFarm.imageURL = farmBitmap;
+				imgFarm.addEventListener(MouseEvent.CLICK, showFarm);
+				blFarm.addEventListener(MouseEvent.CLICK, showFarm);
+				
+				//牧场
+				var ranchClass:Class = AssetsManager.assetsMgr.WUBAO_RANCH;
+				var ranchBitmap:Bitmap = new ranchClass();
+				imgRanch.canSel = true;
+				imgRanch.imageURL = ranchBitmap;
+				imgRanch.addEventListener(MouseEvent.CLICK, showRanch);
+				blRanch.addEventListener(MouseEvent.CLICK, showRanch);
+				
+				//矿山
+				var mineClass:Class = AssetsManager.assetsMgr.WUBAO_MINE;
+				var mineBitmap:Bitmap = new mineClass();
+				imgMine.canSel = true;
+				imgMine.imageURL = mineBitmap;
+				imgMine.addEventListener(MouseEvent.CLICK, showMine);
+				blMine.addEventListener(MouseEvent.CLICK, showMine);
+				
+				//伐木场
+				var woodClass:Class = AssetsManager.assetsMgr.WUBAO_WOOD;
+				var woodBitmap:Bitmap = new woodClass();
+				imgWood.canSel = true;
+				imgWood.imageURL = woodBitmap;
+				imgWood.addEventListener(MouseEvent.CLICK, showCutWood);
+				blWood.addEventListener(MouseEvent.CLICK, showCutWood);
+				
+				//集市
+				var marketClass:Class = AssetsManager.assetsMgr.WUBAO_MARKET;
+				var marketBitmap:Bitmap = new marketClass();
+				imgMarket.canSel = true;
+				imgMarket.imageURL = marketBitmap;
+				imgMarket.addEventListener(MouseEvent.CLICK, showMarket);
+				blMarket.addEventListener(MouseEvent.CLICK, showMarket);
+				
+				//皮革
+				var skinClass:Class = AssetsManager.assetsMgr.WUBAO_SKIN;
+				var skinBitmap:Bitmap = new skinClass();
+				imgSkin.canSel = true;
+				imgSkin.imageURL = skinBitmap;
+				imgSkin.addEventListener(MouseEvent.CLICK, showLeaMill);
+				blSkin.addEventListener(MouseEvent.CLICK, showLeaMill);
+				
+				//议事堂
+				var ystClass:Class = AssetsManager.assetsMgr.WUBAO_YST;
+				var ystBitmap:Bitmap = new ystClass();
+				imgYst.canSel = true;
+				imgYst.imageURL = ystBitmap;
+				imgYst.addEventListener(MouseEvent.CLICK, showYst);
+				blYst.addEventListener(MouseEvent.CLICK, showYst);
+				
+				//民居
+				var roomClass:Class = AssetsManager.assetsMgr.WUBAO_ROOM;
+				var roomBitmap:Bitmap = new roomClass();
+				imgRoom.canSel = true;
+				imgRoom.imageURL = roomBitmap;
+				imgRoom.addEventListener(MouseEvent.CLICK, showRoom);
+				blRoom.addEventListener(MouseEvent.CLICK, showRoom);
+				
+				//书院
+				var schoolClass:Class = AssetsManager.assetsMgr.WUBAO_SCHOOL;
+				var schoolBitmap:Bitmap = new schoolClass();
+				imgSchool.canSel = true;
+				imgSchool.imageURL = schoolBitmap;
+				imgSchool.addEventListener(MouseEvent.CLICK, showSchool);
+				blSchool.addEventListener(MouseEvent.CLICK, showSchool);
+				
+				//客栈
+				var innClass:Class = AssetsManager.assetsMgr.WUBAO_INN;
+				var innBitmap:Bitmap = new innClass();
+				imgInn.canSel = true;
+				imgInn.imageURL = innBitmap;
+				imgInn.addEventListener(MouseEvent.CLICK, showInn);
+				blInn.addEventListener(MouseEvent.CLICK, showInn);
+				
+				//工坊
+				var factoryClass:Class = AssetsManager.assetsMgr.WUBAO_FACTORY;
+				var factoryBitmap:Bitmap = new factoryClass();
+				imgFactory.canSel = true;
+				imgFactory.imageURL = factoryBitmap;
+				imgFactory.addEventListener(MouseEvent.CLICK, showFactory);
+				blFactory.addEventListener(MouseEvent.CLICK, showFactory);
+				
+				//仓库
+				var storeClass:Class = AssetsManager.assetsMgr.WUBAO_STORE;
+				var storeBitmap:Bitmap = new storeClass();
+				imgStore.canSel = true;
+				imgStore.imageURL = storeBitmap;
+				imgStore.addEventListener(MouseEvent.CLICK, showStore);
+				blStore.addEventListener(MouseEvent.CLICK, showStore);
+				
+				//军营
+				var campClass:Class = AssetsManager.assetsMgr.WUBAO_CAMP;
+				var campBitmap:Bitmap = new campClass();
+				imgCamp.canSel = true;
+				imgCamp.imageURL = campBitmap;
+				imgCamp.addEventListener(MouseEvent.CLICK, showCamp);
+				blCamp.addEventListener(MouseEvent.CLICK, showCamp);
+				
+				//医院
+				var hospitalClass:Class = AssetsManager.assetsMgr.WUBAO_HOSPITAL;
+				var hospitaBitmap:Bitmap = new hospitalClass();
+				imgHospital.canSel = true;
+				imgHospital.imageURL = hospitaBitmap;
+				imgHospital.addEventListener(MouseEvent.CLICK, showHospital);
+				blHospital.addEventListener(MouseEvent.CLICK, showHospital);
+				
+				refreshBuild();
+			}
+			
+			private function swapChildIndex():void
+			{
+				var i:int = 0;
+				var index:int = 1;
+				var gi:GameImage = null;
+				var bl:BuildLabel = null;
+				var sl:SWFLoader = null;
+				
+				cvBG.setChildIndex(cvBG.imageUI, 0);
+				
+				for(i = 0; i < cvBG.numChildren;i++)
+				{
+					if (cvBG.getChildAt(i) is GameImage)
+					{
+						gi = cvBG.getChildAt(i) as GameImage;
+						cvBG.setChildIndex(gi, index);
+						index++;
+					}
+				}
+				
+				for(i = 0; i < cvBG.numChildren;i++)
+				{
+					if (cvBG.getChildAt(i) is BuildLabel)
+					{
+						bl = cvBG.getChildAt(i) as BuildLabel;
+						bl.visible = true;
+						bl.includeInLayout = true;
+						cvBG.setChildIndex(bl, index);
+						index++;
+					}
+				}
+				
+				for(i = 0; i < cvBG.numChildren;i++)
+				{
+					if (cvBG.getChildAt(i) is SWFLoader)
+					{
+						sl = cvBG.getChildAt(i) as SWFLoader;
+						cvBG.setChildIndex(sl, index);
+						index++;
+					}
+				}
+			}
+			
+			// 农田
+			private function showFarm(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showFarm();
+			}
+			
+			// 牧场
+			private function showRanch(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showRanch();
+			}
+			
+			// 矿山
+			private function showMine(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showMine();
+			}
+			
+			//伐木场
+			private function showCutWood(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showWood();
+			}
+			
+			//集市
+			private function showMarket(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showMarket();
+			}
+			
+			//皮革
+			private function showLeaMill(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showSkin();
+			}
+			
+			//议事堂
+			private function showYst(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showYst();
+			}
+			
+			//民居
+			private function showRoom(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showRoom();
+			}
+			
+			//书院
+			private function showSchool(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showSchool();
+			}
+			
+			//客栈
+			private function showInn(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showInn();
+			}
+			
+			//工坊
+			private function showFactory(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showFactory();
+			}
+			
+			//仓库
+			private function showStore(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showStore();
+			}
+			
+			//军营
+			private function showCamp(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showCamp();
+			}
+			
+			//医院
+			private function showHospital(evt:MouseEvent):void
+			{
+				WinManager.winMgr.showHospital();
+			}
+			
+			private function hideAllBuildInfo():void
+			{
+				var i:int = 0;
+				var bl:BuildLabel = null;
+				
+				for(i = 0; i < cvBG.numChildren;i++)
+				{
+					if (cvBG.getChildAt(i) is BuildLabel)
+					{
+						bl = cvBG.getChildAt(i) as BuildLabel;
+						bl.visible = false;
+						bl.includeInLayout = false;
+					}
+				}
+			}
+			
+			public function refreshBuild():void
+			{
+				var buildList:BuildList = gameWubao.buildList;
+				var i:int = 0;
+				var build:Build = null;
+				
+				for (i = 0; i < buildList.length; i++)
+				{
+					build = buildList.getObjByIndex(i) as Build;
+					if (build != null)
+					{
+						if (build.type == 1)
+							blSchool.build = build;
+						else if (build.type == 2)
+							blRoom.build = build;
+						else if (build.type == 4)
+							blFactory.build = build;
+						else if (build.type == 5)
+							blFarm.build = build;
+						else if (build.type == 6)
+							blWood.build = build;
+						else if (build.type == 7)
+							blMine.build = build;
+						else if (build.type == 8)
+							blRanch.build = build;
+						else if (build.type == 9)
+							blSkin.build = build;
+						else if (build.type == 10)
+							blMarket.build = build;
+						else if (build.type == 11)
+							blYst.build = build;
+						else if (build.type == 12)
+							blHospital.build = build;
+						else if (build.type == 13)
+							blCamp.build = build;
+					}
+				}
+				
+				blInn.setLabel(0, "客栈", false);
+				blStore.setLabel(0, "库房", false);
+				showUpSwf();
+			}
+			
+			private function showUpSwf():void
+			{
+				var i:int = 0;
+				var bl:BuildLabel = null;
+				var build:Build = null;
+				var upList:Array = [];
+				
+				upList.length = 0;
+				
+				for (i = 0; i < cvBG.numChildren; i++)
+				{
+					if (cvBG.getChildAt(i) is BuildLabel)
+					{
+						bl = cvBG.getChildAt(i) as BuildLabel;
+						if (bl != null)
+						{
+							build = bl.build;
+							if (build != null && build.endTime > 0)
+								upList.push(bl);
+						}
+					}
+				} 
+				
+				stopUpSwf(sl1);
+				stopUpSwf(sl2);
+				
+				var sl:SWFLoader = null;
+				for (i = 0; i < upList.length; i++)
+				{
+					bl = upList[i];
+					sl = this["sl" + (i + 1).toString()] as SWFLoader;
+					
+					playUpSwf(sl, bl);
+				}
+			}
+			
+			private function playUpSwf(swfLoader:SWFLoader, target:UIComponent):void
+			{
+				var mc:MovieClip = swfLoader.content as MovieClip;
+				if (mc != null)
+					mc.play();
+				
+				swfLoader.x = target.x + 15;
+				swfLoader.y = target.y;	
+				swfLoader.visible = true;
+				swfLoader.includeInLayout = true;
+			}
+			
+			private function stopUpSwf(swfLoader:SWFLoader):void
+			{
+				var mc:MovieClip = swfLoader.content as MovieClip;
+				if (mc != null)
+					mc.stop();
+					
+				swfLoader.visible = false;
+				swfLoader.includeInLayout = false;
+			}
+			
+			public function autoRefresh():void
+			{
+				var buildList:BuildList = gameWubao.buildList;
+				var techList:TechList = gameWubao.techList;
+				var i:int = 0;
+				var build:Build = null;
+				var tech:Tech = null;
+				
+				for (i = 0; i < buildList.length; i++)
+				{
+					build = buildList.getObjByIndex(i) as Build;
+					if (build != null)
+					{
+						if (build.endTime > 0 && build.endTime <= GameManager.gameMgr.gameTime)
+							TcpManager.tcpMgr.sendCheck(null);
+					}
+				}
+				
+				for (i = 0; i < techList.length; i++)
+				{
+					tech = techList.getObjByIndex(i) as Tech;
+					if (tech != null)
+					{
+						if (tech.endTime > 0 && tech.endTime <= GameManager.gameMgr.gameTime)
+							TcpManager.tcpMgr.sendCheck(null);
+					}
+				}
+			}
+			
+			public function showProgress():void
+			{
+				var i:int = 0;
+				var count:int = cvBG.numChildren;
+				var bl:BuildLabel = null;
+				
+				for (i = 0; i < count; i++)
+				{
+					if (cvBG.getChildAt(i) is BuildLabel)
+					{
+						bl = cvBG.getChildAt(i) as BuildLabel;
+						bl.showProgress();
+					}
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameImage id="cvBG" x="0" y="0" width="1440" height="720">
+		<!-- 伐木场 -->
+		<ns1:GameImage id="imgWood" x="313" y="301" width="120" height="31">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blWood" x="354" y="280">
+		</ns1:BuildLabel>
+		
+		<!-- 仓库 -->
+		<ns1:GameImage id="imgStore" x="452" y="313" width="90" height="58">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blStore" x="457" y="296">
+		</ns1:BuildLabel>
+		
+		<!-- 议事堂 -->
+		<ns1:GameImage id="imgYst" x="589" y="263" width="159" height="150">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blYst" x="632" y="243">
+		</ns1:BuildLabel>
+		
+		<!-- 书院 -->
+		<ns1:GameImage id="imgSchool" x="751" y="269" width="78" height="98">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blSchool" x="754" y="253">
+		</ns1:BuildLabel>
+		
+		<!-- 牧场 -->
+		<ns1:GameImage id="imgRanch" x="937" y="320" width="131" height="51">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blRanch" x="960" y="301">
+		</ns1:BuildLabel>
+		
+		<!-- 农田 -->
+		<ns1:GameImage id="imgFarm" x="1088" y="306" width="295" height="65">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blFarm" x="1191" y="280">
+		</ns1:BuildLabel>
+		
+		<!-- 矿山 -->
+		<ns1:GameImage id="imgMine" x="0" y="246" width="230" height="173">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blMine" x="95" y="285">
+		</ns1:BuildLabel>
+		
+		<!-- 革坊 -->
+		<ns1:GameImage id="imgSkin" x="308" y="384" width="125" height="70">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blSkin" x="321" y="372">
+		</ns1:BuildLabel>
+		
+		<!-- 工坊 -->
+		<ns1:GameImage id="imgFactory" x="473" y="346" width="114" height="88">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blFactory" x="464" y="362">
+		</ns1:BuildLabel>
+		
+		<!-- 医院 -->
+		<ns1:GameImage id="imgHospital" x="807" y="322" width="98" height="115">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blHospital" x="847" y="358">
+		</ns1:BuildLabel>
+
+		<!-- 集市 -->
+		<ns1:GameImage id="imgMarket" x="994" y="410" width="209" height="81">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blMarket" x="1093" y="406">
+		</ns1:BuildLabel>
+		
+		<!-- 客栈 -->
+		<ns1:GameImage id="imgInn" x="228" y="421" width="126" height="106">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blInn" x="243" y="425">
+		</ns1:BuildLabel>
+		
+		<!-- 民居 -->
+		<ns1:GameImage id="imgRoom" x="396" y="420" width="191" height="88">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blRoom" x="473" y="429">
+		</ns1:BuildLabel>
+		
+		<!-- 军营 -->
+		<ns1:GameImage id="imgCamp" x="836" y="419" width="182" height="94">
+		</ns1:GameImage>
+		<ns1:BuildLabel id="blCamp" x="907" y="423">
+		</ns1:BuildLabel>
+		
+		<mx:SWFLoader id="sl1" x="400" y="92" width="48" height="48" mouseChildren="false" mouseEnabled="false"/>
+		<mx:SWFLoader id="sl2" x="500" y="92" width="48" height="48" mouseChildren="false" mouseEnabled="false"/>
+		
+	</ns1:GameImage>
+	
+</mx:Canvas>

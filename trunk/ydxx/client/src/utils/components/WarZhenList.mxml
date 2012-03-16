@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="60" height="140" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import utils.components.events.BagEvent;
+			import mx.utils.StringUtil;
+		
+			//数据源
+			private var _dataProvider:Array = [];
+			
+			//数据项显示的字段
+			private var _labelField:String = "";
+			
+			//数据项显示的ID
+			private var _itemID:String = "";
+			
+			//数据项的宽度
+			private var _itemWidth:int = 60;
+			
+			//数据项的高度
+			private var _itemHeight:int = 20; 
+			
+			//数据项之间的间隙
+			private var _gap:int = 0;
+			
+			//数据项总数
+			private var itemCount:int = 0;
+			
+			private function init():void
+			{
+				if (dataProvider != null)
+					itemCount = dataProvider.length;
+			}
+			
+			public function showData():void
+			{
+				if (dataProvider == null) return;
+				
+				itemCount = dataProvider.length;
+				if (itemCount <= 0) return;
+				if (StringUtil.trim(labelField) == "") return;
+				
+				this.height = (itemCount + 1) * itemHeight + (itemCount - 1) * gap;
+				
+				var btnItem:GameButton = null;
+				var i:int = 0;
+				var obj:Object;
+				
+				this.removeAllChildren();
+				for(i = 0; i < itemCount; i++)
+				{
+					obj = dataProvider[i];
+					btnItem = new GameButton();
+					btnItem.width = itemWidth;
+					btnItem.height = itemHeight;
+					btnItem.x = 0;
+					btnItem.y = i * (itemHeight + gap);
+					btnItem.label = obj[labelField];
+					btnItem.setStyle("paddingLeft", 0);
+					btnItem.setStyle("paddingRight", 0);
+					btnItem.setStyle("styleName", "xiuItem");
+					btnItem.data = obj;
+					btnItem.addEventListener(MouseEvent.CLICK, onItemClick);
+					
+					this.addChild(btnItem);
+				}
+				
+				var btnCancel:GameButton = new GameButton();
+				btnCancel.width = itemWidth;
+				btnCancel.height = itemHeight;
+				btnCancel.x = 0;
+				btnCancel.y = i * (itemHeight + gap);
+				btnCancel.label = "取消";
+				btnCancel.setStyle("paddingLeft", 0);
+				btnCancel.setStyle("paddingRight", 0);
+				btnCancel.setStyle("styleName", "xiuItem");
+				btnCancel.addEventListener(MouseEvent.CLICK, onCancelClick);
+				
+				this.addChild(btnCancel);
+			}
+			
+			private function onItemClick(evt:MouseEvent):void
+			{
+				var obj:Object = evt.target.data;
+				var e:BagEvent = new BagEvent(BagEvent.ItemClick);
+				e.itemObj = obj;
+				
+				dispatchEvent(e);
+			}
+			
+			private function onCancelClick(evt:MouseEvent):void
+			{
+				this.visible = false;
+				this.includeInLayout = false;
+			}
+			
+			//==============================================================
+			// 属性
+			//==============================================================
+			
+			public function get dataProvider():Array
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(param:Array):void
+			{
+				_dataProvider = param;
+			}
+			
+			public function get labelField():String
+			{
+				return _labelField;
+			}
+			
+			public function set labelField(param:String):void
+			{
+				_labelField = param;
+			}
+			
+			public function get itemID():String
+			{
+				return _itemID;
+			}
+			
+			public function set itemID(param:String):void
+			{
+				_itemID = param;
+			}
+			
+			public function get itemWidth():int
+			{
+				return _itemWidth;
+			}
+			
+			public function set itemWidth(param:int):void
+			{
+				_itemWidth = param;
+			}
+			
+			public function get itemHeight():int
+			{
+				return _itemHeight;
+			}
+			
+			public function set itemHeight(param:int):void
+			{
+				_itemHeight = param;
+			}
+			
+			public function get gap():int
+			{
+				return _gap;
+			}
+			
+			public function set gap(param:int):void
+			{
+				_gap = param;
+			}
+			
+			
+		]]>
+	</mx:Script>
+</mx:Canvas>

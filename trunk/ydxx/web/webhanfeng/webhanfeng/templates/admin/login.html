@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>汉风后台管理</title>
+<style type="text/css" media="all">@import "/css/admin.css";body {
+	background-image: url(/images/bg_login.gif);
+}
+</style>
+</head>
+<body>
+<table width="592" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td height="250">&nbsp;</td>
+  </tr>
+</table>
+<table width="592" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><img src="/images/pic_01.gif" width="592" height="165" /></td>
+  </tr>
+  <tr>
+    <td height="155" valign="top" background="/images/pic_02.gif">
+    <!--用户名表单　start -->
+      <table width="320" border="0" align="center" cellpadding="0" cellspacing="0">
+        <form id="form1" name="form1" method="post" action="/admin/login">
+            <input type="hidden" name="action" value="login" />
+            <input type="hidden" id="error" value="${c.error}" />
+        <tr>
+          <td height="86" valign="top" background="/images/pic_03.gif"><table width="239" border="0" align="center" cellpadding="0" cellspacing="0">
+              <tr>
+                <td height="15" colspan="2"></td>
+              </tr>
+              <tr>
+                <td height="28">用户名：</td>
+                <td><input style="WIDTH: 150px " id="username" 
+                  name="username" /></td>
+              </tr>
+              <tr>
+                <td height="28">密　码：</td>
+                <td><input 
+                  name="password" type="password" id="password" style="WIDTH: 150px" /></td>
+              </tr>
+          </table></td>
+        </tr>
+        <tr>
+          <td height="60"><div align="center">
+            <input type="image" width="113" height="31" border="0" src="/images/pic_04.gif" onClick="document.formName.submit()">
+            </div></td>
+        </tr>
+     </form> </table>
+    <!--用户名表单　end -->    
+    </td>
+  </tr>
+</table>
+</body>
+<script type="text/javascript">
+    error = document.getElementById("error").value;
+    if(error==""){}else{alert(error);}
+</script>
+</html>

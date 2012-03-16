@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<link rel="shortcut icon" href="favicon.ico" /> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>网页游戏</title>
+<link rel="stylesheet" type="text/css" href="/css/global.css" />
+</head>
+<body>
+<div id="login">
+  <div id="login_lt">
+    <div class="login_title"><img src="/images/login_01.jpg"/></div>
+    <div class="login_pic"><img src="/images/login_02.jpg"/></div>
+  </div>
+  <div id="login_rt">
+     <div class="rt_titl"><img src="/images/login_03.jpg"/></div>
+     <div class="yongh">
+        <form id="form1" name="form1" method="post" action="/home/login">
+        <input type="hidden" name="act" value="login">
+        <input type="hidden" name="server_id" value="${c.server_id}">
+        %if c.err != "":
+        <div class="yh_a"><font color="red">${c.err}</font></div>
+        %endif
+        <div class="yh_a">用户名：<input type="text" name="user_name" style="width:190px; height:16px; " /></div>
+        <div class="yh_a">密　码：<input type="password" name="password" style="width:190px; height:16px; " /></div>
+        <div class="yh_b">　　<input type="image" src="/images/login_04.jpg" onclick="document.formName.submit();"/>　　<a href="/home/reset_password"><img src="/images/login_05.jpg" border="0"/></a></div>
+        <div class="yh_c"><a href="/home/reg" ><img src="/images/login_06.jpg" border="0"/></a></div>
+    </form> 
+    </div>
+  </div>
+</div>
+<div class="login_foot"><div class="login_foott"></div></div>
+</body>
+</html>

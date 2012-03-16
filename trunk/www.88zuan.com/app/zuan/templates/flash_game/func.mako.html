@@ -1,0 +1,174 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+
+<%def name="get_group(id)">
+<%
+	from zuan.controllers.flash_game import GROUP_INFO
+%>
+% for item in GROUP_INFO:
+	%if id != item[0]:
+	<input type="radio" name="group" value="${item[0]}" />
+	%else:
+    <input type="radio" name="group" value="${item[0]}" checked="checked" />
+    %endif
+<label>${item[1]}</label>
+%endfor
+</%def>
+
+<%def name="get_left_rank_list(group_id = 0)">
+    <%
+    from zuan.model.flash_game import FlashGame
+    from zuan.controllers.flash_game import get_flash_game_pic_url, get_group
+    import pymongo
+
+    fgs = []
+    if not group_id:
+    	fgs = FlashGame.query({}, limit=80, sort=[('score', pymongo.DESCENDING)])
+    else:
+        fgs = FlashGame.query({"group_id": group_id}, limit=20, sort=[('score', pymongo.DESCENDING)])
+   %>
+
+    %for obj in fgs:
+    <%
+    pic_url = get_flash_game_pic_url(obj, c.setting)
+    %>
+    <div class="table">
+        <div class="row" style="line-height: 22px;">
+            <div class="col" style="width: 80px;">
+                <div class="col_line">
+                    <a href="${h.static_flash_game_detail_url(obj._id)}"><img border="0" class="fg_logo" src="${pic_url}" align="middle" alt="${obj.name}" /></a>
+                </div>
+            </div>
+            <div class="col" style="width: 130px">
+                <!--<div class="col_line">【${get_group(obj.group_id)[1]}小游戏】</div>-->
+                <div class="col_line">${h.short_text(obj.name, 10)}</div>
+                <div class="col_line tip_text">人气：${obj.total_play}</div>
+                <div class="col_line tip_text">得分：${round(obj.score, 2)}</div>
+                <!--<div class="col_line tip_text">大小：${h.fmt_file_size(obj.file_size)}</div>-->
+            </div>
+        </div>
+        <div class="interval"></div>
+    </div>
+    %endfor
+</%def>
+
+
+<%def name="get_list(objs, start_page=1, page=1, end_page=1, group_id = 0, show_header=True, show_footer=True)">
+    <%
+    from zuan.controllers.flash_game import get_flash_game_pic_url, get_group
+    from zuan.controllers.flash_game import GROUP_INFO
+    %>
+   %if show_header:
+   <div class="table" style="height: 115px; border-bottom: solid 1px #ccc;">
+        <div class="row">
+            <div class="col">
+        %for i in range(len(GROUP_INFO)):
+                <a href="${h.static_flash_game_group_url(GROUP_INFO[i][0], 1)}" title="${GROUP_INFO[i][1]}">
+                    %if group_id == GROUP_INFO[i][0]:
+                        <strong>${GROUP_INFO[i][1]}小游戏</strong>
+                    %else:
+                        ${GROUP_INFO[i][1]}小游戏
+                    %endif
+                </a> | 
+        %endfor
+           </div>
+        </div>
+   </div>
+   %endif
+
+    <% i = 0 %>
+    %while i < len(objs):
+
+    <div class="table">
+        <div class="row" style="line-height: 20px;">
+            %for j in range(3):
+            <%
+            if i >= len(objs):
+                break
+            obj = objs[i]
+            pic_url = get_flash_game_pic_url(obj, c.setting)
+            %>
+            <div class="col" style="width: 80px;">
+                <div class="col_line">
+                    <a href="${h.static_flash_game_detail_url(obj._id)}" target="_blank"><img border="0" class="fg_logo" src="${pic_url}" align="middle" alt="${obj.name}" /></a>
+                </div>
+            </div>
+            <div class="col" style="width: 144px">
+                <!--<div class="col_line">【${get_group(obj.group_id)[1]}小游戏】</div> -->
+                <div class="col_line" style="font-size: 1.2em;">${h.short_text(obj.name, 15)}</div>
+                <div class="col_line tip_text">人气：${obj.total_play}</div>
+                <div class="col_line tip_text">大小：${h.fmt_file_size(obj.file_size)}</div>
+            </div>
+            <% i += 1%>
+            %endfor
+        </div>
+        <div class="interval"></div>
+    </div>
+    %endwhile
+
+    %if show_footer:
+    <div class="table">
+        <div class="row">
+            %if c.start_page != 1:
+            <div class="col" style="width: 50px;"><a href="${h.static_flash_game_group_url(group_id, start_page - 1)}">上一页</a></div>
+            %endif
+            %for i in range(start_page, end_page + 1):
+            <div class="col" style="min-width: 0;width: 20px;">
+                %if i == page:
+                <strong><a href="${h.static_flash_game_group_url(group_id, i)}">[${i}]</a></strong>
+                %else:
+                <a href="${h.static_flash_game_group_url(group_id, i)}">${i}</a>
+                %endif
+            </div>
+            %endfor
+            <div class="col" style="width: 50px;"><a href="${h.static_flash_game_group_url(group_id, end_page + 1)}">下一页</a></div>
+        </div>
+    </div>
+    %endif
+</%def>
+
+
+<%def name="get_top_ads()">
+<div class="table" style="height: 90px; overflow:hidden; margin-left: 5px;">
+    <iframe width="100%" height="100%" src="/ad/bu_top.html" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+</div>
+</%def>
+
+<%def name="get_big_ads()">
+<!-- bd ads -->
+<div class="table" style="height: 250px; overflow:hidden;">
+  <iframe width="100%" height="100%" src="/ad/bd_right.html" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+</div>
+<!-- end -->
+
+<!-- google ads -->
+<div class="table" style="height: 250px; overflow:hidden;">
+  <iframe width="100%" height="100%" src="/ad/gg_right.html" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+</div>
+<!-- end -->
+</%def>
+
+<%def name="get_matrix_ads()">
+<%
+import random
+r = random.randint(0, 1)
+bd_style = ""
+gg_style=""
+if r == 0:
+    bd_style="hidden"
+else:
+    gg_style="hidden"
+%>
+<!-- bd ads -->
+<div class="table ${bd_style}" style="height: 250px; overflow:hidden;">
+  <iframe width="100%" height="100%" src="/ad/bd_right.html" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+</div>
+<!-- end -->
+
+<!-- google ads -->
+<div class="table ${gg_style}" style="height: 250px; overflow:hidden;">
+  <iframe width="100%" height="100%" src="/ad/gg_right.html" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+</div>
+<!-- end -->
+</%def>

@@ -1,0 +1,43 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">编辑游戏区</span>
+</div>
+
+<div class="content_content">
+<form action="/admin/edit_line" method="post">
+    <input type="hidden" name="act" value="edit" />
+    <input type="hidden" name="line_id" value="${c.line.id}" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="line_name">区名称</label>
+    <input type="text" id="line_name" name="line_name" value="${c.line.name}"/>
+    </p>
+    
+    <p>
+    <label for="game_id">游戏ID</label>
+    <select id="game_id" name="game_id">
+        %for game in c.games:
+            %if game.id == c.line.game_id:
+                <option value=${game.id} selected="selected">${game.name}</option>
+            %else:
+                <option value=${game.id}>${game.name}</option>
+            %endif
+        %endfor
+    </select>
+    </p>
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+
+</div>
+
+</%def>

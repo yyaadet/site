@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="380" height="296" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			import net.tcp.TcpManager;
+			import net.tcp.model.sphere.TcpCreateSphere;
+			
+			private var gameWubao:WuBao = null;
+			
+			private function init():void
+			{
+				setTitle("创建势力");
+				helpID = 10;
+			}
+			
+			override public function refresh():void
+			{
+				tiName.text = "";
+				taContent.text = "";
+				gameWubao = GameManager.gameMgr.wubao;
+			}
+			
+			private function createSphere():void
+			{
+				var createSphere:TcpCreateSphere = new TcpCreateSphere();
+				createSphere.wbID = gameWubao.uniqID;
+				createSphere.name = tiName.text;
+				createSphere.content = taContent.text;
+				TcpManager.tcpMgr.sendCreateSphere(createSphere);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="360" height="220" styleName="lowCanvas">
+		<mx:Label x="10" y="10" text="名称：" width="41" height="20"/>
+		<GameTextInput id="tiName" x="53" y="10" width="60" isCH="true" maxChars="4" height="20"/>
+		
+		<mx:Label x="13" y="35" text="简介：" width="41" height="20"/>
+		<mx:TextArea id="taContent" x="8" width="340" height="150" maxChars="200" y="58"/>
+		<mx:Label x="121" y="10" text="最多4个中文字符，且必须唯一" height="20"/>
+		<mx:Label x="121" y="35" text="最多200个字符" height="20"/>
+	</mx:Canvas>
+	<OKButton x="122" y="262" click="createSphere();"/>
+	<CloseButton x="194" click="super.closeWin(event);" y="262"/>
+	
+</GameWindow>

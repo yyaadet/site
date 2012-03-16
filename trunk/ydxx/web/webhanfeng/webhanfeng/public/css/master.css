@@ -1,0 +1,35 @@
+body {margin: 0px;text-align:center;font-size:12px;color:#585858;font-family:Arial, Helvetica, sans-serif; background:#F4F3EE;}
+.clean {clear:both;} 
+div,form,img,ul,ol,li,dl,dt,dd { margin: 0; padding: 0; border: 0;}
+#wh_big{ width:736px; height:446px; margin:60px auto 50px auto;}
+.wh_top{ width:736px; height:117px; float:left;}
+.wh_bt{ width:736px; height:274px; float:left; background-image:url(/images/xtwh_bg.gif);}
+.wh_f{ width:300px; height:29px; margin:70px 0px 0px 200px!important;*margin:70px 0px 0px 150px; float:left; font-size:16px; color:#FF0000;}
+.textfield{ width:171px; font-size:15px;color:#000; height:22px;}
+.textfield1{ width:260px; font-size:15px;color:#000; height:22px;}
+#jh_big{ width:736px; height:367px; margin:60px auto 50px auto;}
+.jh_top{ width:736px; height:140px; float:left;}
+.jh_tleft{ width:291px; height:140px; float:left;}
+.jh_tright{width:445px; height:140px; float:left;}
+.jh_bt{ width:736px; height:225px; float:left;}
+.jh_bleft{ width:291px; height:225px; float:left;}
+.jh_bright{width:445px; height:225px; float:left;background-image:url(/images/jh_rb.gif);}
+.bd{ width:350px; height:87px; float:left; margin:25px 0px 0px 35px!important;*margin:25px 0px 0px 18px; }
+.bd_t{ width:350px; height:25px; float:left; text-align:left;}
+.bd_left{ width:171px; float:left;}
+.bd_right{ width:90px; float:left;  margin:7px 0px 0px 15px!important;*margin:7px 0px 0px 10px;color:#FF0000; font-size:13px;}
+.bd_botton{ width:65px; height:26px; float:left; }
+.bd_bottonw{ width:83px; height:26px; float:left; margin-left:20px; }
+.bd_ta{ width:350px; height:26px; float:left; text-align:left;margin-top:27px;}
+#sq_big{ width:736px; height:620px; margin:60px auto 50px auto;}
+.sq_top{ width:736px; height:140px; float:left;}
+.sq_left{ width:291px; height:480px; float:left;}
+.sq_right{ width:445px; height:480px; float:left; background-image:url(/images/sq_rtbg.gif);}
+.right_big{ width:382px; height:375px; float:left; margin:18px 0px 0px 29px!important;*margin:18px 0px 0px 15px;}
+#textfieldr ul{ margin:0px ;padding:3px;}
+.right_big ul li{ list-style-type:none; text-align:left; line-height:24px;height: 27px; font-size:12px;font-family:ËÎÌו;}
+.textfieldr{ width:200px; font-size:12px;color:#656564; height:15px;border: 1px solid #C5C5C4;}
+.textfielde{ width:310px; font-size:12px;color:#656564; height:15px;border: 1px solid #C5C5C4;}
+.textfieldc{ width:130px; font-size:12px;color:#656564; height:15px;border: 1px solid #C5C5C4;}
+.bd_bottons{ width:65px; height:26px; float:left; margin-left:160px!important;*margin-left:80px;}
+.textarea{ width:359px; font-size:15px; color:#656564; height:120px; font-size:12px; font-family:ËÎÌו; border: 1px solid #C5C5C4; }

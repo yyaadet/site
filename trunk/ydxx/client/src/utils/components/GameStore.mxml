@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="256" height="226" creationComplete="init();" minWidth="56" minHeight="48">
+	<mx:Script>
+		<![CDATA[
+			import mx.core.ScrollPolicy;
+		
+			import images.AssetsManager;
+			import mx.collections.ArrayCollection;
+			import utils.components.events.BagEvent;
+			import utils.components.item.BagItem;
+			
+			//数据源
+			private var _dataProvider:Array = null;
+			
+			//数据项唯一ID
+			private var _itemID:String = "";
+			
+			//数量字段
+			private var _numField:String = "";
+			
+			//图片地址字段
+			private var _urlField:String = "";
+			
+			//提示信息字段
+			private var _tipField:String = "";
+			
+			//判断两个数据项是否相等的函数
+			private var _equalFun:String = null;
+			
+			//横排个数
+			private var _rowCount:int = 3;
+			
+			//竖排个数
+			private var _colCount:int = 8;
+			
+			private var _itemWidth:int = 48;
+			
+			private var _itemHeight:int = 48;
+			
+			private var _gapWidth:int = 2;
+			private var _gapHeight:int = 2;
+			
+			private var _max:int = 0;
+			
+			private var _free:int = 0;
+			
+			//数据项总数
+			private var itemCount:int = 0;
+			
+			private var itemList:Array = [];
+			
+			private function init():void
+			{
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				cvContainer.verticalScrollPolicy = ScrollPolicy.ON;
+			}
+			
+			public function showData():void
+			{
+				if (dataProvider == null) return;
+				
+				removeAll();
+				itemCount = dataProvider.length;
+				
+				rowCount = int(this.height / (itemHeight + gapHeight));
+				colCount = int((this.width - 16) / (itemWidth + gapWidth));
+				
+				var i:int = 0;
+				var j:int = 0;
+				var rowIndex:int = 0;
+				var colIndex:int = 0;
+				var bagItem:BagItem = null;
+				var obj:Object;
+				
+				//要显示的个数
+				var showNum:int = max;
+				
+				//需要显示上锁的个数
+				var lock:int = 0;
+				lock = showNum - itemCount - free;
+					
+				//显示当前拥有的数据项
+				for (i = 0; i < itemCount; i++)
+				{
+					obj = dataProvider[i];
+					if (obj[numField] == 0) continue;
+					
+					bagItem = new BagItem();
+					bagItem.width = itemWidth;
+					bagItem.height = itemHeight;
+					bagItem.x = colIndex * (itemWidth + gapWidth) + gapWidth;
+					bagItem.y = rowIndex * (itemHeight + gapHeight) + gapHeight;
+					cvContainer.addChild(bagItem);
+					itemList.push(bagItem);
+					
+					bagItem.addEventListener(MouseEvent.CLICK, onItemClick);
+					bagItem.obj = obj;
+					bagItem.num = obj[numField];
+					bagItem.imageURL = obj[urlField];
+					bagItem.tip = obj[tipField];
+					bagItem.equalFun = equalFun;
+					bagItem.isLock = false;
+					
+					if ((i + 1) % colCount == 0)
+					{
+						colIndex = 0;
+						rowIndex ++;
+					}
+					else
+						colIndex ++;
+				}
+				
+				var deClass:Class;
+				var bmp:Bitmap = null;
+				if (free > 0)
+				{
+					for (i = itemCount; i < itemCount + free; i++)
+					{
+						bagItem = new BagItem();
+						bagItem.width = itemWidth;
+						bagItem.height = itemHeight;
+						bagItem.x = colIndex * (itemWidth + gapWidth) + gapWidth;
+						bagItem.y = rowIndex * (itemHeight + gapHeight) + gapHeight;
+						cvContainer.addChild(bagItem);
+						bagItem.showNum = false;
+						itemList.push(bagItem);
+						bagItem.addEventListener(MouseEvent.CLICK, onItemClick);
+						
+						deClass = AssetsManager.assetsMgr.WPN_DEFAULT;
+						bmp = new deClass();
+						bagItem.imageURL = bmp;
+						
+						if ((i + 1) % colCount == 0)
+						{
+							colIndex = 0;
+							rowIndex ++;
+						}
+						else
+							colIndex ++;
+					}
+				}
+				
+				if (lock > 0)
+				{
+					for (i = itemCount + free; i < showNum; i++)
+					{
+						bagItem = new BagItem();
+						bagItem.width = itemWidth;
+						bagItem.height = itemHeight;
+						bagItem.x = colIndex * (itemWidth + gapWidth) + gapWidth;
+						bagItem.y = rowIndex * (itemHeight + gapHeight) + gapHeight;
+						cvContainer.addChild(bagItem);
+						bagItem.showNum = false;
+						itemList.push(bagItem);
+						bagItem.addEventListener(MouseEvent.CLICK, onItemClick);
+						
+						bagItem.isLock = true;
+						deClass = AssetsManager.assetsMgr.WPN_DEFAULT_L;
+						bmp = new deClass();
+						bagItem.imageURL = bmp;
+						
+						if ((i + 1) % colCount == 0)
+						{
+							colIndex = 0;
+							rowIndex ++;
+						}
+						else
+							colIndex ++;
+					}
+				}
+			}
+			
+			public function removeAll():void
+			{
+				var i:int = 0;
+				var count:int = cvContainer.numChildren;
+				var bagItem:BagItem = null;
+				
+				for(i = 0; i < count; i++)
+				{
+					if (cvContainer.getChildAt(i) is BagItem)
+					{
+						bagItem = cvContainer.getChildAt(i) as BagItem;
+						bagItem.removeAll();
+					}
+				}
+				
+				cvContainer.removeAllChildren();
+				itemList.length = 0;
+			}
+			
+			private function onItemClick(evt:MouseEvent):void
+			{
+				if (evt.currentTarget is BagItem)
+				{
+					var bagItem:BagItem = evt.currentTarget as BagItem;
+					if (bagItem.num < 1) return;
+					
+					var obj:Object = bagItem.obj;
+					var e:BagEvent = new BagEvent(BagEvent.ItemClick);
+					
+					e.bagItem = evt.currentTarget as BagItem;
+					e.mouseEvent = evt;
+					dispatchEvent(e);
+				}
+			}
+			
+			public function getItemByID(uniqID:int):BagItem
+			{
+				var i:int = 0;
+				var ret:BagItem = null;
+				
+				for (i = 0;i < itemList.length; i++)
+				{
+					ret = itemList[i] as BagItem;
+					if (ret.obj == null) continue;
+					
+					if (ret.obj[itemID] == uniqID)
+						return ret;
+				}
+				
+				return null;
+			}
+			
+			public function subItem(item:BagItem, subNum:int):void
+			{
+				if (item != null)
+				{
+					if (subNum >= item.num)
+					{
+						item.clear();
+						item.showNum = false;
+					}
+					else
+					{
+						item.num -= subNum;
+					}
+				}
+			}
+			
+			public function insert(item:BagItem):Boolean
+			{
+				var bagItem:BagItem = null;
+				var i:int = 0;
+				
+				//在背包中找到同样的，则两个合并
+				for (i = 0; i < itemList.length; i++)
+				{
+					bagItem = itemList[i] as BagItem;
+					
+					if (bagItem != null && bagItem.obj != null && bagItem.obj[equalFun](item.obj))
+					{
+						bagItem.combin(item);
+						return true;
+					}
+				}
+				
+				//在背包中找个空格
+				for (i = 0; i < itemList.length; i++)
+				{
+					bagItem = itemList[i] as BagItem;
+					
+					if (bagItem != null && !bagItem.isFill() && !bagItem.isLock)
+					{
+						bagItem.add(item, item.num);
+						bagItem.showNum = true;
+						
+						return true;
+					}
+				}
+				
+				return false;
+			}
+			
+			//==============================================================
+			// 属性
+			//==============================================================
+			
+			public function get dataProvider():Array
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(param:Array):void
+			{
+				_dataProvider = param;
+			}
+			
+			public function get itemID():String
+			{
+				return _itemID;
+			}
+			
+			public function set itemID(param:String):void
+			{
+				_itemID = param;
+			}
+			
+			public function get numField():String
+			{
+				return _numField;
+			}
+			
+			public function set numField(param:String):void
+			{
+				_numField = param;
+			}
+			
+			public function get urlField():String
+			{
+				return _urlField;
+			}
+			
+			public function set urlField(param:String):void
+			{
+				_urlField = param;
+			}
+			
+			public function get tipField():String
+			{
+				return _tipField;
+			}
+			
+			public function set tipField(param:String):void
+			{
+				_tipField = param;
+			}
+			
+			public function get equalFun():String
+			{
+				return _equalFun;
+			}
+			
+			public function set equalFun(param:String):void
+			{
+				_equalFun = param;
+			}
+			
+			public function get rowCount():int
+			{
+				return _rowCount;
+			}
+			
+			public function set rowCount(param:int):void
+			{
+				_rowCount = param;
+			}
+			
+			public function get colCount():int
+			{
+				return _colCount;
+			}
+			
+			public function set colCount(param:int):void
+			{
+				_colCount = param;
+			}
+			
+			public function get itemWidth():int
+			{
+				return _itemWidth;
+			}
+			
+			public function set itemWidth(param:int):void
+			{
+				_itemWidth = param;
+			}
+			
+			public function get itemHeight():int
+			{
+				return _itemHeight;
+			}
+			
+			public function set itemHeight(param:int):void
+			{
+				_itemHeight = param;
+			}
+			
+			public function get gapWidth():int
+			{
+				return _gapWidth;
+			}
+			
+			public function set gapWidth(param:int):void
+			{
+				_gapWidth = param;
+			}
+
+			public function get gapHeight():int
+			{
+				return _gapHeight;
+			}
+			
+			public function set gapHeight(param:int):void
+			{
+				_gapHeight = param;
+			}
+			
+			public function get max():int
+			{
+				return _max;
+			}
+			
+			public function set max(param:int):void
+			{
+				_max = param;
+			}
+			
+			public function get free():int
+			{
+				return _free;
+			}
+			
+			public function set free(param:int):void
+			{
+				_free = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvContainer" x="0" y="0" width="100%" height="100%" verticalScrollPolicy="on">
+	</mx:Canvas>
+</mx:Canvas>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="50" height="60" xmlns:ns1="utils.components.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import wubao.ui.events.ComposeEvent;
+			import wubao.ui.events.SellEvent;
+			import wubao.ui.events.DestroyEvent;
+		
+			private function compose():void
+			{
+				var evt:ComposeEvent = new ComposeEvent(ComposeEvent.COMPOSE);
+				this.dispatchEvent(evt);
+			}
+			
+			private function sell():void
+			{
+				var evt:SellEvent = new SellEvent(SellEvent.SELL);
+				this.dispatchEvent(evt);
+			}
+			
+			private function destroy():void
+			{
+				var evt:DestroyEvent = new DestroyEvent(DestroyEvent.DESTROY);
+				this.dispatchEvent(evt);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton id="btnCompose" x="0" y="0" height="20" width="50" label="强　化" btnType="menu" click="compose();"/>
+	<ns1:GameButton x="0" y="20" height="20" width="50" label="出　售" btnType="menu" click="sell();"/>
+	<ns1:GameButton x="0" y="40" height="20" width="50" label="回　收" btnType="menu" click="destroy();"/>
+	
+</mx:Canvas>

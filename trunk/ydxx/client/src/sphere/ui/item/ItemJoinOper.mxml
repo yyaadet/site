@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="118" height="21" xmlns:ns1="utils.components.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import sphere.list.SphereList;
+			import utils.GameManager;
+			import sphere.model.Sphere;
+			import wubao.model.User;
+			import net.tcp.model.sphere.TcpConfJoin;
+			import net.tcp.TcpManager;
+			import mail.model.Mail;
+			
+			private var _data:Object;
+			
+			private function agree():void
+			{
+				send(1);
+			}
+			
+			private function refuse():void
+			{
+				send(0);
+			}
+			
+			private function send(type:int):void
+			{
+				var gameMail:Mail = data as Mail;
+				var gameUser:User = gameMail.gameUser;
+				if (gameUser == null) return;
+				
+				var confJoin:TcpConfJoin = new TcpConfJoin();
+				confJoin.mailID = gameMail.uniqID;
+				confJoin.userID = gameUser.uniqID;
+				confJoin.isConf = type;
+				TcpManager.tcpMgr.sendConfJoin(confJoin);
+			}
+			
+			override public function get data():Object
+			{
+				return _data;
+			} 
+			
+			override public function set data(value:Object):void
+			{
+				_data = value;
+				
+				var self:User = GameManager.gameMgr.user;
+				var sphereList:SphereList = GameManager.gameMgr.sphereList;
+				var gameSphere:Sphere = sphereList.getObjByID(self.sphereID) as Sphere;
+				
+				if (gameSphere != null && gameSphere.isFull)
+					btnAgree.enabled = false;
+				else
+					btnAgree.enabled = true;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton id="btnAgree" x="2" y="0" btnType="menu" label="同意" click="agree();" width="56" height="21"/>
+	<ns1:GameButton x="60" y="0" btnType="menu" label="拒绝" click="refuse();" width="56" height="21"/>
+	
+</mx:Canvas>

@@ -1,0 +1,21 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+    	<div class="table" style="height: 35px;">
+        	<div class="row">
+            	<div class="col"><a href="/admin/flash_game_add">添加小游戏</a></div>
+            </div>
+        </div>
+        
+        <form action="/admin/edit_flash_game" method="get">
+        <div class="table">
+        	<div class="row">
+            	<div class="col">小游戏ID</div>
+                <div class="col"><input type="text" name="id" value="" /></div>
+                <div class="col"><input type="submit" value="搜索" /></div>
+            </div>
+        </div>
+        </form>
+</%def>

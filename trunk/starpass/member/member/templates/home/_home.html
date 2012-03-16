@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<!--<link rel="shortcut icon" href="favicon.ico" /> -->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="/css/global.css" />
+<script type="text/javascript" src="/scripts/jquery.js"></script>
+<script type="text/javascript" src="/scripts/jquery.min.js"></script>
+
+${self.html_head()}
+${self.html_title()}
+</head>
+<body>
+<div id="top">
+    ${self.html_top()}
+</div>
+
+
+<div id="content">
+    <div id="left_big">
+        ${self.html_left()}
+    </div> 
+      
+   <div class="rt_big">
+     <div class="rt_titlebg"><dl>${self.html_content_title()}</dl></div>
+     <div class="md_top"><img src="/images/md_top.jpg"/></div>
+     
+     <div class="md_md">
+       <div class="youxi_md">
+         ${self.html_content()}
+       </div>
+     </div>
+     <div class="md_bottom"><img src="/images/md_bottom.jpg"/></div>
+     
+   </div>
+</div>
+
+
+
+
+<div id="foot_big">
+    ${self.html_foot()}
+</div>
+</body>
+${self.foot_js()}
+</html>
+
+<%def name="html_head()"></%def>
+
+<%def name="html_title()"></%def>
+
+<%def name="html_top()">
+<div class="header">
+  <div id="logo_big">
+    <div class="menu"><a href="${c.home_url}" target="_top"><img src="/images/menu_01.jpg" border="0"/></a><a href="/" target="_top"><img src="/images/menu_02.jpg" border="0"/></a><a href="/home/exchange" target="_top"><img src="/images/menu_03.jpg" border="0"/></a><a href="/home/recharge" target="_top"><img src="/images/menu_04.jpg" border="0"/></a><a href="/home/expand_game" target="_top"><img src="/images/menu_0t.jpg" border="0"/></a><a href="/home/game_gift" target="_top"><img src="/images/menu_05.jpg" border="0"/></a></div>
+  </div>  
+</div>
+</%def>
+
+<%def name="html_left()"></%def>
+
+<%def name="html_content_title()"></%def>
+<%def name="html_content()"></%def>
+
+<%def name="html_foot()">
+<div class="foot">
+   <div class="foot_line"></div>
+   <div class="foot_linea"><img src="/images/linea.jpg"/></div>
+   <div class="foot_wz">     <!--CopyRight © 2009-2010  All Rights Reserved
+                                   <br />
+     京ICP备09009412号-->
+     </div>
+</div>
+</%def>
+
+<%def name="foot_js()"></%def>

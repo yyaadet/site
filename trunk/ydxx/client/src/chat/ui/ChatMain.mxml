@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="167" fontSize="12" creationComplete="init();" 
+	xmlns:ns1="utils.components.*">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+			import city.model.City;
+			import utils.SceneManager;
+			import utils.WinManager;
+			import sphere.model.Sphere;
+			import map.MapManager;
+			import net.tcp.TcpManager;
+			import net.tcp.model.TcpChat;
+			import utils.GameManager;
+			import wubao.model.User;
+			import mx.core.ScrollPolicy;
+			import mx.events.FlexEvent;
+			import mx.utils.StringUtil;
+			
+			private static const ALL:int = 0;
+			
+			private static const WORLD:int = 1;
+			
+			private static const PREV:int = 2;
+			
+			private static const SPHERE:int = 3;
+			
+			private var screenIndex:int = 0;
+			private var screenAry:Array = [];
+			
+			//选择的聊天频道
+			private var selChannel:int = 0;
+			
+			//聊天间隔秒数
+			private var chatInterval:int = 3;
+			private var chatTime:Timer = new Timer(1000);
+			private var chatIndex:int = 0;
+			
+			//显示最大信息条数
+			private var maxLine:int = 200;
+			private var allList:Array = [];
+			private var worldList:Array = [];
+			private var sphereList:Array = [];
+			private var prevList:Array = [];
+			private var warList:Array = [];
+			
+			private function init():void
+			{
+				info.setFocus();
+				info.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+				
+				allScreen.addEventListener(FlexEvent.VALUE_COMMIT, onComp);
+				worldScreen.addEventListener(FlexEvent.VALUE_COMMIT, onComp);
+				prevScreen.addEventListener(FlexEvent.VALUE_COMMIT, onComp);
+				sphereScreen.addEventListener(FlexEvent.VALUE_COMMIT, onComp);
+				
+				screenAry = [{height:252, btnType:"close"},{height:27, btnType:"open"},{height:132, btnType:"open"}];
+				allClick();
+				
+				screenIndex = 2;
+				chatTime.addEventListener(TimerEvent.TIMER, onTimer);
+				showChat();
+			}
+			
+			private function onTimer(evt:TimerEvent):void
+			{
+				chatIndex ++;
+				if (chatIndex >= chatInterval)
+				{
+					chatIndex = 0;
+					chatTime.stop();
+				}
+			}
+			
+			private function allClick():void
+			{
+				setSelect();
+				hideScreen();
+				
+				btnAll.selected = true;
+				allScreen.visible = true;
+				allScreen.includeInLayout = true;
+				
+				selChannel = ALL;
+			}
+			
+			private function worldClick():void
+			{
+				setSelect();
+				hideScreen();
+				
+				btnWorld.selected = true;
+				worldScreen.visible = true;
+				worldScreen.includeInLayout = true;
+				
+				selChannel = WORLD;
+			}
+			
+			private function prevClick():void
+			{
+				setSelect();
+				hideScreen();
+				
+				btnPrev.selected = true;
+				prevScreen.visible = true;
+				prevScreen.includeInLayout = true;
+				cvPrev.visible = true;
+				cvPrev.includeInLayout = true;
+				
+				selChannel = PREV;
+			}
+			
+			private function sphereClick():void
+			{
+				setSelect();
+				hideScreen();
+				
+				btnSphere.selected = true;
+				sphereScreen.visible = true;
+				sphereScreen.includeInLayout = true;
+				
+				selChannel = SPHERE;
+			}
+			
+			private function setSelect():void
+			{
+				btnAll.selected = false;
+				btnWorld.selected = false;
+				btnPrev.selected = false;
+				btnSphere.selected = false;
+			}
+			
+			private function hideScreen():void
+			{
+				allScreen.visible = false;
+				allScreen.includeInLayout = false;
+				worldScreen.visible = false;
+				worldScreen.includeInLayout = false;
+				prevScreen.visible = false;
+				prevScreen.includeInLayout = false;
+				sphereScreen.visible = false;
+				sphereScreen.includeInLayout = false;
+				cvPrev.visible = false;
+				cvPrev.includeInLayout = false;
+			}
+			
+			private function onKeyUp(evt:KeyboardEvent):void
+			{
+				if (evt.keyCode == 13)
+					sendChat();
+			}
+			
+			private function chatPrev():void
+			{
+				var gameUser:User = validPrev();
+				if (gameUser == null) return;
+				
+				cvPrev.visible = false;
+				cvPrev.includeInLayout = false;
+				sendPrivWarnInfo("你现在可以给「" + gameUser.userName + "」发送聊天信息了");
+			}
+			
+			private function sendChat():void
+			{
+				var chatSend:String = "";
+				chatSend = info.text;
+				if (StringUtil.trim(chatSend) == "") return;
+				
+				if (chatIndex > 0)
+				{
+					var warn:String = "发言间隔需大于" + chatInterval.toString() + "秒";
+					if (selChannel == ALL)
+						sendAllWarnInfo(warn);
+					else if (selChannel == WORLD)
+						sendWorldWarnInfo(warn);
+					else if (selChannel == SPHERE)
+						sendSphereWarnInfo(warn);
+					else if (selChannel == PREV)
+						sendPrivWarnInfo(warn);
+						
+					return;
+				}
+				
+				chatIndex ++;
+				chatTime.start();
+				
+				if (selChannel == SPHERE && GameManager.gameMgr.wubao.sphereID <= 0)
+				{
+					sendSphereWarnInfo("当前没加入任何势力");
+					return;
+				}
+				
+				var recvID:int = 0;
+				if (selChannel == ALL || selChannel == WORLD)
+					recvID = -2;
+				else if (selChannel == SPHERE)
+					recvID = -3;
+				else if (selChannel == PREV)
+				{
+					var gameUser:User = validPrev();
+					if (gameUser == null) return;
+						
+					recvID = gameUser.uniqID;
+				}
+				
+				var reg:RegExp = /</g;
+				chatSend = chatSend.replace(reg, "&lt;");
+				reg = />/g;
+				chatSend = chatSend.replace(reg, "&gt;");
+				
+				chatSend = filterChat(chatSend);
+				
+				//开始发送
+				var tcpChat:TcpChat = new TcpChat();
+				tcpChat.sendID = GameManager.gameMgr.userID;
+				tcpChat.recvID = recvID;
+				tcpChat.chatInfo = chatSend;
+				
+				TcpManager.tcpMgr.sendChat(tcpChat);
+				info.text = "";
+			}
+			
+			private function filterChat(chatStr:String):String
+			{
+				var i:int = 0;
+				var ary:Array = [];
+				ary = GameManager.gameMgr.filterList;
+				var len:int = ary.length;
+				var replace:String = "";
+				var randomIndex:int = 0;
+				
+				chatStr = chatStr.split(" ").join("");
+				
+				for (i = 0; i < len; i++)
+				{
+					if (chatStr.indexOf(ary[i]) >= 0)
+					{
+						randomIndex = PubUnit.getRandom(0, PubUnit.chatReplaceList.length - 1);
+						replace = PubUnit.chatReplaceList[randomIndex];
+						return replace;
+					}
+				}
+				
+				return chatStr;
+			}
+			
+			//校验私聊玩家对象的合法性
+			private function validPrev():User
+			{
+				var userName:String = tiUser.text;
+				
+				if (StringUtil.trim(userName) == "")
+				{
+					sendPrivWarnInfo("请输入私聊玩家名称");
+					return null;
+				}
+				
+				var gameUser:User = null;
+				gameUser = GameManager.gameMgr.userList.getUserByName(userName);
+				if (gameUser == null)
+				{
+					sendPrivWarnInfo("没有找到私聊的玩家" + "「" + userName + "」");
+					return null;
+				}
+				else
+				{
+					if (gameUser.uniqID == GameManager.gameMgr.userID)
+					{
+						sendPrivWarnInfo("你不能与自己私聊");
+						return null;
+					}
+				}
+				
+				return gameUser;
+			}
+			
+			private function showLink(evt:TextEvent):void
+			{
+				var pre:String = evt.text.substr(0, 3);
+				
+				if (pre == "sID")
+				{
+					var userID:int = int(evt.text.substr(3, evt.text.length - 3));
+					if (userID < 1) return;
+					
+					var gameUser:User = GameManager.gameMgr.userList.getObjByID(userID) as User;
+					if (gameUser == null) return;
+					
+					info.setFocus();
+					prevClick();
+					tiUser.text = gameUser.userName;
+					chatPrev();
+				}
+				else if (pre == "cID")
+				{
+					var cityID:int = int(evt.text.substr(3, evt.text.length - 3));
+					if (cityID < 1) return;
+					
+					var gameCity:City = GameManager.gameMgr.cityList.getObjByID(cityID) as City;
+					if (gameCity == null) return;
+					
+					SceneManager.sceneMgr.enterMap(false, gameCity.mapX, gameCity.mapY);
+				}
+			}
+			
+			private function sendAllWarnInfo(str:String):void
+			{
+				var info:String = "";
+				
+				info = "<font color='#f5f600'>" + "[提示]" + "</font>" + 
+				       "<font color='#FFAF28'>" + str + "</font>";
+				       
+				allScreen.htmlText += info + "\n";
+			}
+			
+			private function sendWorldWarnInfo(str:String):void
+			{
+				var info:String = "";
+				
+				info = "<font color='#f5f600'>" + "[提示]" + "</font>" + 
+				       "<font color='#FFAF28'>" + str + "</font>";
+				       
+				worldScreen.htmlText += info + "\n";
+			}
+			
+			private function sendPrivWarnInfo(str:String):void
+			{
+				var info:String = "";
+				
+				info = "<font color='#f5f600'>" + "[提示]" + "</font>" + 
+				       "<font color='#FFAF28'>" + str + "</font>";
+				       
+				prevScreen.htmlText += info + "\n";
+			}
+			
+			private function sendSphereWarnInfo(str:String):void
+			{
+				var info:String = "";
+				
+				info = "<font color='#f5f600'>" + "[提示]" + "</font>" + 
+				       "<font color='#FFAF28'>" + str + "</font>";
+				       
+				sphereScreen.htmlText += info + "\n";
+			}
+			
+			//显示在综合信息窗口上
+			public function sendAllInfo(str:String):void
+			{
+				var chatInfo:TcpChat = new TcpChat();
+				chatInfo.sendID = -1;
+				chatInfo.chatInfo = str;
+				showInfo(chatInfo);
+			}
+			
+			public function showInfo(chatInfo:TcpChat):void
+			{
+				var sendID:int = chatInfo.sendID;
+				var recvID:int = chatInfo.recvID;
+				var content:String = chatInfo.chatInfo;
+				var info:String = "";
+				
+				//系统
+				if (sendID == -1)
+				{
+					info = "<font color='#f5f600'>" + "[提示]" + "</font>" + 
+					       "<font color='#FFAF28'>" + content + "</font>";
+					
+					showLimitInfo(info, allList, allScreen, true);           
+				}
+				else
+				{
+					var gameUser:User = null;
+					
+					//世界
+					if (recvID == -2)
+					{
+						gameUser = GameManager.gameMgr.userList.getObjByID(sendID) as User;
+						if (gameUser == null) return;
+						
+						//自己发的信息
+						if (gameUser.uniqID == GameManager.gameMgr.userID)
+						{
+							if (gameUser.rank > 0 && gameUser.rank <= 3)
+							{
+								info = "<font color='#f5f600'>" + "[世界]" + "</font>" +
+									   "<font color='" + gameUser.rankColor1 + "'>[" + gameUser.rankName + "]</font>" +  
+								       "<font color='#04d905'>「" + gameUser.userName + "」：" + "</font>";
+							}
+							else
+							{ 
+								info = "<font color='#f5f600'>" + "[世界]" + "</font>" + 
+								       "<font color='#04d905'>「" + gameUser.userName + "」：" + "</font>";
+							} 
+							
+							if (gameUser.isGM)
+								info += "<font color='#FFAF28'>" + content + "</font>";
+							else
+							    info += "<font color='#EECD7E'>" + content + "</font>";
+							 
+							showLimitInfo(info, worldList, worldScreen, false);
+							showLimitInfo(info, allList, allScreen, true);      
+						}
+						//其他玩家发的信息
+						else
+						{
+							if (gameUser.rank > 0 && gameUser.rank <= 3)
+							{
+								info = "<font color='#f5f600'>" + "[世界]" + "</font>" +
+								       "<font color='" + gameUser.rankColor1 + "'>[" + gameUser.rankName + "]</font>" +
+								       "<a href='event:" + "sID" + gameUser.uniqID.toString() + "'><font color='#04d905'>『<b>" + gameUser.userName + "』</b></font></a>" +
+								       "<font color='#04d905'>" + "：" + "</font>";
+							}
+							else
+							{
+								info = "<font color='#f5f600'>" + "[世界]" + "</font>" +
+								       "<a href='event:" + "sID" + gameUser.uniqID.toString() + "'><font color='#04d905'>『<b>" + gameUser.userName + "』</b></font></a>" +
+								       "<font color='#04d905'>" + "：" + "</font>";
+							}
+							       
+							if (gameUser.isGM)
+								info += "<font color='#FFAF28'>" + content + "</font>";
+							else
+							    info += "<font color='#EECD7E'>" + content + "</font>";
+							        
+							showLimitInfo(info, worldList, worldScreen, false);
+							showLimitInfo(info, allList, allScreen, true);      
+						}
+					}
+					//势力
+					if (recvID == -3)
+					{
+						gameUser = GameManager.gameMgr.userList.getObjByID(sendID) as User;
+						if (gameUser == null) return;
+						if (gameUser.sphereID != GameManager.gameMgr.wubao.sphereID) return;
+						
+						//自己发的信息
+						if (gameUser.uniqID == GameManager.gameMgr.userID)
+						{
+							if (gameUser.rank > 0 && gameUser.rank <= 3)
+							{
+								info = "<font color='#f5f600'>" + "[势力]" + "</font>" +
+									   "<font color='" + gameUser.rankColor1 + "'>[" + gameUser.rankName + "]</font>" +  
+								       "<font color='#04d905'>「" + gameUser.userName + "」：" + "</font>";
+							}
+							else
+							{
+								info = "<font color='#f5f600'>" + "[势力]" + "</font>" + 
+								       "<font color='#04d905'>「" + gameUser.userName + "」：" + "</font>";
+							}
+							        
+							if (gameUser.isGM)
+								info += "<font color='#FFAF28'>" + content + "</font>";
+							else
+							    info += "<font color='#EECD7E'>" + content + "</font>";
+							       
+							showLimitInfo(info, sphereList, sphereScreen, false);
+							showLimitInfo(info, allList, allScreen, true);      
+						}
+						//其他玩家发的信息
+						else
+						{
+							if (gameUser.rank > 0 && gameUser.rank <= 3)
+							{
+								info = "<font color='#f5f600'>" + "[势力]" + "</font>" +
+									   "<font color='" + gameUser.rankColor1 + "'>[" + gameUser.rankName + "]</font>" +  
+								       "<font color='#04d905'>「" + gameUser.userName + "」：" + "</font>";
+							}
+							else
+							{
+								info = "<font color='#f5f600'>" + "[势力]" + "</font>" +
+								       "<a href='event:" + "sID" + gameUser.uniqID.toString() + "'><font color='#04d905'>『<b>" + gameUser.userName + "</b>』</font></a>" +
+								       "<font color='#04d905'>" + "：" + "</font>";
+							}
+							       
+							if (gameUser.isGM)
+								info += "<font color='#FFAF28'>" + content + "</font>";
+							else
+							    info += "<font color='#EECD7E'>" + content + "</font>";
+							       
+							showLimitInfo(info, sphereList, sphereScreen, false);
+							showLimitInfo(info, allList, allScreen, true);      
+						}
+					}
+					//私聊
+					else
+					{
+						var gameUser1:User = null;
+						var gameUser2:User = null;
+						gameUser1 = GameManager.gameMgr.userList.getObjByID(sendID) as User;
+						gameUser2 = GameManager.gameMgr.userList.getObjByID(recvID) as User;
+						if (gameUser1 == null || gameUser2 == null) return;
+						
+						//己方跟对方私聊
+						if (sendID == GameManager.gameMgr.userID)
+						{
+							info = "<font color='#f5f600'>" + "你对" + "</font>" +
+							       "<a href='event:" + "sID" + gameUser2.uniqID.toString() + "'><font color='#04d905'>『<b>" + gameUser2.userName + "</b>』</font></a>" +
+							       "<font color='#04d905'>" + "说：" + "</font>";
+							       
+							if (gameUser1.isGM)
+								info += "<font color='#FFAF28'>" + content + "</font>";
+							else
+							    info += "<font color='#EECD7E'>" + content + "</font>";
+							       
+							showLimitInfo(info, prevList, prevScreen, false);
+							showLimitInfo(info, allList, allScreen, true);      
+						}
+						else if (recvID == GameManager.gameMgr.userID)
+						{
+							info = "<font color='#f5f600'>" + "" + "</font>" +
+							       "<a href='event:" + "sID" + gameUser1.uniqID.toString() + "'><font color='#04d905'>『<b>" + gameUser1.userName + "</b>』</font></a>" +
+							       "<font color='#04d905'>" + "对你说：" + "</font>";
+							       
+							if (gameUser1.isGM)
+								info += "<font color='#FFAF28'>" + content + "</font>";
+							else
+							    info += "<font color='#EECD7E'>" + content + "</font>";
+							       
+							showLimitInfo(info, prevList, prevScreen, false);
+							showLimitInfo(info, allList, allScreen, true);      
+						}
+					}
+				}
+			}
+			
+			public function showWarInfo(str:String):void
+			{
+				showLimitInfo(str, warList, taWar, false);
+				downScroll(taWar);
+			}
+			
+			private function showLimitInfo(info:String, infoList:Array, screen:TextArea, isAllScreen:Boolean):void
+			{
+				infoList.push(info);
+				
+				if (infoList.length > maxLine)
+					infoList.splice(0, 1);
+				
+				screen.htmlText = "";
+				var i:int = 0;
+				
+				for (i = 0; i < infoList.length; i++)
+				{
+					screen.htmlText += infoList[i] + "\n";
+				}
+			}
+			
+			private function onComp(evt:FlexEvent):void
+			{
+				var ta1:TextArea = evt.target as TextArea;
+				downScroll(ta1);
+			}
+			
+			private function downScroll(ta:TextArea):void
+			{
+				if (ta == null) return;
+				
+				ta.validateNow();
+				ta.verticalScrollPosition = ta.maxVerticalScrollPosition;
+			}
+			
+			private function resizeScreen():void
+			{
+				allScreen.height = screenAry[screenIndex].height;
+				worldScreen.height = screenAry[screenIndex].height;
+				prevScreen.height = screenAry[screenIndex].height;
+				sphereScreen.height = screenAry[screenIndex].height;
+				btnResize.btnType = screenAry[screenIndex].btnType;
+				
+				this.height = cvType.height + screenAry[screenIndex].height + cvOp.height;
+				screenIndex ++;
+				if (screenIndex == 3)
+					screenIndex = 0;
+				
+				downScroll(allScreen);
+				downScroll(worldScreen);
+				downScroll(prevScreen);
+				downScroll(sphereScreen);
+			}
+			
+			private function hide():void
+			{
+				this.visible = false; 
+				this.includeInLayout = false;
+				GameManager.gameMgr.gameApp.chatOpen.visible = true;
+				GameManager.gameMgr.gameApp.chatOpen.includeInLayout = true;
+			}
+			
+			private function showChat():void
+			{
+				chatChannel.setStyle("backgroundColor", 0x203224);
+				chatChannel.setStyle("backgroundAlpha", 0.9);
+				warChannel.setStyle("backgroundColor", 0x282E20);
+				warChannel.setStyle("backgroundAlpha", 0.5);
+				cvChat.visible = true;
+				cvChat.includeInLayout = true;
+				cvWar.visible = false;
+				cvWar.includeInLayout = false;
+				resizeScreen();
+			}
+			
+			private function showWar():void
+			{
+				warChannel.setStyle("backgroundColor", 0x203224);
+				warChannel.setStyle("backgroundAlpha", 0.9);
+				chatChannel.setStyle("backgroundColor", 0x282E20);
+				chatChannel.setStyle("backgroundAlpha", 0.5);
+				cvChat.visible = false;
+				cvChat.includeInLayout = false;
+				cvWar.visible = true;
+				cvWar.includeInLayout = true;
+				
+				screenIndex = 2;
+				this.height = cvType.height + screenAry[screenIndex].height + cvOp.height;
+				downScroll(taWar);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="chatChannel" x="0" y="0" width="30" height="16" click="showChat();" visible="false" includeInLayout="false">
+		<mx:Label x="0" y="0" width="30" height="16" text="聊天"  fontSize="12" paddingTop="0" paddingBottom="0" fontFamily="新宋体" color="0xFFFFFF"/>
+	</mx:Canvas>
+	
+	<mx:Canvas id="warChannel" x="30" y="0" width="30" height="16" click="showWar();" visible="false" includeInLayout="false">
+		<mx:Label x="0" y="0" width="30" height="16" text="战报"  fontSize="12" paddingTop="0" paddingBottom="0" fontFamily="新宋体" color="0xFFFFFF"/>
+	</mx:Canvas>
+	
+	<mx:Canvas id="cvChat" bottom="0" left="0" top="0" right="0">
+		<mx:TextArea id="allScreen" x="0" y="0" width="300" height="125" editable="false" leading="3" link="showLink(event);" borderStyle="solid" borderThickness="1" borderColor="#838D72" cornerRadius="0" backgroundColor="#282E20" backgroundAlpha="0.5">
+		</mx:TextArea>
+		
+		<mx:TextArea id="worldScreen" x="0" y="0" width="300" height="125" editable="false" leading="3" link="showLink(event);" borderStyle="solid" borderThickness="1" borderColor="#838D72" cornerRadius="0" backgroundColor="#282E20" backgroundAlpha="0.5" visible="false" includeInLayout="false">
+		</mx:TextArea>
+		
+		<mx:TextArea id="prevScreen" x="0" y="0" width="300" height="125" editable="false" leading="3" link="showLink(event);" borderStyle="solid" borderThickness="1" borderColor="#838D72" cornerRadius="0" backgroundColor="#282E20" backgroundAlpha="0.5" visible="false" includeInLayout="false">
+		</mx:TextArea>
+		
+		<mx:TextArea id="sphereScreen" x="0" y="0" width="300" height="125" editable="false" leading="3" link="showLink(event);" borderStyle="solid" borderThickness="1" borderColor="#838D72" cornerRadius="0" backgroundColor="#282E20" backgroundAlpha="0.5" visible="false" includeInLayout="false">
+		</mx:TextArea>
+		
+		<mx:Canvas id="cvPrev" width="184" height="22" horizontalCenter="0" bottom="42" visible="false" includeInLayout="false" backgroundColor="#203224" backgroundAlpha="0.9" borderStyle="solid" borderThickness="1" cornerRadius="5">
+			<mx:Label x="1" y="0" text="玩家名：" fontSize="12" fontFamily="新宋体" width="55" color="#FFFFFF">
+			</mx:Label>
+			<mx:TextInput id="tiUser" x="51" y="0" width="80" height="20">
+			</mx:TextInput>
+			<ns1:GameButton x="132" y="0" width="50" height="20" label="确　定" btnType="menu" click="chatPrev();">
+			</ns1:GameButton>
+		</mx:Canvas>
+		
+		<mx:Canvas id="cvType" width="300" height="20" left="0" bottom="22">
+			<ns1:GameButton id="btnAll" x="0" y="0" width="65" height="20" btnType="chatType" label="综合" click="allClick();"/>
+			<ns1:GameButton id="btnWorld" x="65" y="0" width="65" height="20" btnType="chatType" label="世界" click="worldClick();"/>
+			<ns1:GameButton id="btnSphere" x="130" y="0" width="65" height="20" btnType="chatType" label="势力" click="sphereClick();"/>
+			<ns1:GameButton id="btnPrev" x="195" y="0" width="65" height="20" btnType="chatType" label="私聊" click="prevClick();"/>
+			<ns1:GameButton id="btnResize" x="261" y="1" width="19" height="19" click="resizeScreen();"/>
+			<ns1:GameButton id="btnClose" x="281" y="1" width="19" height="19" styleName="winClose" click="hide();"/>
+		</mx:Canvas>
+		
+		<mx:Canvas id="cvOp" height="22" left="0" bottom="0" width="300" backgroundColor="#203224" backgroundAlpha="0.9">
+			<mx:TextInput id="info" x="0" y="0" width="250" height="22" maxChars="100"/>
+			<ns1:GameButton id="btnSend" y="0" label="发　送" width="50" height="22" click="sendChat();" btnType="send" x="250"/>
+		</mx:Canvas>
+	</mx:Canvas>
+	
+	<mx:Canvas id="cvWar" left="0" top="16" right="0" bottom="0" visible="false" includeInLayout="false">
+		<mx:TextArea id="taWar" x="0" y="0" width="100%" height="100%" editable="false" borderStyle="solid" borderThickness="1" borderColor="#838D72" cornerRadius="0" backgroundColor="#282E20" backgroundAlpha="0.5" >
+		</mx:TextArea>
+	</mx:Canvas>
+	
+	
+</mx:Canvas>

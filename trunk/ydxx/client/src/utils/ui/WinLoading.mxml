@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns="components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="60" styleName="winCanvas" creationComplete="init()">
+
+	<mx:Script>
+		<![CDATA[
+		
+			//提示信息
+			private var _tipInfo:String = "";
+			
+			private function init():void
+			{
+				this.mouseChildren = false;
+			}						
+			
+			public function get tipInfo():String
+			{
+				return _tipInfo;
+			}
+			
+			public function set tipInfo(param:String):void
+			{
+				_tipInfo = param;
+				
+				if (tip != null)
+					tip.text = _tipInfo;
+			}
+			
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label id="tip" x="0" y="18" width="100%" height="20" textAlign="center" styleName="content"/>
+	
+</mx:Canvas>

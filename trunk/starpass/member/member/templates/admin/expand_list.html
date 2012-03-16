@@ -1,0 +1,43 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">推广员管理</span>
+</div>
+
+<div class="div_table">
+<table>
+    <tr>
+        <th><span>推广员ID</span></th>
+        <th><span>用户ID</span></th>
+        <th><span>佣金</span></th>
+        <th><span>邮箱</span></th>
+        <th><span>总的推广人数</span></th>
+        <th><span>等级</span></th>
+        <th><span>注册时间</span></th>
+        <th><span>基本操作</span></th>
+    </tr>
+    
+    %for item in c.data:
+        <%
+            cnt = get_users_by_expand_id(item.id)
+            lev = 1 + cnt/100
+        %>
+    <tr>
+        <td>${item.id}</td>
+        <td>${item.uid}</td>
+        <td>${item.rmb}</td>
+        <td>${item.email}</td>
+        <td>${cnt}</td>
+        <td>${lev}</td>
+        <td>${readable_time(item.reg_time)}</td>
+        <td>操作</td>
+    %endfor
+</table>
+</div>
+
+<%namespace file="/admin/pager.html" import="*" />
+${pager("/admin/expand_list?page=")}
+
+</%def>

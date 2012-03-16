@@ -1,0 +1,34 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">添加新的折扣</span>
+</div>
+
+<div class="content_content">
+
+<form action="/admin/add_recharge_rate" method="post">
+    <input type="hidden" name="act" value="add" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="rmb">一次充值金额</label>
+    <input type="text" id="rmb" name="rmb" />
+    </p>
+    
+    <p>
+    <label for="rate">&nbsp;&nbsp;获得的折扣</label>
+    <input type="text" id="rate" name="rate" /><span>&nbsp;&nbsp;如：填写98表示获得98折</span>
+    </p>
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+</div>
+
+</%def>

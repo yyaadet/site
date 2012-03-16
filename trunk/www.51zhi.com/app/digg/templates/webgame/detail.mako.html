@@ -1,0 +1,65 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+
+<%def name="get_title()">${c.obj.name}</%def>
+
+<%def name="get_description()">${h.short_text(c.obj.info, 100)}</%def>
+
+<%def name="get_content()">
+
+<div id="content">
+    <div id="content_left">
+		
+        <%namespace name="webgame" file="/webgame/func.mako.html" />
+        ${webgame.get_webgame_list('', [c.obj], 0, 0, 0, 0, False, False)}
+
+        <div class="table" style="border-bottom: solid 1px #CEE3F8;">
+        	<div class="row">
+            	<div class="col" style="font-size: 1.3em; background: #EFF7FF;">
+                    最新发卡
+                </div>
+                <div class="col">
+                    <a href="${h.static_card_page_url('newest', c.obj._id)}">更多...</a>
+                </div>
+            </div>
+        </div>
+        <%namespace name="card" file="/card/func.mako.html" />
+        ${card.get_list('', c.cards, 0, 0, 0, 0, False, False)}
+        
+        <div class="table" style="border-bottom: solid 1px #CEE3F8;">
+        	<div class="row">
+            	<div class="col" style="font-size: 1.3em; background: #EFF7FF;">网友提交的新闻</div>
+            </div>
+        </div>
+        
+        <%namespace name="webgame_news" file="/webgame_news/func.mako.html" />
+        ${webgame_news.get_webgame_news_list('', c.news, 0, c.start_page, c.page, c.end_page, False, False)}
+
+        <!-- page -->
+        <div class="table">
+            <div class="row">
+                %if c.start_page > 1:
+                <div class="col" style="width: 50px;"><a href="${h.static_webgame_detail_url(c.obj._id, c.start_page - 1)}">上10页</a></div>
+                %endif
+                %for i in range(c.start_page + 1, c.end_page):
+                <div class="col" style="min-width: 0;width: 20px;">
+                    %if i == c.page:
+                    <strong><a href="${h.static_webgame_detail_url(c.obj._id, i)}">[${i}]</a></strong>
+                    %else:
+                    <a href="${h.static_webgame_detail_url(c.obj._id, i)}">${i}</a>
+                    %endif
+                </div>
+                %endfor
+                <div class="col" style="width: 50px;"><a href="${h.static_webgame_detail_url(c.obj._id, c.end_page)}">下10页</a></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="content_right">
+    	<%namespace file="/home/index.mako.html" name="home" />
+        ${home.get_content_right_add_link()}
+    </div>
+</div>
+</%def>

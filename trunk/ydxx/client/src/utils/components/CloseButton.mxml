@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameButton xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="64" height="24" label="关　闭" fontSize="12">
+	
+</GameButton>

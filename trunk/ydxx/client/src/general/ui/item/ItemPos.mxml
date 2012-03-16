@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="105" height="21" xmlns:ns1="utils.components.*" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import wubao.model.User;
+			import general.ui.events.PosEvent;
+			import army.model.Army;
+			import utils.WinManager;
+			import utils.GameManager;
+			import city.model.City;
+			import utils.SceneManager;
+			import general.model.General;
+			
+			private var _data:Object;
+			
+			private var gameGeneral:General = null;
+			
+			private function init():void
+			{
+			}	
+				
+			private function posCity():void
+			{
+				gameGeneral = data as General;
+				if (gameGeneral != null)
+				{
+					var gameCity:City = null;
+					
+					//坞堡
+					if (gameGeneral.place == 1)
+					{
+						//找到武将所属的玩家所在的城池
+						var gameUser:User = GameManager.gameMgr.userList.getObjByID(gameGeneral.userID) as User;
+						if (gameUser != null)
+						{
+							var cityID:int = gameUser.cityID;
+							gameCity = GameManager.gameMgr.cityList.getObjByID(cityID) as City;
+							if (gameCity != null)
+								SceneManager.sceneMgr.enterMap(false, gameCity.mapX, gameCity.mapY);
+						}
+					}
+					//城池	
+					else if (gameGeneral.place == 2)
+					{
+						gameCity = GameManager.gameMgr.cityList.getObjByID(gameGeneral.placeID) as City;
+						if (gameCity != null)
+							SceneManager.sceneMgr.enterMap(false, gameCity.mapX, gameCity.mapY);
+					}
+					//军团
+					else if (gameGeneral.place == 3)
+					{
+						var gameArmy:Army = GameManager.gameMgr.armyList.getObjByID(gameGeneral.placeID) as Army;
+						if (gameArmy != null)
+							SceneManager.sceneMgr.enterMap(false, gameArmy.mapX, gameArmy.mapY);
+					}
+					
+					var posEvent:PosEvent = new PosEvent(PosEvent.POS_GENERAL);
+					this.parentDocument.dispatchEvent(posEvent);
+				}
+			} 
+			
+			private function showGeneralInfo():void
+			{
+				gameGeneral = data as General;
+				if (gameGeneral == null) return;
+				
+				WinManager.winMgr.showGeneral(gameGeneral.uniqID);
+			}
+			
+			override public function get data():Object
+			{
+				return _data;
+			}
+			
+			override public function set data(param:Object):void
+			{
+				_data = param;
+				
+				gameGeneral = _data as General;
+				
+				if (gameGeneral.initYear > GameManager.gameMgr.gameYear)
+				{
+					btnPos.enabled = false;
+					btnPos.toolTip = "武将未出仕";
+				}
+				else
+				{
+					btnPos.enabled = true;
+					btnPos.toolTip = "定位到武将所在城池";
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton id="btnView" x="0" y="0" width="50" height="21" label="查看" btnType="menu" click="showGeneralInfo();"/>
+	<ns1:GameButton id="btnPos" x="55" y="0" width="50" height="21" label="定位" btnType="menu" click="posCity();"/>
+</mx:Canvas>

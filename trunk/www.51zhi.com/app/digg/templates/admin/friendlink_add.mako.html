@@ -1,0 +1,47 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+<div id="content" >
+   <%namespace name='friendlink' file='/admin/friendlink.mako.html' />
+   ${friendlink.get_menu()}
+   
+   <form action="/admin/friendlink_add_do" method="post">
+   <div class="table">
+   		<div class="row">
+        	<div class="col">名称：</div>
+            <div class="col"><input type="text" class="text" name="name" /></div>
+        </div>
+        <div class="row">
+        	<div class="col">url：</div>
+            <div class="col"><input type="text" class="url" name="url" /></div>
+        </div>
+        <div class="row">
+        	<div class="col">重点：</div>
+            <div class="col">
+            	<input type="radio" name="is_hot" value="0" checked="checked" /><label>否</label>
+                <input type="radio" name="is_hot" value="1" /><label>是</label>
+            </div>
+        </div>
+        <div class="row">
+        	<div class="col">在主页：</div>
+            <div class="col">
+            	<input type="radio" name="is_in_home" value="0" checked="checked" /><label>否</label>
+                <input type="radio" name="is_in_home" value="1" /><label>是</label>
+            </div>
+        </div>
+        <div class="row">
+        	<div class="col">显示顺序：</div>
+            <div class="col">
+            	<input type="text" name="order" value="0" class="text" /><label>数值越大越靠前</label>
+            </div>
+        </div>
+        <div class="row">
+        	<div class="col"></div>
+            <div class="col"><input type="submit" class="button" value="提交" /></div>
+        </div>
+   </div>
+   </form>
+</div>
+</%def>

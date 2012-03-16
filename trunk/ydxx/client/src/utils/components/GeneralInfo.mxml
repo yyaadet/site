@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="460" height="246" xmlns:ns1="utils.components.*" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.utils.getDefinitionByName;
+			import wubao.model.UserTreasure;
+			import utils.PubUnit;
+			import utils.TipInfo;
+			import army.model.Army;
+			import utils.SceneManager;
+			import general.model.Zhen;
+			import general.model.Skill;
+			import general.model.General;
+			import utils.GameManager;
+			
+			private var _gameGeneral:General = null;
+			
+			private var _selItem:Object = null;
+			
+			private function init():void
+			{
+				gsl1.addEventListener(XiulianList.FINISH, onFinish);
+				gsl1.addEventListener(XiulianList.ITEM_CLICK, onItemClick);
+			}
+			
+			private function onFinish(evt:Event):void
+			{
+				this.dispatchEvent(new Event(XiulianList.FINISH));
+			}
+			
+			private function onItemClick(evt:Event):void
+			{
+				selItem = gsl1.selItem;
+				this.dispatchEvent(new Event(XiulianList.ITEM_CLICK));
+			}
+			
+			public function get gameGeneral():General
+			{
+				return _gameGeneral;
+			}
+			
+			public function set gameGeneral(param:General):void
+			{
+				_gameGeneral = param;
+				
+				if (_gameGeneral == null)
+					return;
+				
+				img1.imageURL = _gameGeneral.faceURL;
+				lblName.text = gameGeneral.firstName + gameGeneral.lastName;
+				lblZi.text = gameGeneral.zi;
+				
+				lblKill.text = _gameGeneral.killNum.toString();
+				lblFaith.text = _gameGeneral.faith.toString();
+				
+				cvIntelli.toolTip = TipInfo.getInteInfo();
+				cvKongfu.toolTip = TipInfo.getKongfuInfo();
+				cvPolity.toolTip = TipInfo.getPolityInfo();
+				cvAttack.toolTip = TipInfo.getAttackInfo();
+				cvDefense.toolTip = TipInfo.getDefenseInfo();
+				cvSpeed.toolTip = TipInfo.getSpeedInfo();
+				cvFaith.toolTip = TipInfo.getFaith();
+				cvSpirit.toolTip = TipInfo.getSpirit();
+				
+				lblKongfu.text = _gameGeneral.kongfuStr;
+				lblIntelli.text = _gameGeneral.intelligenceStr;
+				lblPolity.text = _gameGeneral.polityStr;
+				lblUserName.text = _gameGeneral.userName;
+				lblLevel.text = _gameGeneral.soliderTrain.toString();
+				lblLevel.toolTip = TipInfo.getTrain();
+				
+				if (_gameGeneral.soliderTotal <= 0)
+				{
+					lblNum.text = "";
+					lblHurt.text = "";
+					lblSpirit.text = "";
+					lblSolider.text = "";
+				}
+				else
+				{
+					lblNum.text = _gameGeneral.soliderNum.toString();
+					lblHurt.text = _gameGeneral.hurtNum.toString();
+					lblSpirit.text = _gameGeneral.soliderSpirit.toString();
+					lblSolider.text = gameGeneral.soliderName + " " + gameGeneral.soliderTotal.toString();
+				}
+				
+				var ary:Array = PubUnit.getGeneralInfo(gameGeneral);
+				lblAttack.htmlText = ary[0].toString();
+				lblDefense.htmlText = ary[1].toString();
+				lblSpeed.htmlText = ary[2].toString();
+				
+				taDes.text = _gameGeneral.description;
+				
+				gsl1.gameGeneral = _gameGeneral;
+				
+				eb1.curValue = _gameGeneral.killNum;
+				eb1.totalvalue = PubUnit.getExpExchange(_gameGeneral.soliderTrain);
+				eb1.draw();
+				eb1.toolTip = "经验：" + eb1.curValue.toString() + "/" + eb1.totalvalue.toString();
+			}
+			
+			public function refresh():void
+			{
+				lblKongfu.text = gameGeneral.kongfuStr;
+				lblIntelli.text = gameGeneral.intelligenceStr;
+				lblPolity.text = gameGeneral.polityStr;
+				lblKill.text = gameGeneral.killNum.toString();
+				
+				gsl1.gameGeneral = gameGeneral;
+			}
+			
+			public function get selItem():Object
+			{
+				return _selItem;
+			}
+			
+			public function set selItem(param:Object):void
+			{
+				_selItem = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvGeneral" x="0" y="0" width="460" height="96">
+		<ns1:GameImage id="img1" x="0" y="0" width="96" height="96">
+		</ns1:GameImage>
+		
+		<ns1:ExpBar id="eb1" x="0" y="90" width="96">
+		</ns1:ExpBar>
+		
+		<mx:Label id="lblLevel" x="38" y="2" styleName="content" width="55" height="20" color="#FFFFFF" textAlign="right" fontSize="16" fontFamily="Arial"/>
+		
+		<mx:Canvas x="102" y="1" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="姓名" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblName" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas x="192" y="1" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="字" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblZi" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas x="282" y="1" width="178" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="部曲" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblSolider" x="33" y="2" styleName="content" width="140" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		
+		<mx:Canvas id="cvKongfu" x="102" y="25" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="武力" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblKongfu" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas id="cvFollows" x="192" y="25" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="主公" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblUserName" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas id="cvAttack" x="282" y="25" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="攻击" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblAttack" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas id="cvSpirit" x="372" y="25" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="士气" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblSpirit" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+
+		<mx:Canvas id="cvIntelli" x="102" y="49" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="智力" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblIntelli" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas id="cvFaith" x="192" y="49" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="忠诚" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblFaith" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas id="cvDefense" x="282" y="49" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="防御" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblDefense" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas x="372" y="49" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="健卒" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblNum" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		
+		<mx:Canvas id="cvPolity" x="102" y="73" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="政治" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblPolity" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas x="192" y="73" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="经验" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblKill" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas id="cvSpeed" x="282" y="73" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="机动" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblSpeed" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas x="372" y="73" width="88" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+			<mx:Label x="0" y="2" text="伤兵" styleName="label" width="30" height="20" color="#FFFFFF"/>
+			<mx:Label id="lblHurt" x="33" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left"/>
+		</mx:Canvas>
+	</mx:Canvas>
+	
+	<ns1:XiulianList id="gsl1" x="0" y="101" width="460" height="68">
+	</ns1:XiulianList>
+	
+	<mx:TextArea id="taDes" x="0" width="460" height="72" editable="false" y="174"/>
+</mx:Canvas>

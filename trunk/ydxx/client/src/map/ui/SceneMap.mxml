@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="620" creationComplete="init();" xmlns:ns1="army.ui.*" xmlns:ns2="utils.components.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+			import utils.SceneManager;
+			import mx.utils.StringUtil;
+			import utils.WinManager;
+			import city.model.City;
+			import utils.GameManager;
+			import mx.core.ScrollPolicy;
+			import map.MapManager;
+			
+			private function init():void
+			{
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+				
+			}
+			
+			public function initMap():void
+			{
+				MapManager.mapMgr.initMap(bigMap, smallMap);
+			}
+			
+			public function createArmy():void
+			{
+				var len:int = GameManager.gameMgr.armyList.getSelfArmy().length;
+				if (len < 1)
+				{
+					winArmyList.visible = false;
+					winArmyList.includeInLayout = false;
+				}
+				else
+				{
+					winArmyList.visible = true;
+					winArmyList.includeInLayout = true;
+					winArmyList.createArmy();
+				}
+			}
+			
+			/**
+			 * 刷新军团列表
+			 * 
+			 */
+			public function refreshArmy(type:int = 1):void
+			{
+				var len:int = GameManager.gameMgr.armyList.getSelfArmy().length;
+				if (len < 1)
+				{
+					winArmyList.visible = false;
+					winArmyList.includeInLayout = false;
+				}
+				else
+				{
+					winArmyList.visible = true;
+					winArmyList.includeInLayout = true;
+					winArmyList.refresh(type);
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="bigMap" x="0" y="0" width="1000" height="620">
+	</mx:Canvas>
+	
+	<mx:Canvas id="smallMap" width="258" height="208" y="0" x="742">
+		<mx:backgroundImage>@Embed(source='../../images/assets/map/map_big.png')</mx:backgroundImage>
+	</mx:Canvas>
+	
+	<ns1:WinArmyList id="winArmyList" visible="false" includeInLayout="false" right="0" top="216">
+	</ns1:WinArmyList>
+</mx:Canvas>

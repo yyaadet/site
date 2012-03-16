@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <script type="text/javascript" src="/scripts/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/css/main.css" />
+        ${self.html_head()}
+        ${self.html_title()}
+    </head>
+    
+    <body>
+        <div id="container">
+            <div id="header"><h1><img src="/images/top_bgright.jpg"/></h1></div>
+            <div id="wrapper">
+                <div id="content">
+                    ${self.html_content()}
+                </div>
+            </div>
+            <div id="extra">
+                ${self.html_extra()}
+            </div>
+            <div id="nav">
+                ${self.html_navigation()}
+            </div>
+            <div id="footer"><span class="copyright"> 北京星芒软件 </span> </div>
+        </div>
+    </body>
+${self.foot_js()}
+</html>
+
+<%def name="html_head()"></%def>
+
+<%def name="html_title()"></%def>
+
+<%def name="html_content()"></%def>
+
+<%def name="html_extra()"></%def>
+
+<%def name="html_navigation()"></%def>
+
+<%def name="foot_js()"></%def>

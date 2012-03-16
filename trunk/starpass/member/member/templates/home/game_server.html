@@ -1,0 +1,74 @@
+<%inherit file="index.html" />
+
+
+
+<%def name="html_content_title()">
+${c.game.name}的游戏服务器
+</%def>
+
+
+
+
+<%def name="html_content()">
+
+<div class="server_t"><dl>推荐服务器</dl></div>
+          <div class="hw">
+              <div class="hw_a">
+                <div class="ft"><a href="/home/load_game?server_id=${c.servers[0].id}" class="white">${c.servers[0].name}</a></div>
+              </div>
+           </div>
+           <div class="server_t"><dl>最近登录</dl></div>
+           <div class="hw">
+           %if c.server is not None:
+              <div class="hw_a">
+                <div class="ft"><a href="/home/load_game?server_id=${c.server.id}" class="white">${c.server.name}</a></div>
+              </div>
+           %endif
+           </div>
+           <div class="server_t"><dl>选择服务器</dl></div>
+           
+           
+           <div class="dx_big">
+                %for line in c.lines:
+                <div class="dx_c" id="${line.id}" ><dl><a href="#" class="r">${line.name}</a></dl></div>
+                %endfor
+           </div>
+           
+           
+           <div class="sx_bigb">
+              <div class="hwb">
+                %for server in c.servers:
+                        <div class="hw_a line_${server.line}"><div class="ft"><a class="white" href="/home/load_game?server_id=${server.id}" >${server.name}</a></div></div>
+                %endfor
+              </div>
+           </div>
+
+
+</%def>
+
+<%def name="foot_js()">
+<script>
+$(document).ready(function(){
+//显示当前游戏的最后一个线路，同时改变样式
+show_line(${c.lines[0].id});
+$("#"+${c.lines[0].id}).removeClass('dx_c').addClass('dx_d');
+
+$("div.dx_big div").click(
+function(){
+    $("div.dx_big div").removeClass('dx_d').addClass('dx_c');
+    $(this).removeClass('dx_c').addClass('dx_d');
+    show_line(this.id);
+}
+);
+
+function show_line(n){
+    $("div.hwb div").hide();
+    $("div.hwb div.line_"+n).show();
+    $("div.hwb div.hw_a div").show();
+}
+
+});
+
+</script>
+
+</%def>

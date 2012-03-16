@@ -1,0 +1,22 @@
+* 进入setup目录
+
+* yum install mysql-server
+* chkconfig --add mysqld && chkconfig --level 135 mysqld on
+* service mysqld restart
+mysqladmin -u root password 'newpasswd'
+GRANT ALL PRIVILEGES ON *.* TO 'myuser'@'%' IDENTIFIED BY 'mypasswd' WITH GRANT OPTION; FLUSH PRIVILEGES;
+
+* yum install mysql-devel
+
+* ntpdate time.asia.apple.com
+
+* 运行./presetup.sh
+
+* ./ready.sh   #安装系统软件
+    Install db (0:no, 1:yes) ? :1     #装数据库   
+    input mysql host: localhost
+    input username: root
+    input password: xiaotao
+    input db name: ydxx2
+
+* ./setup

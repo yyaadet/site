@@ -1,0 +1,51 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_title()">添加订阅</%def>
+
+<%def name="get_content()">
+<div id="content" >
+   <div id="left">
+        <%namespace file="/user/func.mako.html" name="user" />
+        ${user.user_left_menu()}
+    </div>
+    <div id="mid">
+       <form action="/rss/do_add" method="post">
+       <div class="table">
+           <div class="row">
+            	<div class="col">名称：</div>
+                <div class="col"><input type="text" class="text" name="name" /></div>
+            </div>
+            <!--
+           <div class="row">
+            	<div class="col">数目：</div>
+                <div class="col">
+                	<input type="text" class="text" name="num" value="10" /><label class="tip_text">每次获取的数目</label>
+                </div>
+            </div>
+            -->
+            <div class="row">
+            	<div class="col">链接：</div>
+                <div class="col"><input type="text" class="url" name="url" value="http://" /></div>
+            </div>
+            <div class="row">
+                 <div class="col">类别：</div>
+                 <div class="col">
+                     <%namespace file="/rss/func.mako.html" name="rss" />
+                     ${rss.get_groups()}
+                 </div>
+            </div>
+            
+            <div class="row">
+            	<div class="col"></div>
+                <div class="col"><input type="submit" class="button" value="提交" /></div>
+            </div>
+       </div>
+       </form>
+    </div>
+    
+    <div id="right"></div>
+   
+</div>
+</%def>

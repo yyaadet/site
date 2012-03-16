@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="0x000000" preloader="utils.preload.Preloader"
+	applicationComplete="initApp();" xmlns:wb="wubao.ui.*" xmlns:ns1="utils.components.*" xmlns:ns2="utils.ui.*" xmlns:map="map.ui.*" 
+	xmlns:ns3="chat.ui.*" xmlns:ns4="xiulian.ui.*" xmlns:ns5="city.ui.*" xmlns:ns6="battle.ui.*">
+	
+	<mx:Script source="hanfeng.as" />
+	<mx:Style source="images/hanfeng.css" />
+	 
+	<mx:Canvas id="bigMap" x="0" y="0" width="1000" height="620" visible="false" includeInLayout="false">
+    </mx:Canvas>
+    
+	<wb:SceneWubao id="swb" x="0" y="0" visible="false" includeInLayout="false">
+	</wb:SceneWubao>
+	
+	<map:SceneMap id="smp" x="0" y="0" visible="false" includeInLayout="false">
+	</map:SceneMap>
+	
+	<ns5:SceneArea id="sa" x="0" y="0" visible="false" includeInLayout="false">
+	</ns5:SceneArea>
+	
+	<ns6:SceneBattle id="sb" x="0" y="0" visible="false" includeInLayout="false">
+	</ns6:SceneBattle>
+	
+	<ns2:PanelRes id="panelRes" top="0" left="190">
+	</ns2:PanelRes>
+	
+	<ns2:PanelDate id="panelDate" top="0" left="0">
+	</ns2:PanelDate>
+	
+	<ns2:PanelMenu id="panelMenu" right="0" bottom="0">
+	</ns2:PanelMenu>
+	
+	<ns2:PanelTip id="panelTip" top="30" left="225">
+	</ns2:PanelTip>
+	
+	<ns2:PanelAttackCity id="panelAttackCity" top="30" left="360">
+	</ns2:PanelAttackCity>
+	
+	<ns2:PanelOperate id="panelOperate" right="5" top="60">
+	</ns2:PanelOperate>
+	
+	<mx:Canvas id="panelPlace" width="120" height="60" borderStyle="solid" borderThickness="3" cornerRadius="7" backgroundColor="#434A0C" backgroundAlpha="0.7" borderColor="#E3D71F" visible="false" includeInLayout="false" right="5" top="5">
+		<mx:Label id="lblPlace1" fontSize="24" fontWeight="bold" fontFamily="新宋体" color="#FFFFFF" horizontalCenter="0" verticalCenter="0"/>
+	</mx:Canvas>
+	
+	<map:PanelAlarm id="panelAlarm" left="0" top="225" visible="false" includeInLayout="false">
+	</map:PanelAlarm>
+	
+	<ns2:PanelQueue id="panelQuene" left="0" top="123">
+	</ns2:PanelQueue>
+	
+	<ns5:SceneAttackCity id="sac" x="0" y="0" visible="false" includeInLayout="false">
+	</ns5:SceneAttackCity>
+	
+	<ns3:ChatMain id="chatMain" bottom="0" left="0" visible="false" includeInLayout="false">
+	</ns3:ChatMain>
+	
+	<mx:Canvas id="chatOpen" width="66" height="36" bottom="0" left="0" visible="false" includeInLayout="false" toolTip="显示聊天区" buttonMode="true" useHandCursor="true" backgroundImage="@Embed(source='images/assets/chat/open.png')" click="openChat();">
+	</mx:Canvas>
+	
+	<mx:TextArea id="taTest" x="10" y="176" width="280" height="274" visible="false" includeInLayout="false"/>
+	<mx:Tree x="264" y="375" visible="false" includeInLayout="false"></mx:Tree>
+	
+	<ns6:SceneFight id="sf" x="0" y="0" visible="false" includeInLayout="false">
+	</ns6:SceneFight>
+	
+</mx:Application>

@@ -1,0 +1,47 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_title()">注册</%def>
+
+<%def name="get_content()">
+<div id="content">
+    <div id="content_left">
+        <form action="/user/do_reg" method="post">
+    	<div class="table">
+            <div class="row">
+                <div class="col">使用其他账号登陆：</div>
+                <div class="col">
+                    <%namespace file="/user/func.mako.html" name="user" />
+                    ${user.qq_login_button()}
+                </div>
+            </div>
+        	<div class="row">
+            	<div class="col">用户名：</div>
+                <div class="col"><input class="text" name="username" type="text" value=""/></div>
+            </div>
+            <div class="row">
+            	<div class="col">密码：</div>
+                <div class="col"><input class="text" name="passwd" type="password" value="" /></div>
+            </div>
+            <div class="row">
+            	<div class="col">重复密码：</div>
+                <div class="col"><input class="text" name="passwd1" type="password" value="" /></div>
+            </div>
+            <div class="row">
+            	<div class="col">Email：</div>
+                <div class="col"><input class="text" name="email" type="text" value="" /></div>
+            </div>
+            <div class="row">
+            	<div class="col"><a href="/user/login">立即登陆</a></div>
+                <div class="col"><input class="button"  type="submit" value="加 入"/></div>
+            </div>
+        </div>
+        </form>
+	</div>
+	<div id="content_right">
+        <%namespace file="/home/index.mako.html" name="home" />
+        ${home.get_content_right_add_link()}
+	</div>
+</div>
+</%def>

@@ -1,0 +1,69 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_title()">${c.user.name}的主页</%def>
+
+<%def name="get_menu(name)">
+<%
+menus = [
+        {"name": u"个人主页", "url": "/user/index", "is_admin": 0},
+        {"name": u"我的新闻", "url": "/webgame_news/my", "is_admin": 0},
+        {'name': u"我的游戏", "url": "/webgame/my", "is_admin": 0},
+        {'name': u"添加游戏", "url": "/webgame/add", "is_admin": 0},
+        {'name': u"添加新闻", "url": "/webgame_news/add", "is_admin": 0},
+        {"name": u"管理入口", "url": "/admin/index", "is_admin": 1},
+        ]
+%>
+
+<div class="table">
+	<div class="row">
+    	%for info in menus:
+        	<%
+            if info['is_admin'] == 1 and c.is_admin != 1:
+            	continue
+            %>
+        	%if name == info['name']:
+            	<div class="col"><a href="${info['url']}"><strong>${info['name']}</strong></a> | </div>
+            %else:
+            	<div class="col"><a href="${info['url']}">${info['name']}</a> | </div>
+            %endif
+        %endfor
+    </div>
+</div>
+</%def>
+
+<%def name="get_content()">
+<div id="content">
+    <div id="content_left">
+    	${self.get_menu(u"个人主页")}
+
+        <div class="table">
+            <div class="row">
+                <div class="col">积分：</div>
+                <div class="col">${c.user.score}</div>
+            </div>
+            <div class="row">
+                <div class="col">新闻数：</div>
+                <div class="col">${c.user.news_num}</div>
+            </div>
+            <div class="row">
+                <div class="col">评论数：</div>
+                <div class="col">${c.user.comment_num}</div>
+            </div>
+            <div class="row">
+                <div class="col">游戏数目：</div>
+                <div class="col">${c.user.game_num}</div>
+            </div>
+            <div class="row">
+                <div class="col">人气值：</div>
+                <div class="col">${c.user.visited_num}</div>
+            </div>
+        </div>
+    </div>
+    <div id="content_right">
+    	<%namespace file="/home/index.mako.html" name="home" />
+        ${home.get_content_right_add_link()}
+    </div>
+</div>
+</%def>

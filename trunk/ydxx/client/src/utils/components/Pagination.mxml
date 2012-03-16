@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="118" height="20" creationComplete="init();">
+
+	<mx:Script>
+		 <![CDATA[
+		 
+		 	//总记录数
+		 	private var totalNum:int = 0;
+		 	
+		 	//总页数
+		 	private var totalPage:int = 0;
+		 	
+		 	//当前所在页数
+		 	private var curPage:int = 1;
+		 	
+		 	//获取每页数据的函数， 需开发者指定
+		 	private var _pageFun:String = "getPageObj";
+		 	
+		 	//每页显示的数目，默认10条
+		 	private var _pageNum:int = 10;
+		 	
+		 	//所有数据的集合,必须是列表类  需开发者指定
+		 	private var _dataSource:Object;
+		 	
+		 	//数据显示组件，需开发者指定
+		 	private var _dataUI:Object;
+		 	
+		 	//数据显示组件的数据源属性，需开发者指定
+		 	private var _dataUIProvider:String = "";
+		 	
+		 	//当前页显示的数据集合
+		 	private var _showData:Object;
+		 	
+			private function init():void
+			{
+				firstPage.addEventListener(MouseEvent.CLICK, gotoFirstPage);
+				priorPage.addEventListener(MouseEvent.CLICK, gotoPriorPage);
+				nextPage.addEventListener(MouseEvent.CLICK, gotoNextPage);
+				lastPage.addEventListener(MouseEvent.CLICK, gotoLastPage);
+			}
+			
+			/**
+			 * 转到首页
+			 * 
+			 */ 
+			private function gotoFirstPage(evt:MouseEvent):void
+			{
+				if (curPage == 1) return;
+				
+				curPage = 1;
+				showPageData(curPage);
+			}
+			
+			/**
+			 * 转到上一页
+			 * 
+			 */ 
+			private function gotoPriorPage(evt:MouseEvent):void
+			{
+				if (curPage == 1) return;
+				
+				curPage --;
+				showPageData(curPage);
+			}
+			
+			/**
+			 * 转到下一页
+			 * 
+			 */ 
+			private function gotoNextPage(evt:MouseEvent):void
+			{
+				if (curPage == totalPage) return;
+				
+				curPage ++;
+				showPageData(curPage);
+			}
+			
+			/**
+			 * 转到末页
+			 * 
+			 */ 
+			private function gotoLastPage(evt:MouseEvent):void
+			{
+				if (curPage == totalPage) return;
+				
+				curPage = totalPage;
+				showPageData(curPage);
+			}
+			
+			/**
+			 * 现实某页的数据
+			 * @param page  指定的页
+			 * 
+			 */ 
+			private function showPageData(page:int = 1):void
+			{
+				if (_dataSource == null) return;
+				if (page < 1) return;
+				
+				var startNum:int = 0;
+				startNum = (page - 1) * pageNum + 1;
+				
+				showData = dataSource[pageFun](startNum, pageNum);
+				dataUI[dataUIProvider] = showData;
+				
+				if (totalNum == 0)
+					pageInfo.text = "1/1";
+				else
+					pageInfo.text = curPage.toString() + "/" + totalPage.toString();
+			}
+			
+			public function refresh(page:int = 1):void
+			{
+				if (dataSource == null) return;
+				
+				totalNum = dataSource.length; 
+				totalPage = Math.ceil(totalNum / pageNum);
+				
+				curPage = page > totalPage ? totalPage : page;
+				if (curPage == 0)
+					curPage = 1;
+					
+				showPageData(curPage);
+			}
+			
+			//==================================================================
+			//属性设置
+			//==================================================================
+			
+		 	public function get dataSource():Object
+		 	{
+		 		return _dataSource;
+		 	}
+		 	
+		 	public function set dataSource(param:Object):void
+		 	{
+		 		_dataSource = param;
+		 	}
+		 	
+		 	public function get pageNum():int
+		 	{
+		 		return _pageNum;
+		 	}
+		 	
+		 	public function set pageNum(param:int):void
+		 	{
+		 		_pageNum = param;
+		 	}
+		 	
+		 	public function get pageFun():String
+		 	{
+		 		return _pageFun;
+		 	}
+		 	
+		 	public function set pageFun(param:String):void
+		 	{
+		 		_pageFun = param;
+		 	}
+		 	
+		 	public function get dataUI():Object
+		 	{
+		 		return _dataUI;
+		 	}
+		 	
+		 	public function set dataUI(param:Object):void
+		 	{
+		 		_dataUI = param;
+		 	}
+		 	
+		 	public function get dataUIProvider():String
+		 	{
+		 		return _dataUIProvider;
+		 	}
+		 	
+		 	public function set dataUIProvider(param:String):void
+		 	{
+		 		_dataUIProvider = param;
+		 	}
+		 	
+		 	public function get showData():Object
+		 	{
+		 		return _showData;
+		 	}
+		 	
+		 	public function set showData(param:Object):void
+		 	{
+		 		_showData = param;
+		 	}
+		 	
+		 	public function get showPage():int
+		 	{
+		 		return curPage;
+		 	}
+		 	
+		 ]]>
+	</mx:Script>
+	
+	<mx:Button id="firstPage" x="0" y="2" label="首页" width="16" height="16" fontSize="12" buttonMode="true" useHandCursor="true" fontWeight="normal" styleName="first"/>
+	<mx:Button id="priorPage" x="16" y="2" label="上一页" width="16" height="16" fontSize="12" buttonMode="true" useHandCursor="true" fontWeight="normal" styleName="prior"/>
+	<mx:Label id="pageInfo" x="31" y="0" fontSize="12" width="50" height="20" color="#FFFFFF" fontFamily="Arial" textAlign="center"/>
+	<mx:Button id="nextPage" x="80" y="2" label="下一页" width="16" height="16" fontSize="12" buttonMode="true" useHandCursor="true" fontWeight="normal" styleName="next"/>
+	<mx:Button id="lastPage" x="96" y="2" label="末页" width="16" height="16" fontSize="12" buttonMode="true" useHandCursor="true" fontWeight="normal" styleName="last"/>
+</mx:Canvas>

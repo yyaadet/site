@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="80" height="180" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import utils.SceneManager;
+			import utils.PubUnit;
+			import images.AssetsManager;
+			import mx.controls.Label;
+			import utils.GameManager;
+			import city.model.City;
+		
+			private var timer1:Timer = new Timer(400);
+			
+			private var alarm:Class;
+			private var index:int = 0;
+			private var flashCount:int = 0;
+			
+			private function init():void
+			{
+				timer1.addEventListener(TimerEvent.TIMER, onTimer);
+			}
+			
+			public function refresh(cityList:Array):void
+			{
+				var i:int = 0;
+				var cityID:int = 0;
+				var gameCity:City = null;
+				
+				alarmCity.removeAllChildren();
+				
+				for (i = 0; i < cityList.length; i++)
+				{
+					cityID = cityList[i];
+					gameCity = GameManager.gameMgr.cityList.getObjByID(cityID) as City;
+					
+					if (gameCity != null)
+					{
+						var lblCity:Label = new Label();
+						lblCity.width = alarmCity.width;
+						lblCity.height = 20;
+						lblCity.x = 0;
+						lblCity.y = i * lblCity.height + 5;
+						lblCity.text = gameCity.cityName;
+						lblCity.setStyle("color", PubUnit.WHITE);
+						lblCity.setStyle("fontSize", 12);
+						lblCity.setStyle("fontFamily", "新宋体");
+						lblCity.data = gameCity;
+						alarmCity.addChild(lblCity);
+						lblCity.mouseChildren = false;
+						lblCity.useHandCursor = true;
+						lblCity.buttonMode = true;
+						lblCity.addEventListener(MouseEvent.CLICK, cityClick);
+					}
+				}
+			}
+			
+			private function cityClick(evt:MouseEvent):void
+			{
+				var lblCity:Label = evt.target as Label;
+				if (lblCity == null) return;
+				
+				var gameCity:City = lblCity.data as City;
+				if (gameCity == null) return;
+				
+				SceneManager.sceneMgr.enterMap(false, gameCity.mapX, gameCity.mapY);
+			}
+			
+			public function startFlash():void
+			{
+				if (timer1.running) timer1.stop();
+				
+				timer1.start();
+			}
+			
+			private function onTimer(evt:TimerEvent):void
+			{
+				if (index == 0)
+				{
+					alarmFlash.setStyle("backgroundImage", alarm);
+					index = 1;
+				}
+				else
+				{
+					alarmFlash.clearStyle("backgroundImage");
+					index = 0;
+				}
+				
+				flashCount ++;
+				if (flashCount > 10)
+				{
+					alarmFlash.setStyle("backgroundImage", alarm);
+					timer1.stop();
+					flashCount = 0;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="alarmFlash" x="0" y="0" width="32" height="32" toolTip="有军团入侵"/>
+	<mx:Canvas id="alarmCity" x="32" y="0" width="48" height="180"/>
+	
+</mx:Canvas>

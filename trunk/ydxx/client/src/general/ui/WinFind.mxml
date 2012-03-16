@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="610" height="351" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.ui.PanelOperate;
+			import utils.TipInfo;
+			import utils.SceneManager;
+			import task.model.Task;
+			import wubao.model.User;
+			import general.model.General;
+			import utils.WinManager;
+			import general.ui.events.PosEvent;
+			import mx.utils.StringUtil;
+			import general.list.GeneralList;
+			import utils.GameManager;
+			
+			private var generalList:GeneralList = null;
+			
+			private function init():void
+			{
+				setTitle("寻　访");
+				helpID = 5;
+				this.addEventListener(PosEvent.POS_GENERAL, posGen);
+			}
+			
+			private function posGen(evt:PosEvent):void
+			{
+				var winGenList:WinGenList = WinManager.winMgr.winGenList;
+				if (winGenList != null)
+				{
+					winGenList.visible = false;
+					winGenList.includeInLayout = false;
+				}
+			
+				WinManager.winMgr.winFind.visible = false;
+				WinManager.winMgr.winFind.includeInLayout = false;
+			}
+			
+			override public function refresh():void
+			{
+				generalList = GameManager.gameMgr.generalList.getNamedList();
+				
+				lblTotal.text = "总条数 " + generalList.length.toString();
+				
+				pagination.dataSource = generalList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgFind;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+				
+				tiName.text = "";
+			}
+			
+			private function search():void 
+			{
+				if (StringUtil.trim(tiName.text).length == 0)
+				{
+					refresh();
+					return;
+				}
+				
+				generalList = GameManager.gameMgr.generalList.getSearchList(StringUtil.trim(tiName.text));
+				
+				lblTotal.text = "总条数 " + generalList.length.toString();
+				
+				pagination.dataSource = generalList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgFind;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+			}
+			
+			override protected function closeWin(evt:MouseEvent):void
+			{
+				super.closeWin(evt);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:DataGrid id="dgFind" x="10" y="34" width="590" height="277" headerHeight="25" rowHeight="25" textAlign="center">
+		<mx:columns>
+			<mx:DataGridColumn headerText="姓名" dataField="generalName" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="主公" dataField="userName" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="武力" dataField="kongfu" width="50" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="智力" dataField="intelligence" width="50" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="政治" dataField="polity" width="50" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+
+		  <mx:DataGridColumn headerText="友好度" dataField="friend" width="50" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2" toolTip="登用武将所需要的最低友好度">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			
+			<mx:DataGridColumn headerText="所在" dataField="placeName" width="60" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="出仕" dataField="initYearStr" width="60" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="" width="110" sortable="false" draggable="false" resizable="false" itemRenderer="general.ui.item.ItemPos">
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<GameTextInput id="tiName" x="10" y="319" width="80" height="22" isCH="true"/>
+	<GameButton id="btnFind" x="94" y="319" label="搜　索" click="search();" height="22" btnType="off"/>
+	
+	<Pagination id="pagination" x="482" y="319">
+	</Pagination>
+	
+	<mx:Label id="lblTotal" x="255" y="321" text="Label" width="100" height="20" textAlign="center"/>
+	
+	<mx:Button id="btnGuid" x="483" y="60" width="48" height="20" visible="false" includeInLayout="false"/>
+</GameWindow>
+

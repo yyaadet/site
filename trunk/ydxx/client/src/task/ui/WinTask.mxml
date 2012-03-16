@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="550" height="408" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import guid.GuidManager;
+			import wubao.model.WuBao;
+			import wubao.model.Build;
+			import utils.ui.PanelMenu;
+			import utils.ui.PanelOperate;
+			import utils.TipInfo;
+			import utils.ui.PanelDate;
+			import utils.SceneManager;
+			import wubao.model.User;
+			import utils.WinManager;
+			import mx.events.ItemClickEvent;
+			import shop.model.Treasure;
+			import net.tcp.model.task.TcpTaskState;
+			import net.tcp.model.task.TcpBonus;
+			import net.tcp.TcpManager;
+			import net.tcp.model.task.TcpTask;
+			import utils.FormatText;
+			import task.ui.item.ItemBonus;
+			import task.model.Task;
+			import utils.components.events.BagEvent;
+			import utils.GameManager;
+			import task.list.TaskList;
+			
+			private var taskList:TaskList = null;
+			
+			private var taskID:int = 0;
+			
+			private var gameTask:Task = null;
+			
+			private var curIndex:int = 0;
+			
+			private function init():void
+			{
+				setTitle("任　务");
+				helpID = 13;
+				gvl1.addEventListener(BagEvent.ItemClick, gvl1Click);
+				gvl2.addEventListener(BagEvent.ItemClick, gvl2Click);
+				refresh();
+			}
+			
+			override public function refresh():void
+			{
+				listBar1.selectedIndex = curIndex;
+				showTask(curIndex);
+			}
+			
+			private function listClick(evt:ItemClickEvent):void
+			{
+				showTask(evt.index);
+			}
+			
+			private function showTask(index:int):void
+			{
+				if (index == 0)
+					showBegin();
+				else if (index == 1)
+				{
+					showGrow();
+				}
+					
+				curIndex = index;
+			}
+			
+			//========================================================================================
+			// 新手任务
+			//========================================================================================
+			
+			private function showBegin():void
+			{
+				taskList = GameManager.gameMgr.taskList.getBeginShow();
+				
+				gvl1.dataProvider = taskList.list;
+				gvl1.labelField = "title";
+				gvl1.itemID = "uniqID";
+				gvl1.itemWidth = 96;
+				gvl1.itemHeight = 30;
+				gvl1.showData();
+				
+				var lastTask:Task = taskList.getObjByIndex(taskList.length - 1) as Task;
+				gvl1.posItem(lastTask.uniqID);
+			}
+			
+			private function gvl1Click(evt:BagEvent):void
+			{
+				taskID = evt.itemObj.uniqID;
+				gameTask = taskList.getObjByID(taskID) as Task;
+				if (gameTask == null) return;
+				
+				showTaskInfo(1);
+			}
+			
+			//========================================================================================
+			// 成长任务
+			//========================================================================================
+			
+			private function showGrow():void
+			{
+				taskList = GameManager.gameMgr.taskList.getGrowShow();
+				
+				gvl2.dataProvider = taskList.list;
+				gvl2.labelField = "title";
+				gvl2.itemID = "uniqID";
+				gvl2.itemWidth = 96;
+				gvl2.itemHeight = 30;
+				gvl2.showData();
+				
+				if (listBar1.selectedIndex == 1)
+					gvl2.readMark(operType);
+			}
+			
+			private function gvl2Click(evt:BagEvent):void
+			{
+				taskID = evt.itemObj.uniqID;
+				gameTask = taskList.getObjByID(taskID) as Task;
+				if (gameTask == null) return;
+				
+				showTaskInfo(2);
+			}
+			
+			/**
+			 * 显示任务信息
+			 * compIndex 1--新手任务  2--成长任务
+			 * 
+			 */ 
+			private function showTaskInfo(compIndex:int):void
+			{
+				this["taInfo" + compIndex.toString()].htmlText = gameTask.info;
+				this["lblTarget" + compIndex.toString()].htmlText = gameTask.target;
+				
+				//新手任务
+				if (compIndex == 1)
+					taGuid.htmlText = FormatText.packegText("界面指引： " + gameTask.guid, FormatText.RED);
+				
+				this["cvBonus" + compIndex.toString()].removeAllChildren();
+				var bonus:Array = gameTask.bonus;
+				if (bonus == null || bonus.length < 1) return;
+				
+				var i:int = 0;
+				var len:int = 0;
+				var itemX:int = 0;
+				var itemY:int = 0;
+				var index:int = 0;
+				var itemBonus:ItemBonus = null;
+				var col:int = 3;
+				
+				//显示前8个奖励包含声望，6种资源，金币
+				len = 8;
+				for (i = 0; i < len; i++)
+				{
+					if (bonus[i] < 1) continue;
+				
+					itemBonus = new ItemBonus();
+					
+					itemBonus.x = (index - int(index / col) * col) * itemBonus.width;
+					itemBonus.y = int(index / col) * itemBonus.height;
+					
+					this["cvBonus" + compIndex.toString()].addChild(itemBonus);
+					itemBonus.na = Task.BONUS[i]; 
+					itemBonus.num = bonus[i];
+					
+					index ++; 
+				}
+				
+				//显示道具奖励
+				var len1:int = 1;
+				var gameTreasure:Treasure = null;
+				var tsList:Array = [];
+				var j:int = 0;
+				var flag:Boolean = false;
+				var item1:ItemBonus = null;
+				
+				for (i = len; i < len + len1; i++)
+				{
+					if (bonus[i] < 1) continue;
+					
+					//判断是否已创建过道具组件
+					for (j = 0; j < tsList.length; j++)
+					{
+						if (tsList[j] == bonus[i])
+						{
+							flag = true;
+							break;
+						}
+					}
+					
+					//创建道具组件
+					if (!flag)
+					{
+						itemBonus = new ItemBonus();
+						itemBonus.uniqID = bonus[i];
+						tsList.push(bonus[i]);
+						itemBonus.x = (index - int(index / col) * col) * itemBonus.width;
+						itemBonus.y = int(index / col) * itemBonus.height;
+						this["cvBonus" + compIndex.toString()].addChild(itemBonus);
+						gameTreasure = GameManager.gameMgr.treasureList.getObjByID(bonus[i]) as Treasure;
+						itemBonus.na = gameTreasure.name;
+						itemBonus.num = 1;
+						index ++;
+					}
+					else
+					{
+						item1 = null;
+						//找到对应的组件
+						for (j = 0; j < this["cvBonus" + compIndex.toString()].numChildren; j++)
+						{
+							if (this["cvBonus" + compIndex.toString()].getChildAt(j) is ItemBonus)
+							{
+								item1 = this["cvBonus" + compIndex.toString()].getChildAt(j) as ItemBonus;
+								if (item1 != null && item1.uniqID == bonus[i])
+									break;
+							}
+						}
+						
+						if (item1 != null)
+							item1.num ++;
+					}	
+					
+					flag = false;
+				}
+				
+				//显示士卒奖励
+				if (bonus[len + len1] > 0)
+				{
+					itemBonus = new ItemBonus();
+					itemBonus.x = (index - int(index / col) * col) * itemBonus.width;
+					itemBonus.y = int(index / col) * itemBonus.height;
+					
+					this["cvBonus" + compIndex.toString()].addChild(itemBonus);
+					itemBonus.na = "士卒";
+					itemBonus.num = bonus[i];
+				}
+				
+				var state:int = gameTask.state;
+				
+				if (state == 0)
+				{
+					this["btnOper" + compIndex.toString()].label = "接受任务";
+					this["btnOper" + compIndex.toString()].enabled = true;
+					this["lblTarget" + compIndex.toString()].htmlText += FormatText.packegText(" （未接受）", FormatText.RED); 
+					this["lblBonus" + compIndex.toString()].htmlText = "";
+				}
+				else if (state == 1)
+				{
+					this["btnOper" + compIndex.toString()].label = "领取奖励";
+					this["btnOper" + compIndex.toString()].enabled = false;
+					this["lblTarget" + compIndex.toString()].htmlText += FormatText.packegText(" （未完成）", FormatText.RED);
+					this["lblBonus" + compIndex.toString()].htmlText = "";
+				}
+				else if (state == 2)
+				{
+					this["btnOper" + compIndex.toString()].label = "领取奖励";
+					this["btnOper" + compIndex.toString()].enabled = true;
+					this["lblTarget" + compIndex.toString()].htmlText += FormatText.packegText(" （完成）", FormatText.GREEN); 
+					this["lblBonus" + compIndex.toString()].htmlText = FormatText.packegText("（未领取）", FormatText.RED);
+				}
+				else if (state == 3)
+				{
+					this["btnOper" + compIndex.toString()].label = "领取奖励";
+					this["btnOper" + compIndex.toString()].enabled = false;
+					this["lblTarget" + compIndex.toString()].htmlText += FormatText.packegText(" （完成）", FormatText.GREEN); 
+					this["lblBonus" + compIndex.toString()].htmlText = FormatText.packegText("（已领取）", FormatText.GREEN);
+				}
+			}
+			
+			//0--接受任务  1--领取奖励  2--取消任务
+			private var operType:int = 0;
+			
+			private function taskOper(compIndex:int):void
+			{
+				if (this["btnOper" + compIndex.toString()].label == "接受任务")
+				{
+					var tcpTask:TcpTask = new TcpTask();
+					tcpTask.taskID = gameTask.uniqID;
+					TcpManager.tcpMgr.sendTask(tcpTask);
+					
+					operType = 0;
+					if (listBar1.selectedIndex == 1)
+						gvl2.setMark(gameTask.uniqID);
+					
+					GuidManager.guidMgr.gotoNext();
+				}
+				else if (this["btnOper" + compIndex.toString()].label == "领取奖励")
+				{
+					var tcpBonus:TcpBonus = new TcpBonus();
+					tcpBonus.taskID = gameTask.uniqID;
+					TcpManager.tcpMgr.sendBonus(tcpBonus);
+					
+					operType = 1;
+					if (listBar1.selectedIndex == 1)
+						gvl2.setMark(gameTask.uniqID);
+					
+					if (GameManager.gameMgr.isShowGuid)
+					{
+						GuidManager.guidMgr.gotoNext();
+						this.visible = false;
+						this.includeInLayout = false;
+					}
+				}
+			}
+			
+			private function taskCancel():void
+			{
+				TcpManager.tcpMgr.sendCancelTask(null);
+				
+				operType = 2;	
+				if (listBar1.selectedIndex == 1)
+					gvl2.setMark(gameTask.uniqID);
+			}
+			
+			override protected function closeWin(evt:MouseEvent):void
+			{
+				super.closeWin(evt);
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<GameToggleButtonBar id="listBar1" x="10" y="34" height="22" dataProvider="vs1" width="230" itemClick="listClick(event);">
+	</GameToggleButtonBar>
+	
+	<mx:ViewStack x="10" y="54" id="vs1" width="530" height="344" creationPolicy="all">
+		<mx:Canvas label="新手任务" width="100%" height="100%" styleName="lowCanvas">
+			<mx:Canvas x="8" y="8" width="100" height="324" styleName="lowCanvas">
+				<GameVerList id="gvl1" x="0" y="0" height="320" width="96">
+				</GameVerList>
+			</mx:Canvas>
+			<mx:Canvas width="400" height="292" styleName="winCanvas" x="118" y="8">
+				<mx:Label x="9" y="9" text="任务提示：" width="65" height="20"/>
+				<mx:TextArea id="taInfo1" x="9" y="29" width="380" height="76" editable="false"/>
+				<mx:TextArea id="taGuid" x="9" y="106" height="22" backgroundAlpha="0" editable="false" width="380"/>
+				<mx:Label x="10" y="135" text="任务目标：" width="65" height="20"/>
+				<mx:Label id="lblTarget1" x="9" y="155" width="380" height="20"/>
+				<mx:Label x="9" y="184" text="任务奖励：" width="65" height="20"/>
+				<mx:Label id="lblBonus1" x="75" y="184" height="20" width="100"/>
+				<mx:Canvas id="cvBonus1" x="9" width="380" height="76" styleName="lowCanvas" y="205">
+				</mx:Canvas>
+			</mx:Canvas>
+			<GameButton id="btnCancel1" x="386" y="308" label="撤销任务" click="taskCancel();"/>
+			<GameButton id="btnOper1" x="454" y="308" label="领取奖励" click="taskOper(1);"/>
+		</mx:Canvas>
+		<mx:Canvas label="战役任务" width="100%" height="100%" styleName="lowCanvas">
+			<mx:Canvas x="8" y="8" width="100" height="324" styleName="lowCanvas">
+				<GameVerList id="gvl2" x="0" y="0" height="320" width="96">
+				</GameVerList>
+			</mx:Canvas>
+			<mx:Canvas width="400" height="292" styleName="winCanvas" x="118" y="8">
+				<mx:Label x="9" y="9" text="任务提示：" width="65" height="20"/>
+				<mx:TextArea id="taInfo2" x="9" y="29" width="380" height="76" editable="false"/>
+				<mx:TextArea id="taGuid2" x="9" y="105" height="20" backgroundAlpha="0" editable="false" width="380"/>
+				<mx:Label x="10" y="135" text="任务目标：" width="65" height="20"/>
+				<mx:Label id="lblTarget2" x="9" y="155" width="380" height="20"/>
+				<mx:Label x="9" y="184" text="任务奖励：" width="65" height="20"/>
+				<mx:Label id="lblBonus2" x="75" y="184" height="20" width="100"/>
+				<mx:Canvas id="cvBonus2" x="9" width="380" height="76" styleName="lowCanvas" y="205">
+				</mx:Canvas>
+			</mx:Canvas>
+			<GameButton id="btnCancel2" x="386" y="308" label="撤销任务" click="taskCancel();"/>
+			<GameButton id="btnOper2" x="454" y="308" label="领取奖励" click="taskOper(2);"/>
+		</mx:Canvas>
+	</mx:ViewStack>	
+</GameWindow>

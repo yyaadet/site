@@ -1,0 +1,78 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+<%namespace name="flash_game" file="/flash_game/func.mako.html" />
+
+<%def name="get_content()">
+<style type="text/css">
+.left_td { width: 80px;}
+</style>
+<div id="content" >
+    <div id="content_left">
+		
+    </div>
+    <div id="content_right">
+    <form method="post" enctype="multipart/form-data" action="/admin/flash_game_edit_do" >
+    	<table cellpadding="2px" cellspacing="0" width="100%">
+                <tr>
+                	<td class="left_td">* 游戏名称</td>
+                    <td><input type="text" name="name" value="${c.obj.name}" /> <label style="color:#ccc">不超过20个汉字或40个字母数字</label></td>
+                </tr>
+                <tr>
+                	<td>* 尺寸大小</td>
+                    <td><input type="text" name="width" value="640" style="width: 40px;" /> * <input type="text" name="height" value="480" style="width: 40px;"/> <label style="color:#ccc">不能超过800*600</label></td>
+                </tr>
+                <tr>
+                	<td>* 选择文件</td>
+                    <td><input type="file" name="file"/> <label style="color:#ccc">仅支持swf文件，限5M</label></td>
+                </tr>
+                <tr>
+                	<td>* 游戏封面</td>
+                    <td><input type="file" name="pic"/><label style="color:#ccc">jpg、bmp、gif格式，100K以内</label></td>
+                </tr>
+                <tr>
+                	<td>封面预览</td>
+                    <%
+                    from zuan.controllers.flash_game import get_flash_game_pic_url
+                    pic_url = get_flash_game_pic_url(c.obj, c.setting, False) 
+                    %>
+                    <td><img width="290" height="220" src="${pic_url}" /></td>
+                </tr>
+                <tr>
+                	<td>* 游戏分类</td>
+                    <td>
+                    	${flash_game.get_group(c.obj.group_id)}
+                    </td>
+                </tr>
+                <tr>
+                	<td>* 游戏简介</td>
+                    <td><textarea class="txt" name="info">${c.obj.info}</textarea> <br />
+                    <label style="color:#ccc">不超过200个汉字或400个字母</label></td>
+                </tr>
+                <tr>
+                	<td>* 操作说明</td>
+                    <td><textarea class="txt" name="operate_info">${c.obj.operate_info}</textarea><br />
+                    <label style="color:#ccc">不超过200个汉字或400个字母</label>
+                    </td>
+                </tr>
+                <tr>
+                	<td>* 作者姓名</td>
+                    <td><input type="text" name="author" value="${c.obj.author}" /></td>
+                </tr>
+                <tr>
+                	<td>联系电话</td>
+                    <td><input type="text" name="phone" value="${c.obj.phone}" /></td>
+                </tr>
+                <tr>
+                	<td><input type="hidden" name="id" value="${c.obj._id}" /></td>
+                    <td><input type="submit" value="提 交"  class="button" />
+                        <a href="/flash_game/rem?id=${c.obj._id}">删除</a> |
+                        <a href="${h.static_flash_game_detail_url(c.obj._id)}">详细</a>
+                    </td>
+                </tr>
+            </table>
+    </form>
+     <!-- content right end -->
+    </div>
+</div>
+</%def>

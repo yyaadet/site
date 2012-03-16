@@ -1,0 +1,23 @@
+#-*- encoding: utf-8 -*-
+<%inherit file="/home/base.mako.html" />
+
+<%def name="get_title()">
+商务合作
+</%def>
+
+<%def name="get_content()">
+<div id="content">
+<div id="content_left">
+    <div class="table" style="margin-left: 10px;">
+   		<div class="row" style="height: 26px;">广告业务和异业合作：</div>
+        <div class="row" style="height: 26px;">
+        	<p>Email：1134362918@qq.com; <br /> QQ: 1134362918;</p>
+        </div>
+   </div>
+</div>
+<div id="content_right">
+   <%namespace file="/home/index.mako.html" name="home" />
+   ${home.get_content_right_add_link()}
+</div>
+</div>
+</%def>

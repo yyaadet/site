@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="90" height="21" xmlns:ns1="utils.components.*" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.GameManager;
+			import wubao.model.User;
+		
+			import sphere.events.FireUserEvent;
+			
+			private var _data:Object;
+			
+			private function init():void
+			{
+			}	
+				
+			private function fireUser():void
+			{
+				var fireEvent:FireUserEvent = new FireUserEvent(FireUserEvent.FIRE_USER);
+				fireEvent.user = data;
+				this.parentDocument.dispatchEvent(fireEvent);
+			}
+			
+			override public function get data():Object
+			{
+				return _data;
+			} 
+			
+			override public function set data(value:Object):void
+			{
+				_data = value;
+				
+				btnFire.visible = true;
+				var gameUser:User = data as User;
+				if (gameUser != null)
+				{
+					if (gameUser.uniqID == GameManager.gameMgr.userID)
+						btnFire.visible = false;
+					
+					if (!gameUser.isLeader)
+						btnFire.visible = false;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton id="btnFire" x="13" y="0" label="开　除" btnType="menu" click="fireUser();" height="21"/>
+</mx:Canvas>

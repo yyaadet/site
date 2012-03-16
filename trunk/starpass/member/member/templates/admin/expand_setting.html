@@ -1,0 +1,39 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">推广设置</span>
+</div>
+
+<div class="content_content">
+<form action="/admin/expand_setting" method="post">
+    <input type="hidden" name="act" value="edit" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="expand_rate">推广佣金比率</label>
+    <input size="60" type="text" id="expand_rate" name="expand_rate" value="${c.expand_rate}"/>
+    </p>
+    
+    
+    <p>
+    <label for="expand_return">&nbsp;推广返回URL</label>
+    <input size="60" type="text" id="expand_return" name="expand_return" value="${c.expand_return}"/>
+    </p>
+    
+    <p>
+    <label for="expand_txt">推广文字描述</label>
+    <textarea type="text" id="expand_txt" name="expand_txt" cols="80" rows="10">${c.expand_txt}</textarea>
+    </p>
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+</div>
+
+</%def>

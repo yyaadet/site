@@ -1,0 +1,57 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+<div id="content" >
+        ${self.get_rss_list(c.objs,c.start_page, c.page, c.end_page, c.total_pages)}
+</div>
+</%def>
+
+<%def name="get_rss_list(objs, start_page, page, end_page, total_pages)">
+
+<table id="mytable">
+<tr>
+  <th>名称</th>
+  <th>链接</th>
+  <th>订阅人</th>
+  <th>新闻</th>
+  <th>今日新闻</th>
+  <th>删除</th>
+</tr>
+%for obj in objs:
+<tr>
+   <td>${obj.name}</td>
+   <td><a href="${obj.url}" target="_blank">${obj.url}</a></td>
+   <td>${obj.uname}</td>
+   <td>${obj.fetch_num}</td>
+   <td>${obj.today_fetch_num}</td>
+   %if obj.is_del == 0:
+   <td><a href="/admin/rss_rem?id=${obj._id}">删除</a></td>
+   %else:
+   <td><a href="/admin/rss_rem?id=${obj._id}">恢复</a></td>
+   %endif
+</tr>
+%endfor
+</table>
+
+<!-- page -->
+<div class="table">
+    <div class="row">
+        %if start_page != 1:
+        <div class="col" style="width: 50px;"><a href="/admin/rss?page=${start_page - 1}">上10页</a></div>
+        %endif
+        %for i in range(start_page, end_page + 1):
+        <div class="col" style="min-width: 0;width: 30px;">
+            %if i == page:
+            <strong><a href="/admin/rss?page=${i}">[${i}]</a></strong>
+            %else:
+            <a href="/admin/rss?page=${i}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col" style="width: 50px;"><a href="/admin/rss?page=${end_page + 1}">下10页</a></div>
+        <div class="col" style="width: 50px;">总页数：${total_pages}</div>
+    </div>
+</div>
+</%def>

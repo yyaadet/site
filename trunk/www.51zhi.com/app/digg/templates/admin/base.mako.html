@@ -1,0 +1,52 @@
+## -*- coding: utf-8 -*-
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" media="screen" href="/admin/admin.css" />
+	<script type="text/javascript" src="/admin/jquery.min.js" ></script>
+    <script type="text/javascript" src="/tools.js" ></script>
+    <title>后台管理中心</title>
+  </head>
+  
+  <body>
+     ${self.get_top()}
+
+     ${self.get_content()}
+		
+     ${self.get_tail()}
+  </body>
+</html>
+
+<%def name="get_top(name='')">
+<%
+menus = [{'name': u"用户管理", "url": "/admin/user_list"},
+		{'name': u"友情链接", "url": "/admin/friendlink"},
+        {'name': u"订阅管理", "url": "/admin/feed"},
+        {'name': u"系统设置", "url": "/admin/setting"},]        
+%>
+<div id="top">
+    <div class="table" style="width:970px;">
+    <div class="row" style="border-bottom: solid 1px #CEE3F8;">
+        %for menu in menus:
+            %if menu['name'] == name:
+            <div class="col hot"><a href="${menu['url']}">${menu['name']}</a></div>
+            %else:
+            <div class="col"><a href="${menu['url']}">${menu['name']}</a></div>
+            %endif
+        %endfor
+	</div>
+    </div>
+</div>
+</%def>
+
+<%def name="get_content()">
+<div id="content" >
+</div>
+</%def>
+
+<%def name="get_tail()">
+<div id="tail" >
+	<span>荣誉出品</span>
+</div>
+</%def>

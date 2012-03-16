@@ -1,0 +1,59 @@
+<!--服务器设置　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <input type="hidden" id="error" value="${c.error}" />
+    <tr>
+      <td width="12%" height="40" align="right" bgcolor="#f9f0e1" class="gray">　SOCKET服务器IP：</td>
+      <td align="left" valign="middle" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray" style="WIDTH: 450px " name="socket_ip" id="socket_ip" value="${c.socket_ip}"/></td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　SOCKET服务器端口：</td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray"  style="WIDTH: 450px " name="socket_port" id="socket_port" value="${c.socket_port}" /></td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　FLEX服务器IP：</td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray"  style="WIDTH: 450px " name="flex_ip" id="flex_ip" value="${c.flex_ip}" /></td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　FLEX服务器端口：</td>
+      <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray" style="WIDTH: 450px " name="flex_port" id="flex_port" value="${c.flex_port}" /></td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　游戏名称：</td>
+      <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray" style="WIDTH: 450px " name="game_name" id="game_name" value="${c.game_name}" /></td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　服务器名称：</td>
+      <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray" style="WIDTH: 450px " name="server_name" id="server_name" value="${c.server_name}" /></td>
+    </tr>
+    
+    <tr>
+      <td height="40" colspan="2" align="left" bgcolor="#f9f0e1" class="gray">　　　　　　　　　　　 
+        <a href="#"
+            onclick="selectTab('/admin/game_server?action=edit'
+            +'&socket_ip='+$('#socket_ip').val()
+            +'&socket_port='+$('#socket_port').val()
+            +'&flex_ip='+$('#flex_ip').val()
+            +'&flex_port='+$('#flex_port').val()
+            +'&game_name='+$('#game_name').val()
+            +'&server_name='+$('#server_name').val()
+            )"><img src="/images/pic_24.gif" width="54" height="25" border="0" /></a>
+            </td>
+    </tr>
+</table>
+<script type="text/javascript">
+    error = document.getElementById("error").value;
+    if(error==""){}else{alert(error);}
+</script>
+<!--服务器URL设置 end-->
+

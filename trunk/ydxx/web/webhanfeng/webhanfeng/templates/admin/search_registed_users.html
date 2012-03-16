@@ -1,0 +1,90 @@
+    <!--玩家例表　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <tr>
+      <td height="30" colspan="13" bgcolor="#FFFFFF">
+        <table width="100%" height="45" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td  align="left" bgcolor="#f9f0e1"><ul class="img">
+            <li>起始时间：<input name="start_time" class="gray" id="start_time" value="${c.start_time}" style="WIDTH: 150px " />   
+            
+            <li>终止时间：<input name="end_time" class="gray" id="end_time" value="${c.end_time}" style="WIDTH: 150px " />   （年-月-日）
+             <li><a href="#" onclick="javascript:;if (checkTime()) selectTab('/admin/search_registed_users?start_time='+$('#start_time').val()
+                +'&end_time='+$('#end_time').val()
+                )"><img src="/images/pic_15.gif" width="76" height="25" border="0" /></a></li></ul></td>
+          </tr>
+      </table></td>
+    </tr>
+    <tr>
+      <td height="30" align="center" bgcolor="#ac7e43" class="white_bc">ID</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">运营商ID</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">角色名称</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">可用游戏币</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">注册游戏时间</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">最后登录IP</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">累计消费虚拟币</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">在线时长</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">是否锁定</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">操作</td>
+    </tr>
+    %for item in c.data:
+        <%
+            day = 24*60*60
+            hour = 60*60
+            minute = 60
+            online_day = item.online_second / day
+            online_hour = (item.online_second - online_day*day) / hour
+            online_minute = (item.online_second - online_day*day - online_hour*hour) / minute
+            online_second = item.online_second - online_day*day - online_hour*hour - online_minute*minute
+            online_date = str(online_day) + u"天" + str(online_hour) + u"时" + str(online_minute) + u"分" + str(online_second) + u"秒"
+        %>
+    <tr>
+      <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.id}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.oid}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.name}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.money}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${readable_time(item.first_login_time)}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.last_login_ip}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.consume}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${online_date}</td>
+      %if item.is_locked == 1:
+      <td align="center" bgcolor="#f9f0e1" class="gray">是</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">
+        <a href="#" class="menu" onclick="selectTab('/admin/user_list?action=unlock&id=${item.id}')">解锁</a>
+      </td>
+      %else:
+      <td align="center" bgcolor="#f9f0e1" class="gray">否</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">
+        <a href="#" class="menu" onclick="selectTab('/admin/user_list?action=lock&id=${item.id}')">锁定</a></td>
+      %endif
+    </tr>
+    %endfor
+    
+    <%namespace file="/admin/mypager.html" import="*" />
+    ${footer_page("/admin/search_registed_users?start_time="+c.start_time+"&end_time="+c.end_time+"&page=")}
+    
+</table>
+<script>
+function strDateTime(str)
+{
+var r = str.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/);
+if(r==null)return false;
+var d= new Date(r[1], r[3]-1, r[4]);
+return (d.getFullYear()==r[1]&&(d.getMonth()+1)==r[3]&&d.getDate()==r[4]);
+}
+function checkTime()
+{
+    start_time = $('#start_time').val()
+    end_time = $('#end_time').val()
+    if(!strDateTime(start_time)){
+        alert("起始时间错误");
+        return false;
+        }
+    if(!strDateTime(end_time)){
+        alert("终止时间错误");
+        return false;
+        }
+    return true;
+}
+</script>
+<!--玩家例表 end-->
+

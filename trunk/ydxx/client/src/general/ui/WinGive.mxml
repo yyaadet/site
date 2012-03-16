@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="443" height="220" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.FormatText;
+			import utils.events.ConfirmEvent;
+			import utils.ui.WinAsk;
+			import utils.WinManager;
+			import net.tcp.TcpManager;
+			import wubao.model.UserTreasure;
+			import net.tcp.model.wubao.TcpGrant;
+			import wubao.model.Friend;
+			import general.model.General;
+			import utils.PubUnit;
+			import utils.components.item.BagItem;
+			import utils.components.events.BagEvent;
+			import utils.GameManager;
+			import wubao.list.UserTsList;
+			
+			private var _generalID:int = 0; 
+			
+			private var gameGeneral:General = null;
+			
+			private var treasureList:UserTsList;
+			
+			private function init():void
+			{
+				setTitle("赠　送");
+				helpID = 5;
+				gs1.addEventListener(BagEvent.ItemClick, bagClick);
+				this.addEventListener(MouseEvent.CLICK, onClick);
+			}
+			
+			private function onClick(evt:MouseEvent):void
+			{
+				if (evt.target is BagItem)
+				{
+					var bagItem:BagItem = evt.target as BagItem;
+					if (bagItem != null && bagItem.num > 0)
+						return;
+				}
+			}
+			
+			override public function refresh():void
+			{
+				var info:String = "";
+				gameGeneral = GameManager.gameMgr.generalList.getObjByID(generalID) as General;
+				if (gameGeneral != null)
+					info += "登用武将 " + gameGeneral.generalName + " 需要最低友好度为 " + gameGeneral.friend;
+				
+				var friend:Friend = null;
+				friend = GameManager.gameMgr.friendList.getObjByID(generalID) as Friend;
+				if (friend != null)
+					info += " 当前友好度为 " + friend.value;
+				else
+					info += " 当前友好度为 0";
+				
+				lblInfo.text = info;
+				showData();
+			}
+			
+			//显示财宝
+			private function showData():void
+			{
+				treasureList = GameManager.gameMgr.userTsList.getBagInfo(5);
+				if (treasureList == null) return;
+				
+				gs1.dataProvider = treasureList.list;
+				gs1.itemID = "treasureID";
+				gs1.numField = "num";
+				gs1.urlField = "url";
+				gs1.tipField = "tip";
+				gs1.equalFun = "equal";
+				gs1.max = 24;
+				gs1.free = 24 - treasureList.length;
+				gs1.showData();
+			}
+			
+			private var selBagItem:BagItem = null;
+			private var winAsk:WinAsk = null;
+			
+			private function bagClick(evt:BagEvent):void
+			{
+				var bagItem:BagItem = evt.bagItem;
+				if (bagItem == null || bagItem.obj == null) return;
+				
+				selBagItem = bagItem;
+				var userTreasure:UserTreasure = null;
+				
+				userTreasure = selBagItem.obj as UserTreasure;
+				if (userTreasure != null)
+				{
+					var str:String = "确定要赠送给武将" + FormatText.packegText("【" + gameGeneral.generalName + "】") + "一个" + 
+					                 FormatText.packegText("“" + userTreasure.treasure.name + "”") + "吗？";
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmGive);
+				}
+			}
+			
+			private function confirmGive(evt:ConfirmEvent):void
+			{
+				if (gameGeneral == null) return;
+				if (selBagItem == null)
+				{
+					WinManager.winMgr.showResult("请选择要赠送的道具");
+					return;
+				}
+				
+				var userTreasure:UserTreasure = null;
+				var type:int = 0;
+				var treasureID:int = 0;
+				
+				userTreasure = selBagItem.obj as UserTreasure;
+				if (userTreasure != null)
+				{
+					type = userTreasure.treasure.type;
+					treasureID = userTreasure.treasureID;
+				}
+				else
+					return;
+					
+				userTreasure = GameManager.gameMgr.userTsList.getOneTreasure(type, treasureID);
+				if (userTreasure != null)
+				{
+					var grant:TcpGrant = new TcpGrant();
+					grant.wbID = GameManager.gameMgr.wubao.uniqID;
+					grant.type = 1;
+					grant.genSide = 1;
+					grant.generalID = generalID;
+					grant.treasureID = userTreasure.uniqID;
+					
+					TcpManager.tcpMgr.sendGrant(grant);
+				}
+			}
+			
+			public function get generalID():int
+			{
+				return _generalID;
+			}
+			
+			public function set generalID(param:int):void
+			{
+				_generalID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label id="lblInfo" x="10" y="34" text="Label" height="20" width="423"/>
+	<mx:Canvas id="cvBag" x="10" y="54" width="423" height="156" styleName="lowCanvas">
+		<GameStore id="gs1" x="0" y="0" width="419" height="152">
+		</GameStore>
+	</mx:Canvas>
+	
+</GameWindow>

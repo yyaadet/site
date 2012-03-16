@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="66" height="262" fontSize="12" creationComplete="init();" xmlns:ns1="utils.components.*">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+			import utils.components.events.BagEvent;
+			import mx.controls.Button;
+			import mx.utils.StringUtil;
+			import mx.core.ScrollPolicy;
+			
+			//数据源
+			private var _dataProvider:Array = [];
+			
+			//数据项显示的字段
+			private var _labelField:String = "";
+			
+			//数据项显示的ID
+			private var _itemID:String = "";
+			
+			//数据项的宽度
+			private var _itemWidth:int = 66;
+			
+			//数据项的高度
+			private var _itemHeight:int = 22; 
+			
+			//数据项之间的间隙
+			private var _gap:int = 0;
+			
+			private var _indexClick:int = 1;
+			
+			//用来存放数据项的容器
+			private var itemContainer:Canvas = null;
+			
+			//数据项列表
+			private var itemList:Array = [];
+			
+			//数据项总数
+			private var itemCount:int = 0;
+			
+			//每页显示个数
+			private var pageNum:int = 0;
+			
+			//当前移动的位置
+			private var movePos:int = 0;
+			
+			//是否可以向上翻页
+			private var canUp:Boolean = true;
+			
+			//是否可以向下翻页
+			private var canDown:Boolean = true;
+				
+			private function init():void
+			{
+				if (itemContainer == null)
+				{
+					itemContainer = new Canvas();
+					itemContainer.x = 0;
+					itemContainer.y = 0;
+					itemContainer.width = itemArea.width;
+					itemContainer.height = itemArea.height;
+					itemArea.addChild(itemContainer);
+					
+					itemContainer.horizontalScrollPolicy = ScrollPolicy.OFF;
+					itemContainer.verticalScrollPolicy = ScrollPolicy.OFF;
+				}
+				
+				itemArea.horizontalScrollPolicy = ScrollPolicy.OFF;
+				itemArea.verticalScrollPolicy = ScrollPolicy.OFF;
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+			}
+			
+			private function moveUp():void
+			{
+				itemContainer.y += itemHeight + gap;
+				validUpDown();
+			}
+			
+			private function moveDown():void
+			{
+				itemContainer.y -= itemHeight + gap;
+				validUpDown();
+			}
+			
+			public function showData():void
+			{
+				if (itemContainer == null) return;
+				itemContainer.removeAllChildren();
+				
+				if (dataProvider == null || dataProvider.length < 1) return;
+				if (StringUtil.trim(labelField) == "") return;
+				
+				var btnItem:GameButton = null;
+				var i:int = 0;
+				var obj:Object;
+				var clickItem:GameButton = null;
+				
+				pageNum = itemArea.height / itemHeight;
+				itemCount = dataProvider.length;
+				itemContainer.x = 0;
+				itemContainer.y = 0;
+				itemContainer.width = itemArea.width;
+				itemContainer.height = itemCount * itemHeight + (itemCount - 1) * gap;
+				
+				itemList.length = 0;
+				
+				for(i = 0; i < itemCount; i++)
+				{
+					obj = dataProvider[i];
+					btnItem = new GameButton();
+					btnItem.width = itemWidth;
+					btnItem.height = itemHeight;
+					btnItem.x = 0;
+					btnItem.y = i * (itemHeight + gap);
+					btnItem.setStyle("paddingLeft", 0);
+					btnItem.setStyle("paddingRight", 0);
+					btnItem.setStyle("styleName", "xiuItem");
+					itemContainer.addChild(btnItem);
+					itemList.push(btnItem);
+					
+					btnItem.label = obj[labelField];
+					btnItem.data = obj;
+					btnItem.addEventListener(MouseEvent.CLICK, onItemClick);
+					if ((i + 1) == indexClick) clickItem = btnItem;
+				}
+				
+				validUpDown();
+				
+				if (clickItem != null)
+					clickItem.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+			}
+			
+			/**
+			 * 根据项目ID定位
+			 * 
+			 */ 
+			public function posItem(uniqID:int):void
+			{
+				if (itemContainer == null) return;
+				
+				var index:int = dispatchItemClick(uniqID);	
+				index ++;
+				if (index <= 10) return;
+				
+				//定位
+				index = index - pageNum; 
+				itemContainer.y = -(index * itemHeight + (index - 1) * gap);
+				
+				validUpDown();
+			}
+			
+			private function dispatchItemClick(uniqID:int):int
+			{
+				var i:int = 0;
+				var len:int = 0;
+				var index:int = 0;
+				var obj:Object;
+				
+				len = dataProvider.length;
+				
+				//找到该项目对应的索引值
+				for (i = 0; i < len; i++)
+				{
+					obj = dataProvider[i];
+					if (obj[itemID] == uniqID)
+					{
+						index = i;
+						break;
+					}
+				} 
+				
+				//派发最后一个项目的单击事件
+				var btnItem:GameButton = itemList[index];
+				if (btnItem != null)
+					btnItem.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+				
+				return index;
+			}
+			
+			//=====================================================================
+			// 任务模块所需函数
+			//=====================================================================
+			
+			private var markID:int = 0;
+			private var markPos:int = 0;
+			
+			public function setMark(uniqID:int):void
+			{
+				markID = uniqID;
+				markPos = itemContainer.y;
+			}
+			
+			public function readMark(type:int = 0):void
+			{
+				if (itemContainer == null) return;
+				
+				//领取奖励
+				if (type == 1)
+				{
+					if (itemContainer.height <= itemArea.height)
+						itemContainer.y = 0;
+					else
+					{
+						if (itemContainer.y <= 0)
+							itemContainer.y = 0;
+						else
+							itemContainer.y += itemHeight;
+					} 
+				}
+				else
+				{
+					dispatchItemClick(markID);
+					itemContainer.y = markPos;
+				}
+				
+				validUpDown();
+			}
+			
+			private function validUpDown():void
+			{
+				if (itemContainer == null) return;
+				
+				if (itemContainer.y >= 0)
+					btnUp.enabled = false;
+				else
+					btnUp.enabled = true;
+				
+				if ((itemContainer.y + itemContainer.height) <= itemArea.height)
+					btnDown.enabled = false;
+				else
+					btnDown.enabled = true;
+			}
+			
+			private function onItemClick(evt:MouseEvent):void
+			{
+				var btnItem:GameButton = null;
+				if (evt.target is GameButton)
+				{
+					btnItem = evt.target as GameButton;
+					setAllSelect(false);
+					btnItem.selected = true;
+					btnItem.setStyle("color", PubUnit.BLACK);
+					
+					var obj:Object = btnItem.data;
+					var e:BagEvent = new BagEvent(BagEvent.ItemClick);
+					e.itemObj = obj;
+					
+					dispatchEvent(e);
+				}
+			}
+			
+			public function setAllSelect(isSel:Boolean):void
+			{
+				var i:int = 0;
+				var len:int = itemContainer.numChildren;
+				var btnItem:GameButton = null;
+				
+				for (i = 0; i < len; i++)
+				{
+					if (itemContainer.getChildAt(i) is GameButton)
+					{
+						btnItem = itemContainer.getChildAt(i) as GameButton;
+						if (btnItem != null)
+						{
+							btnItem.selected = isSel;
+							btnItem.setStyle("color", PubUnit.WHITE);
+						}
+					}
+				}
+			}
+			
+			public function getIndexByName(labelName:String):int
+			{
+				var i:int = 0;
+				var btnItem:GameButton = null;
+				var len:int = itemList.length;
+				
+				for (i = 0; i < len; i++)
+				{
+					btnItem = itemList[i];
+					if (btnItem.label == labelName)
+						return i;
+				}
+				
+				return 0;
+			}
+			
+			//==============================================================
+			// 属性
+			//==============================================================
+			
+			public function get dataProvider():Array
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(param:Array):void
+			{
+				_dataProvider = param;
+			}
+			
+			public function get labelField():String
+			{
+				return _labelField;
+			}
+			
+			public function set labelField(param:String):void
+			{
+				_labelField = param;
+			}
+			
+			public function get itemID():String
+			{
+				return _itemID;
+			}
+			
+			public function set itemID(param:String):void
+			{
+				_itemID = param;
+			}
+			
+			public function get itemWidth():int
+			{
+				return _itemWidth;
+			}
+			
+			public function set itemWidth(param:int):void
+			{
+				_itemWidth = param;
+			}
+			
+			public function get itemHeight():int
+			{
+				return _itemHeight;
+			}
+			
+			public function set itemHeight(param:int):void
+			{
+				_itemHeight = param;
+			}
+			
+			public function get gap():int
+			{
+				return _gap;
+			}
+			
+			public function set gap(param:int):void
+			{
+				_gap = param;
+			}
+			
+			public function get indexClick():int
+			{
+				return _indexClick;
+			}
+			
+			public function set indexClick(param:int):void
+			{
+				_indexClick = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton id="btnUp" height="10" paddingLeft="0" paddingRight="0" left="0" top="0" right="0" btnType="xiuPrior" click="moveUp();"/>
+	<ns1:GameButton id="btnDown" height="10" paddingLeft="0" paddingRight="0" left="0" right="0" bottom="0" btnType="xiuNext" click="moveDown();"/>
+	<mx:Canvas id="itemArea" top="10" left="0" bottom="10" right="0">
+	</mx:Canvas>
+	
+</mx:Canvas>

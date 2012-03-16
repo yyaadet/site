@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="36" height="40" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			
+			private var timer1:Timer = new Timer(500);
+			
+			private var flag:Boolean = false;
+			
+			private var _isStopFlash:Boolean = true;
+			
+			private function init():void
+			{
+				timer1.addEventListener(TimerEvent.TIMER, onTimer);
+				this.addEventListener(MouseEvent.CLICK, onClick);
+			}
+			
+			private function onClick(evt:MouseEvent):void
+			{
+				if (isStopFlash)
+					stop();
+			}
+			
+			private function onTimer(evt:TimerEvent):void
+			{
+				flag = !flag;
+				this.alpha = flag ? 0.4 : 1;
+			}
+			
+			public function start():void
+			{
+				if (timer1.running) return;
+				timer1.start();
+			}
+			
+			public function stop():void
+			{
+				timer1.stop();
+				this.alpha = 1;
+			}
+			
+			public function get isStopFlash():Boolean
+			{
+				return _isStopFlash;
+			}
+			
+			[Inspectable(defaultValue="BOOLEAN", enumeration="false,true", type="Boolean")]
+			public function set isStopFlash(param:Boolean):void
+			{
+				_isStopFlash = param;
+			}
+			
+		]]>
+	</mx:Script>
+</mx:Canvas>

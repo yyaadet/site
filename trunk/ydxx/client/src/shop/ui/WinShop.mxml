@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="795" height="440" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import net.http.events.HttpRefEvent;
+			import utils.WinManager;
+			import utils.FormatText;
+			import utils.GameManager;
+			import mx.events.ItemClickEvent;
+			import shop.list.TreasureList;
+			import net.http.events.HttpSucEvent;
+			import net.http.HttpManager;
+			
+			private var _onlyRereshMoney:Boolean = false;
+			
+		 	private var type:int = 1;
+		 	
+			private function init():void
+			{
+				setTitle("商　城");
+				helpID = 21;
+			}
+			
+			override public function refresh():void
+			{
+				HttpManager.httpMgr.addEventListener(HttpSucEvent.SUCCESS, getMoneySucc);
+				HttpManager.httpMgr.getMoney()
+			}
+			
+			private function getMoneySucc(evt:HttpSucEvent):void
+			{
+				HttpManager.httpMgr.removeEventListener(HttpSucEvent.SUCCESS, getMoneySucc);
+				moneyInfo.htmlText= "充值 " + FormatText.packegText(GameManager.gameMgr.user.chong.toString()) + 
+				                    " 赠送 " + FormatText.packegText(GameManager.gameMgr.user.give.toString()) + " （金币）";
+				if (onlyRereshMoney) return;
+				
+				type = 1;
+				listBar.selectedIndex = 0;
+				showData();			
+			}
+			
+			private function listClick(evt:ItemClickEvent):void
+			{
+				if (type == evt.index + 1) return;
+				
+				type = evt.index + 1;
+				showData();
+			}
+			
+			private function showData():void
+			{
+				var dataList:TreasureList = null;
+				
+				if (type < 6)
+					dataList = GameManager.gameMgr.treasureList.getTreasureList(type);
+				else
+					dataList = GameManager.gameMgr.treasureList.getOtherList(6);
+					
+				pagination.dataSource = dataList;
+				pagination.pageNum = 9;
+				if (type < 6)
+					pagination.dataUI = this["tilelist" + type.toString()];
+				else
+					pagination.dataUI = tilelist6;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+			}
+		
+			private function showBag():void
+			{
+				WinManager.winMgr.showBag();
+			}
+			
+			private function exchange():void
+			{
+				var str:String = GameManager.gameMgr.exchangeURL;
+				var urlRequest:URLRequest = new URLRequest(str);
+				
+				navigateToURL(urlRequest, "_blank");
+			}
+			
+			private function getGift():void
+			{
+				WinManager.winMgr.showGift();
+			}
+			
+			private function transfer():void
+			{
+				WinManager.winMgr.showTransCoin();
+			}
+			
+			public function get onlyRereshMoney():Boolean
+			{
+				return _onlyRereshMoney;
+			}
+			
+			public function set onlyRereshMoney(param:Boolean):void
+			{
+				_onlyRereshMoney = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label id="moneyInfo" x="575" y="34" width="210"  height="20" styleName="content" textAlign="right"/>
+	
+	<GameToggleButtonBar id="listBar" x="10" y="34" dataProvider="vs1" height="22" itemClick="listClick(event);"  width="546">
+	</GameToggleButtonBar>
+	
+	<mx:ViewStack id="vs1" x="10" y="56" width="775" height="340" creationPolicy="all">
+		<mx:Canvas label="武器" x="0" y="0" width="100%" height="100%">
+			<mx:TileList id="tilelist1" width="100%" height="100%" columnCount="3" rowCount="3" itemRenderer="shop.ui.item.ItemShop" 
+				x="0" y="0" useRollOver="false" selectable="false" backgroundAlpha="0" variableRowHeight="true">
+			</mx:TileList>
+		</mx:Canvas>
+		
+		<mx:Canvas label="经论" x="0" y="0" width="100%" height="100%">
+			<mx:TileList id="tilelist2" width="100%" columnCount="3" rowCount="3" height="100%" itemRenderer="shop.ui.item.ItemShop" 
+				x="0" y="0" useRollOver="false" selectable="false" backgroundAlpha="0" variableRowHeight="true">
+			</mx:TileList>
+		</mx:Canvas>
+		
+		<mx:Canvas label="典籍" x="0" y="0" width="100%" height="100%">
+			<mx:TileList id="tilelist3" width="100%" columnCount="3" rowCount="3" height="100%" itemRenderer="shop.ui.item.ItemShop" 
+				x="0" y="0" useRollOver="false" selectable="false" backgroundAlpha="0" variableRowHeight="true">
+			</mx:TileList>
+		</mx:Canvas>
+		
+		<mx:Canvas label="坐骑" x="0" y="0" width="100%" height="100%">
+			<mx:TileList id="tilelist4" width="100%" columnCount="3" rowCount="3" height="100%" itemRenderer="shop.ui.item.ItemShop" 
+				x="0" y="0" useRollOver="false" selectable="false" backgroundAlpha="0" variableRowHeight="true">
+			</mx:TileList>
+		</mx:Canvas>
+		
+		<mx:Canvas label="财宝" x="0" y="0" width="100%" height="100%">
+			<mx:TileList id="tilelist5" width="100%" columnCount="3" rowCount="3" height="100%" itemRenderer="shop.ui.item.ItemShop" 
+				x="0" y="0" useRollOver="false" selectable="false" backgroundAlpha="0" variableRowHeight="true" offscreenExtraRowsOrColumns="9">
+			</mx:TileList>
+		</mx:Canvas>
+		
+		<mx:Canvas label="其他" x="0" y="0" width="100%" height="100%">
+			<mx:TileList id="tilelist6" width="100%" columnCount="3" rowCount="3" height="100%" itemRenderer="shop.ui.item.ItemShop" 
+				x="0" y="0" useRollOver="false" selectable="false" backgroundAlpha="0" variableRowHeight="true">
+			</mx:TileList>
+		</mx:Canvas>
+	</mx:ViewStack>
+	
+	<Pagination id="pagination" x="667" y="401">
+	</Pagination>
+	
+	<GameButton x="257.5" y="406" label="宝　库" click="showBag();"/>
+	<GameButton x="329.5" y="406" label="兑换金币" click="exchange();"/>
+	<GameButton x="401.5" y="406" label="领取礼品" click="getGift();"/>
+	<GameButton x="473.5" y="406" label="转　账" click="transfer();"/>
+	
+</GameWindow>

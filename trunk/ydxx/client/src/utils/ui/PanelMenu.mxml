@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="330" height="55" creationComplete="init();" xmlns:ns1="utils.components.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import images.AssetsManager;
+			import wubao.model.Build;
+			import wubao.model.WuBao;
+			import utils.TipInfo;
+			import utils.GameManager;
+			import wubao.model.User;
+			import task.model.Task;
+			import utils.PubUnit;
+			import utils.SceneManager;
+			import utils.WinManager;
+			
+			private var build:Build = null;
+			
+			private function init():void
+			{
+				version.text = "版本号：" + PubUnit.version.toString();
+			}	
+			
+			public function refresh():void
+			{
+				var gameWubao:WuBao = GameManager.gameMgr.wubao;
+				build = gameWubao.buildList.getObjByID(Build.YST) as Build;
+			}
+						
+			private function showMarch():void
+			{
+				if (build.level < PubUnit.WorldLimit) return;
+				
+				WinManager.winMgr.showMarch();
+			}
+			
+			private function showShop():void
+			{
+				WinManager.winMgr.showShop();
+			}
+			
+			private function showSphere():void
+			{
+				WinManager.winMgr.showSphere();
+			}
+			
+			private function showGeneral():void
+			{
+				WinManager.winMgr.showGenList();
+			}
+			
+			private function showTask():void
+			{
+				WinManager.winMgr.showTask();
+			}
+			
+			private function showBag():void
+			{
+				WinManager.winMgr.showBag();
+			}
+			
+			private function showMail():void
+			{
+				WinManager.winMgr.showMail();
+			}
+			
+			private function showRank():void 
+			{
+				WinManager.winMgr.showRank();
+			}
+			
+			public function flashSphere():void
+			{
+				menuSphere.start();
+			}
+			
+			public function stopFlashSphere():void
+			{
+				menuSphere.stop();
+			}
+			
+			public function flashTask():void
+			{
+				menuTask.start();
+			}
+			
+			public function stopFlashTask():void
+			{
+				menuTask.stop();
+			}
+			
+			private function onOver(evt:MouseEvent):void
+			{
+				PubUnit.addColor(evt.currentTarget);
+			}
+			
+			private function onOut(evt:MouseEvent):void
+			{
+				PubUnit.clearColor(evt.currentTarget);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="0" y="28" width="330" height="27">
+		<mx:backgroundImage>@Embed(source='../../images/assets/main/menu.png')</mx:backgroundImage>
+	</mx:Canvas>
+	
+	<mx:Canvas id="menuGeneral" x="27" y="0" width="36" height="40" backgroundImage="@Embed(source='../../images/assets/main/wj.png')" useHandCursor="true" buttonMode="true" click="showGeneral();" mouseOver="onOver(event);" mouseOut="onOut(event);">
+	</mx:Canvas>
+	
+	<ns1:FlashMenu id="menuSphere" x="68" y="0" width="36" height="40" backgroundImage="@Embed(source='../../images/assets/main/sl.png')" useHandCursor="true" buttonMode="true" click="showSphere();" mouseOver="onOver(event);" mouseOut="onOut(event);">
+	</ns1:FlashMenu>
+	
+	<ns1:FlashMenu id="menuTask" x="109" y="0" width="36" height="40" isStopFlash="false" backgroundImage="@Embed(source='../../images/assets/main/rw.png')" useHandCursor="true" buttonMode="true" click="showTask();" mouseOver="onOver(event);" mouseOut="onOut(event);">
+	</ns1:FlashMenu>
+	
+	<mx:Canvas x="150" y="0" width="36" height="40" backgroundImage="@Embed(source='../../images/assets/main/bk.png')" useHandCursor="true" buttonMode="true" click="showBag();" mouseOver="onOver(event);" mouseOut="onOut(event);">
+	</mx:Canvas>
+	
+	<ns1:FlashMenu id="menuMail" x="191" y="0" width="36" height="40" backgroundImage="@Embed(source='../../images/assets/main/yj.png')" useHandCursor="true" buttonMode="true" click="showMail();" mouseOver="onOver(event);" mouseOut="onOut(event);">
+	</ns1:FlashMenu>
+	
+	<mx:Canvas x="232" y="0" width="36" height="40" backgroundImage="@Embed(source='../../images/assets/main/sc.png')" useHandCursor="true" buttonMode="true" click="showShop();" mouseOver="onOver(event);" mouseOut="onOut(event);">
+	</mx:Canvas>
+	
+	<mx:Canvas x="273" y="0" width="36" height="40" backgroundImage="@Embed(source='../../images/assets/main/ph.png')" useHandCursor="true" buttonMode="true" click="showRank();" mouseOver="onOver(event);" mouseOut="onOut(event);">
+	</mx:Canvas>
+	
+	<mx:Label id="version" y="38" width="100" height="16" textAlign="right" paddingTop="0" paddingBottom="0" text="版本号" color="#FFFFFF" fontSize="12" right="20"/>
+</mx:Canvas>

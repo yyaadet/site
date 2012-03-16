@@ -1,0 +1,37 @@
+<!--密钥设置　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <input type="hidden" id="error" value="${c.error}" />
+    <tr>
+      <td colspan="2" height="35" align="center" bgcolor="#f9f0e1" class="gray">　<b>现在比率：${c.rate}&nbsp;&nbsp;
+        %if c.end_time == 0:
+        有效时间至：无限时间
+        %else:
+        有效时间至：${readable_time(c.end_time)}
+        %endif
+        </b></td>
+        
+    </tr>
+    <tr>
+      <td width="10%" height="35" align="right" bgcolor="#f9f0e1" class="gray">　充值比率：</td>
+      <td width="90%" align="left" valign="middle" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray" style="width: 150px " name="rate" id="rate" />（rmb:gold=1:value）</td>
+    </tr>
+    <tr>
+      <td width="6%" height="35" align="right" bgcolor="#f9f0e1" class="gray">　有效时间（天）：</td>
+      <td width="94%" align="left" valign="middle" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray" style="width: 150px " name="days" id="days" /></td>
+    </tr>
+    <tr>
+      <td height="35" colspan="2" align="left" bgcolor="#f9f0e1" class="gray">　　　　　　　　
+        <a href="#" onclick="selectTab('/admin/rmb_to_gold?action=edit'
+            +'&rate='+$('#rate').val()
+            +'&days='+$('#days').val()
+            )"><img src="/images/pic_24.gif" width="54" height="25" border="0" /></a></td>
+    </tr>
+</table>
+<script type="text/javascript">
+    error = document.getElementById("error").value;
+    if(error==""){}else{alert(error);}
+</script>
+ <!--密钥设置 end-->
+

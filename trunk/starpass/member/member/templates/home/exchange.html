@@ -1,0 +1,78 @@
+<%inherit file="index2.html" />
+
+<%def name="html_head()">
+<script>
+function get_servers(){
+//    异步获取JSON，将数据存在本地。key用的是game_id__server_id
+    $("#server_id").empty();
+    $("#server_id").prepend("<option value='0'>请选择服务器</option>");
+    $.getJSON(
+        "/home/get_game_servers?game_id="+$("#game_id").val(),
+        function(objs){
+            for(i=0;i<objs.length;i++){
+                $("#server_id").append("<option value='"+objs[i]["id"]+"'>"+objs[i]["name"]+"</option>比率");
+                var keys = $("#game_id").val() + "__" + objs[i]["id"];
+                $("#server_id").data(keys,objs[i]);
+            }
+        }
+    );
+    change_servers();
+}
+function change_servers(){
+    var keys = $("#game_id").val() + "__" + $("#server_id").val();
+    var obj = $("#server_id").data(keys);
+    if ($("#server_id").val() == "0"){
+        $("#rate").html("10");
+    }else{
+        $("#rate").html(obj["rate"]);
+    }
+}
+
+</script>
+</%def>
+
+<%def name="html_content_title()">
+我要兑换
+</%def>
+
+
+
+
+<%def name="html_content()">
+
+<div class="duih"><strong>钱庄掌柜：</strong><br />
+         　　“这位官爷，小的在此恭候多时了。我这儿专业向您提供的专用虚拟货币，当然啦，能换多少这个问题就要取决于您的腰包的质量了。嗯，您要换多少？”</div>
+
+ <div class="duih_a">
+     <form method="post">
+     <input type="hidden" name="act" value="convert" />
+     <div id="duih_xb"><strong>您的星币总额为：<font color="#C2001A">${c.user.gold}</font>　枚　（1　星币=<font color="#C2001A" id="rate">1</font> 游戏金币 ）</strong></div>
+     <div id="duih_left">
+            <div class="duih_leftf">　　　游戏列表：
+                <select id="game_id" name="game_id" class="cs" onchange="get_servers();">
+                    <option selected="selected" value="0">请选择游戏</option>
+                    %for item in c.games:
+                        <option value="${item.id}">${item.name}</option>
+                    %endfor
+                </select>
+            </div>
+            <div class="duih_leftf">游戏服务器列表：
+                <select id="server_id" name="server_id" class="cs" onchange="change_servers();">
+                <option value='0'>请选择服务器</option>
+                </select>
+            </div>
+             <div id="duih_xb">
+                <div class="duih_leftf">　　　我要兑换：
+                <input type="text" name="count" style="width:120px; height:16px; " maxlength="15" /></div>
+                <div class="duih_pic"><input type="image" src="/images/botton_03.jpg" onClick="document.formName.submit();"/></div>
+                <div class="duih_red">${c.err}</div>
+             </div>
+     <div id="duih_xb"><font color="#C2001A">注：1、金币比率可能会在一定时间内有所浮动，请您关注游戏首页的相关报道。
+    2、北京星芒软件保留对此页面兑换比率的最终解释权。</font></div>
+     
+    </div>
+    </form>
+ <div id="duih_rt"><img src="/images/duih_01.jpg"/></div>
+ </div>         
+
+</%def>

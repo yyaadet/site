@@ -1,0 +1,45 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">充值记录</span>
+</div>
+
+<div class="div_table">
+<table>
+    <tr>
+        <th><span>用户ID</span></th>
+        <th><span>来源</span></th>
+        <th><span>充值人民币</span></th>
+        <th><span>所得金币</span></th>
+        <th><span>充值时间</span></th>
+    </tr>
+    
+    %for item in c.data:
+    <tr>
+        <td>${item.uid}</td>
+        <td>
+        %if item.come_from == 1:
+            易宝网银
+        %elif item.come_from == 2:
+            易宝神州行卡
+        %elif item.come_from == 3:
+            易宝联通卡
+        %elif item.come_from == 4:
+            支付宝
+        %else:
+            其他通道
+        %endif
+        </td>
+        <td>${item.rmb}</td>
+        <td>${item.gold}</td>
+        <td>${readable_time(item.time)}</td>
+    %endfor
+</table>
+</div>
+
+<%namespace file="/admin/pager.html" import="*" />
+${pager("/admin/recharge_log?page=")}
+
+</%def>

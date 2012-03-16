@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="240" height="134" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import wubao.model.Build;
+			import utils.events.ConfirmEvent;
+			import utils.FormatText;
+			import utils.ui.WinAsk;
+			import net.tcp.TcpManager;
+			import net.tcp.model.deal.TcpSell;
+			import utils.WinManager;
+			import wubao.model.Weapon;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var _weaponID:int = 0;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var gameWeapon:Weapon = null;
+			
+			private var winAsk:WinAsk = null;
+			
+			private function init():void
+			{
+				setTitle("出　售");
+				tiNum.addEventListener(KeyboardEvent.KEY_UP, onNumKeyUp);
+				tiTotal.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				
+				if (gameWubao != null)
+				{
+					gameWeapon = gameWubao.store.weaponList.getObjByID(weaponID) as Weapon;
+					if (gameWeapon != null)
+					{
+						lblName.htmlText = gameWeapon.levelName + FormatText.packegText(" × ", FormatText.WHITE, "9") + gameWeapon.num.toString();
+					}
+				}
+				
+				tiNum.text = "";
+				tiTotal.text = "";
+			}
+			
+			private function numUp():void
+			{
+				var num:int = int(tiNum.text);
+				
+				if (num > gameWeapon.num)
+					tiNum.text = num.toString();
+			}
+			
+			private function getMax():void
+			{
+				tiNum.text = gameWeapon.num.toString();
+			}
+			
+			private function onNumKeyUp(evt:KeyboardEvent):void
+			{
+				tiNum.text = int(tiNum.text) > 10000 ? "10000" : tiNum.text;
+			}
+			
+			private function onKeyUp(evt:KeyboardEvent):void
+			{
+				tiTotal.text = int(tiTotal.text) > 10000 ? "10000" : tiTotal.text;
+			}
+			
+			private function sendSell():void
+			{
+				var num:int = int(tiNum.text);
+				if (num <= 0)
+				{
+					WinManager.winMgr.showResult("装备数量不能为0");
+					return;
+				}
+				
+				if (num > gameWeapon.num)
+				{
+					WinManager.winMgr.showResult("装备数量不足");
+					return;
+				}
+				
+				var total:int = int(tiTotal.text);
+				if (total < 30)
+				{
+					WinManager.winMgr.showResult("出售价格不能低于30金币");
+					return;
+				}
+				
+				var sendNum:int = GameManager.gameMgr.sellList.getSelfList().length;
+				if (sendNum >= 5)
+				{
+					WinManager.winMgr.showResult("出售数最多5笔");
+					return;
+				}
+				
+				var build:Build = gameWubao.buildList.getObjByID(Build.YST) as Build;
+				if (build != null && build.level < 20)
+				{
+					WinManager.winMgr.showResult("20级以下无法出售装备");
+					return;
+				}
+				
+				var str:String = "确定要将 " + FormatText.packegText(gameWeapon.level.toString()) + 
+				                 " 级【" + FormatText.packegText(gameWeapon.name) + "】以 " + FormatText.packegText(tiTotal.text) + " 金币出售吗？\n" +
+				                 FormatText.packegText("提示：发布一条出售信息需要耗费 5 金币，交易成功后系统会收取交易总金额的10%。");
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmSell);
+			}
+			
+			private function confirmSell(evt:ConfirmEvent):void
+			{
+				var tcpSell:TcpSell = new TcpSell();
+				tcpSell.wbID = gameWubao.uniqID;
+				tcpSell.type = gameWeapon.type;
+				tcpSell.level = gameWeapon.level;
+				tcpSell.num = int(tiNum.text);
+				tcpSell.coins = int(tiTotal.text);
+				TcpManager.tcpMgr.sendDealSell(tcpSell);
+			}
+			
+			public function get weaponID():int
+			{
+				return _weaponID;
+			}
+			
+			public function set weaponID(param:int):void
+			{
+				_weaponID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="220" height="90" styleName="lowCanvas">
+		<mx:Label x="8" y="8" color="#FFFFFF" width="41" height="20" text="装备："/>
+		<mx:Label id="lblName" x="48" y="8" color="#FFFFFF" width="158" height="20"/>
+		
+		<mx:Label x="8" y="33" color="#FFFFFF" width="41" height="20" text="出售："/>
+		<GameTextInput id="tiNum" x="48" y="33" width="50" height="20" isNUM="true" keyUp="numUp();" textAlign="right"/>
+		
+		<mx:Label x="8" y="58" text="总价：" color="#FFFFFF" width="41" height="20"/>
+		<GameTextInput id="tiTotal" x="48" y="58" width="50" isNUM="true" height="20" textAlign="right" text="30"/>
+		<mx:Label x="103" y="58" text="金币" height="20"/>
+		
+		<GameButton x="150" y="57" label="出售" width="60" btnType="off" click="sendSell();" height="24"/>
+	</mx:Canvas>
+	
+</GameWindow>

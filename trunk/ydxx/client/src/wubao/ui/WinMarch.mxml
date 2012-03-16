@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="380" height="304" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import general.list.GeneralList;
+			import general.model.Zhen;
+			import general.model.General;
+			import net.tcp.model.wubao.TcpMarch;
+			import wubao.ui.events.ItemEvent;
+			import net.tcp.TcpManager;
+			import utils.FormatText;
+			import mx.controls.TextInput;
+			import utils.PubUnit;
+			import wubao.ui.item.ItemMarch;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			//出征类型  1--急袭  2--出征
+			private var marchType:int = 0;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var generalList:GeneralList = null; 
+			
+			private var itemList:Array = []; 
+			
+			private function init():void
+			{
+				setTitle("出　征");
+				helpID = 19;
+				rbJixi.selected = true;
+				marchType = 1;
+				nsDays.minimum = 4;
+				nsDays.maximum = 20;
+				
+				var i:int = 0;
+				var ti:TextInput = null;
+				
+				for (i = 0; i < nsDays.numChildren;i++)
+				{
+					if (nsDays.getChildAt(i) is TextInput)
+					{
+						ti = nsDays.getChildAt(i) as TextInput;
+						ti.addEventListener(KeyboardEvent.KEY_UP, onDaysSel);
+						break;
+					}
+				}
+				
+				rbJixi.toolTip = "行军速度较快，出征时间上限为20分钟";
+				rbPutong.toolTip = "行军速度一般，无出征时间上限";
+			}
+			
+			private function onDaysSel(evt:KeyboardEvent):void
+			{
+				if (nsDays.value < nsDays.minimum)
+					nsDays.value = nsDays.minimum;
+					
+				if (nsDays.value > nsDays.maximum)
+					nsDays.value = nsDays.maximum;
+					
+				calcCost();
+			}
+			
+			override public function refresh():void
+			{
+				cvGeneral.removeAllChildren();
+				itemList.length = 0;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				if (gameWubao != null)
+				{
+					generalList = gameWubao.generalList.getMarchList();
+					if (generalList != null && generalList.length > 0)
+					{
+						var i:int = 0;
+						for (i = 0; i < generalList.length; i++)
+						{
+							var gameGeneral:General = generalList.getObjByIndex(i) as General;
+							if (gameGeneral != null)
+							{
+								var itemMarch:ItemMarch = new ItemMarch();
+								itemMarch.gameGeneral = gameGeneral;
+								itemMarch.x = 10;
+								itemMarch.y = i * (itemMarch.height + 3);
+								cvGeneral.addChild(itemMarch);
+								itemMarch.addEventListener(ItemEvent.ITEM_CLICK, onClick);
+								itemList.push(itemMarch);
+							}
+						}
+					}
+				}
+			}
+			
+			private function onClick(evt:ItemEvent):void
+			{
+				var i:int = 0;
+				
+				for (i = 0; i < itemList.length; i++)
+				{
+					var itemMarch:ItemMarch = itemList[i];
+					if (itemMarch.gameGeneral.uniqID != evt.item.gameGeneral.uniqID)
+						itemMarch.cbSel.selected = false;
+				}
+				
+				calcCost();
+			}
+			
+			private function selJixi():void
+			{
+				nsDays.value = 4;
+				nsDays.minimum = 4;
+				nsDays.maximum = 20;
+				marchType = 1;
+				calcCost();
+			}
+			
+			private function selPutong():void
+			{
+				nsDays.value = 40;
+				nsDays.minimum = 40;
+				nsDays.maximum = 4000;
+				marchType = 2;
+				calcCost();
+			}
+			
+			private function calcCost():void
+			{
+				var i:int = 0;
+				var solNum:int = 0;
+				
+				for (i = 0; i < itemList.length; i++)
+				{
+					var itemMarch:ItemMarch = itemList[i];
+					if (itemMarch.cbSel.selected)
+						solNum += itemMarch.gameGeneral.soliderTotal;
+				}
+				
+				var ary:Array = PubUnit.getArmyCost(nsDays.value, solNum);
+				if (gameWubao.money < ary[0])
+					lblMoney.htmlText = FormatText.packegText(ary[0].toString(), FormatText.RED);
+				else
+					lblMoney.htmlText = FormatText.packegText(ary[0].toString(), FormatText.GREEN);
+					
+				if (gameWubao.food < ary[1])
+					lblFood.htmlText = FormatText.packegText(ary[1].toString(), FormatText.RED);
+				else
+					lblFood.htmlText = FormatText.packegText(ary[1].toString(), FormatText.GREEN);
+					
+			}
+			
+			private function march():void
+			{
+				var i:int = 0;
+				
+				for (i = 0; i < itemList.length; i++)
+				{
+					var itemMarch:ItemMarch = itemList[i];
+					if (itemMarch.cbSel.selected)
+					{
+						var march:TcpMarch = new TcpMarch();
+						march.wbID = gameWubao.uniqID;
+						march.generalID = itemMarch.gameGeneral.uniqID;
+						march.type = marchType;
+						march.days = nsDays.value / 4;
+						march.place = itemMarch.gameGeneral.place;
+						march.placeID = itemMarch.gameGeneral.placeID;
+						
+						var zhen:Zhen = itemMarch.selZhen;
+						march.zhen = zhen.uniqID;
+						
+						TcpManager.tcpMgr.sendMarch(march);
+					}
+				}
+			}
+		
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas y="34" width="360" height="55" styleName="lowCanvas" x="10">
+		<mx:RadioButton id="rbJixi" x="5" y="5" label="急袭" height="20" width="50" click="selJixi();"/>
+		<mx:RadioButton id="rbPutong" x="55" y="5" label="普通" height="20" width="50" click="selPutong();"/>
+		
+		<mx:Label x="5" y="30" text="钱币：" height="20" width="41"/>
+		<mx:Label id="lblMoney" x="45" y="29" height="20" width="60" styleName="number"/>
+		
+		<mx:Label x="110" y="30" text="粮食：" height="20" width="41"/>
+		<mx:Label id="lblFood" x="150" y="29" height="20" width="60" styleName="number"/>
+		
+		<mx:Label x="110" y="5" text="时间：" height="20" width="41"/>
+		<mx:Label x="205" y="5" text="分钟" height="20" width="40"/>
+		<mx:NumericStepper id="nsDays" x="150" y="5" height="20" width="50" minimum="1" value="1" change="calcCost();" stepSize="4" maximum="20"/>
+		<OKButton y="5" click="march();" x="287"/>
+	</mx:Canvas>
+	
+	<mx:Canvas x="10" y="97" width="360" height="197" styleName="lowCanvas">
+		<GameButton x="35" y="3" label="武　将" height="24" width="60" btnType="teamTitle"/>
+		<GameButton x="105" y="3" label="部　曲" height="24" width="80" btnType="teamTitle"/>
+		<GameButton x="195" y="3" label="士卒" height="24" width="45" btnType="teamTitle"/>
+		<GameButton x="250" y="3" label="阵　型" height="24" width="90" btnType="teamTitle"/>
+		
+		<mx:Canvas id="cvGeneral" x="3" y="30" width="350" height="160">
+		</mx:Canvas>
+	</mx:Canvas>
+	
+</GameWindow>

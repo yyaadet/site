@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="460" height="305" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.events.ConfirmEvent;
+			import net.tcp.model.sphere.TcpDecWar;
+			import wubao.model.Build;
+			import utils.FormatText;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import net.tcp.TcpManager;
+			import net.tcp.model.sphere.TcpJoin;
+			import wubao.model.WuBao;
+			import sphere.model.Sphere;
+			import utils.GameManager;
+			import sphere.list.SphereList;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var sphereList:SphereList = null;
+			
+			private var _sphereID:int = 0;
+			
+			private var gameSphere:Sphere = null;
+			
+			private function init():void
+			{
+				setTitle("势力信息");
+				helpID = 10;
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				sphereList = GameManager.gameMgr.sphereList;
+				gameSphere = sphereList.getObjByID(sphereID) as Sphere;
+				
+				lblName.text = gameSphere.sphereName;
+				lblUserNum.text = gameSphere.showNum;
+				lblOff.text = gameSphere.levelName;
+				lblCity.text = gameSphere.cityNum.toString();
+				lblPre.text = gameSphere.prestige.toString();
+				lblLeader.text = gameSphere.userName;
+				taContent.text = gameSphere.description;
+				
+				//如果玩家是势力君主
+				if (sphereList.isLeader(gameWubao.userID))
+				{
+					//如果是NPC势力
+					if (gameSphere.uniqID <= 21)
+					{
+						btnJoin.enabled = false;
+					}
+					else
+					{
+						btnJoin.enabled = false;
+					}
+				}
+				//普通玩家
+				else
+				{
+					//如果玩家已经加入过势力
+					if (gameWubao.sphereID > 0)
+						btnJoin.enabled = false;
+					else
+					{
+						//如果是NPC势力
+						if (gameSphere.uniqID <= 21)
+							btnJoin.enabled = false;
+						else
+						{
+							if (gameSphere.isFull)
+							{
+								btnJoin.enabled = false;
+								btnJoin.toolTip = "势力已满员";
+							}
+							else
+							{
+								var build:Build = gameWubao.buildList.getObjByIndex(10) as Build;
+								if (build != null)
+								{
+									if (build.level < 10)
+									{
+										btnJoin.enabled = false;
+										btnJoin.toolTip = "加入势力需要10级议事堂";
+									}
+									else
+									{
+										btnJoin.enabled = true;
+										btnJoin.toolTip = "";
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			private function join():void
+			{
+				var tcpJoin:TcpJoin = new TcpJoin();
+				tcpJoin.wbID = gameWubao.uniqID;
+				tcpJoin.sphereID = gameSphere.uniqID;
+				TcpManager.tcpMgr.sendJoinSphere(tcpJoin);
+			}
+			
+			private var winAsk:WinAsk = null;
+			private function war():void
+			{
+			}
+			
+			public function get sphereID():int
+			{
+				return _sphereID;
+			}
+			
+			public function set sphereID(param:int):void
+			{
+				_sphereID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Label x="12" y="44" text="势力：" height="20" width="41"/>
+	<mx:Label id="lblName" x="52" y="44" height="20" width="80" color="#E3D71F"/>
+				
+	<mx:Label x="162" y="44" text="君主：" height="20" width="41"/>
+	<mx:Label id="lblLeader" x="202" y="44" height="20" width="80" color="#E3D71F"/>
+				
+	<mx:Label x="312" y="44" text="职位：" height="20" width="41"/>
+	<mx:Label id="lblOff" x="352" y="44" height="20" width="80" color="#E3D71F"/>
+				
+	<mx:Label x="12" y="69" text="成员：" height="20" width="41"/>
+	<mx:Label id="lblUserNum" x="52" y="69" height="20" width="80" color="#E3D71F"/>
+				
+	<mx:Label x="162" y="69" text="城池：" height="20" width="41"/>
+	<mx:Label id="lblCity" x="202" y="69" height="20" width="80" color="#E3D71F"/>
+				
+	<mx:Label x="312" y="69" text="威望：" height="20" width="41"/>
+	<mx:Label id="lblPre" x="352" y="69" height="20" width="80" color="#E3D71F"/>
+				
+	<mx:TextArea id="taContent" x="10" y="99" width="440" height="164" editable="false"/>
+	<GameButton id="btnJoin" x="198" y="271" label="申请加入" click="join();"/>
+	
+</GameWindow>

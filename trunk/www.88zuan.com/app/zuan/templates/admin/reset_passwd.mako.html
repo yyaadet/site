@@ -1,0 +1,45 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+
+<%def name="get_content()">
+<style type="text/css">
+.td1 {
+margin: 5px;
+padding: 5px;
+text-align: right;
+}
+
+.td2 {
+margin: 5px;
+padding: 5px;
+text-align: left;
+}
+</style>
+
+    <div id="content_right">
+        % if c.error:
+        <div style="color:#FF6666; width: 300px; font-size: 16px; margin: 0 auto 10px;">错误提示：${c.error}</div>
+    	% endif
+    <form action="/admin/do_reset_passwd" method="post">
+    <table width="300px" height="50px" style="margin: 0 auto;">
+        <tr>
+            <td class="td1">原密码：</td>
+            <td class="td2"><input name="old_passwd" type="password" value="" class="textinput" /></td>
+        </tr>
+        <tr>
+            <td class="td1">新密码：</td>
+            <td class="td2"><input name="new_passwd" type="password" value="" class="textinput"/></td>
+        </tr>
+        <tr>
+            <td class="td1">重复新密码：</td>
+            <td class="td2"><input name="new_passwd1" type="password" value="" class="textinput"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="提 交" /></td>
+        </tr>
+    </table>
+    </form>
+</%def>

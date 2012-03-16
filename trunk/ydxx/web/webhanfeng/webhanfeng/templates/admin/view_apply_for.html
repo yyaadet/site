@@ -1,0 +1,147 @@
+<script type="text/javascript">  
+    function show(){  
+        var loadbox =document.getElementById("loadlayer");  
+        var overlayer = document.getElementById("overlayer");  
+        loadbox.style.display = "block" ;  
+        overlayer.style.display = "block" ;  
+    }  
+      
+    function hide(){  
+        var loadbox =document.getElementById("loadlayer");  
+        var overlayer = document.getElementById("overlayer");  
+        loadbox.style.display = "none" ;  
+        overlayer.style.display = "none" ;  
+    }  
+</script>  
+   
+<style type="text/css">      
+#overlayer{  
+    position: absolute;  
+    top: 0px;  
+    left: 0;  
+    z-index: 90;  
+    width: 100%;  
+    height: 120%;  
+    background-color: #000;  
+    filter:alpha(opacity=0);  
+    -moz-opacity: 0.6;  
+    opacity: 0.6;  
+    display:none;  
+    }  
+   
+#loadbox{  
+    position: absolute;  
+    top: 40%;  
+    left: 0;  
+    width: 100%;  
+    z-index: 100;  
+    text-align: center;  
+    }  
+   
+#loadlayer{  
+    display:none;  
+    }  
+   
+</style>  
+
+<div id="overlayer"></div>
+<div id="loadbox" >  
+  <div id="loadlayer">  
+      <img src="/images/loading.gif" />  <font color=white>请稍候。。。 </font>
+    </div>  
+</div>  
+
+<%
+from webhanfeng.model.user import get_user_by_id
+user = get_user_by_id(c.apply_for.user_id)
+if user:
+    name = user.oid
+else:
+    name = ""
+%>
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+        <tr>
+          <td width="8%" height="35" align="right" bgcolor="#f9f0e1" class="gray">　用户：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${name}　            </td>
+          </tr>
+        <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　年龄：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${c.apply_for.age}　            </td>
+          </tr>
+          
+          <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　性别：</td>
+          %if c.apply_for.sex == 1: 
+            <td align="left" bgcolor="#f9f0e1" class="gray"> 　男　            </td>
+          %else:
+            <td align="left" bgcolor="#f9f0e1" class="gray"> 　女　            </td>
+          %endif
+          </tr>
+          
+          <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　行业：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${c.apply_for.profession}　            </td>
+          </tr>
+          
+          <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　邮件：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${c.apply_for.email}　            </td>
+          </tr>
+          
+          <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　地址：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${c.apply_for.place}　            </td>
+          </tr>
+          
+          
+          <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　每天上线时间：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${c.apply_for.game_hour}　            </td>
+          </tr>
+          
+          <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　收入：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${c.apply_for.income}　            </td>
+          </tr>
+          
+          <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　来源：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${c.apply_for.know_from}　            </td>
+          </tr>
+          
+          
+        <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">理由：</td>
+          <td height="80" align="left" bgcolor="#f9f0e1" class="gray">&nbsp;&nbsp; 
+            <textarea class="textarev" >${c.apply_for.reason}</textarea>
+            </td>
+        </tr>
+        
+        <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">状态：</td>
+          <td height="80" align="left" bgcolor="#f9f0e1" class="gray">&nbsp;&nbsp; 
+            %if c.apply_for.state == 0:
+            未处理
+            %elif c.apply_for.state == 1:
+            已经同意
+            %else:
+            已经拒绝
+            %endif
+            </td>
+        </tr>
+        
+        <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">日期${c.page_num}：</td>
+          <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　${readable_time(c.apply_for.date)}</td>
+        </tr>
+        <tr>
+          <td height="35" colspan="2" align="left" valign="middle" bgcolor="#f9f0e1" class="gray">　　　　　　　　
+            <a href="#"><img src="/images/pic_40.gif" width="51" height="21" border="0" onclick="selectTab('/admin/apply_for?action=del&page=${c.page_num}&id=${c.apply_for.id}')"/></a>
+            <a href="#"><img src="/images/pic_41.gif" width="51" height="21" border="0" onclick="selectTab('/admin/apply_for?page=${c.page_num}')"/></a>
+            %if c.apply_for.state == 0:
+            <a href="#"><img src="/images/pic_42.gif" width="51" height="21" border="0" onclick="show();selectTab('/admin/apply_for?action=ok&page=${c.page_num}&id=${c.apply_for.id}')"/></a>
+            <a href="#"><img src="/images/pic_43.gif" width="51" height="21" border="0" onclick="show();selectTab('/admin/apply_for?action=refuse&page=${c.page_num}&id=${c.apply_for.id}')"/></a>
+            %endif
+            </td>
+          </tr>
+</table>

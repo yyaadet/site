@@ -1,0 +1,55 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">添加管理员</span>
+</div>
+
+<div class="content_content">
+%if c.admin_level > 0:
+<form action="/admin/add_admin" method="post">
+    <input type="hidden" name="act" value="add" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="admin_name">管理员账号</label>
+    <input type="text" id="admin_name" name="admin_name" />
+    </p>
+    
+    <p>
+    <label for="password">管理员密码</label>
+    <input type="password" id="password" name="password" />
+    </p>
+    
+    <p>
+    <label for="level">管理员等级</label>
+    <select id="level" name="level">
+        <option value=1>管理员</option>
+        <option value=2>开发商</option>
+        <option value=3>运营商</option>
+    </select>
+    </p>
+    
+    <p>
+    <label for="game_id">游&nbsp;&nbsp;戏&nbsp;&nbsp;ID</label>
+    <select id="game_id" name="game_id">
+        %for game in c.games:
+            <option value=${game.id}>${game.name}</option>
+        %endfor
+    </select>
+    </p>
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+%else:
+    对不起，您无此权限
+%endif
+</div>
+
+</%def>

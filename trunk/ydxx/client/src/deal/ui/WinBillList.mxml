@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="470" height="196" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.GameManager;
+			import deal.list.BillList;
+			
+			private var billList:BillList = null;
+			
+			private function init():void
+			{
+				setTitle("我的交易");
+			}
+			
+			override public function refresh():void
+			{
+				billList = GameManager.gameMgr.billList.getSelfList();
+				
+				pagination.dataSource = billList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgBill;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:DataGrid id="dgBill" y="34" width="450" height="152" headerHeight="25" rowHeight="25" textAlign="center" x="10">
+		<mx:columns>
+			<mx:DataGridColumn headerText="类型" dataField="typeName" width="50" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="资源" dataField="resName" width="50" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="数量" dataField="resNum" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="成交" dataField="dealNum" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="单价" dataField="price" width="60" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="剩余时间" dataField="leftTime" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="" width="50" sortable="false" draggable="false" resizable="false" itemRenderer="deal.ui.item.ItemCancel">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	<Pagination id="pagination" x="10" y="10" visible="false" includeInLayout="false">
+	</Pagination>
+	
+</GameWindow>

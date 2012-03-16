@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="833" height="29" fontSize="12" backgroundImage="@Embed(source='../../images/assets/main/res.png')" xmlns:ns1="utils.components.*">
+
+	<mx:Script>
+		<![CDATA[
+			import wubao.model.Official;
+			import wubao.model.Build;
+			import utils.PubUnit;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+		
+			private var gameWubao:WuBao = null;
+			
+			private	var build:Build = null;
+			private	var type:int = 0;
+			
+			public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				
+				lblMoney.text = gameWubao.money.toString();
+				lblFood.text = gameWubao.food.toString();
+				lblWood.text = gameWubao.wood.toString();
+				lblIron.text = gameWubao.iron.toString();
+				lblSkin.text = gameWubao.skin.toString();
+				lblHorse.text = gameWubao.horse.toString();
+				
+				type = Build.MARKET;
+				showExpBar(type, ebMoney, gameWubao.money);
+				
+				type = Build.FARM;
+				showExpBar(type, ebFood, gameWubao.food);
+				
+				type = Build.WOOD;
+				showExpBar(type, ebWood, gameWubao.wood);
+				
+				type = Build.MINE;
+				showExpBar(type, ebIron, gameWubao.iron);
+				
+				type = Build.SKIN;
+				showExpBar(type, ebSkin, gameWubao.skin);
+				
+				type = Build.RANCH;
+				showExpBar(type, ebHorse, gameWubao.horse);
+			}
+			
+			private function showExpBar(type:int, eb:ExpBar, curValue:Number):void
+			{
+				build = gameWubao.buildList.getObjByID(type) as Build;
+				var resMax:Number = PubUnit.getResMax(build.type, build.level);
+				
+				eb.totalvalue = resMax;
+				eb.curValue = curValue;
+				eb.draw();
+			}
+			
+			private function moneyOver():void
+			{
+				var generalNum:int = gameWubao.generalList.length;
+				var off:Official = GameManager.gameMgr.offList.getObjByID(gameWubao.offID) as Official;
+				var salary:int = 0;
+				if (off != null)
+					salary = (off.salary + off.follows * 3) * generalNum;
+					
+				type = Build.MARKET;
+				build = gameWubao.buildList.getObjByID(type) as Build;
+				lblMoney.toolTip = "月产量：" + PubUnit.getResProduct(build.type, build.level).toString() + "\n" +
+				                   "月支出：" + (salary / 2 * PubUnit.resFactorList[6] / PubUnit.resFactorList[1]).toString() + "\n\n" +
+				                   "钱币不足支付武将俸禄将导致武将忠诚度下降";
+			}
+			
+			private function foodOver():void
+			{
+				var generalNum:int = gameWubao.generalList.length;
+				var off:Official = GameManager.gameMgr.offList.getObjByID(gameWubao.offID) as Official;
+				var salary:int = 0;
+				if (off != null)
+					salary = (off.salary + off.follows * 3) * generalNum;
+					
+				type = Build.FARM;
+				build = gameWubao.buildList.getObjByID(type) as Build;
+				lblFood.toolTip = "年产量：" + (PubUnit.getResProduct(build.type, build.level) - gameWubao.people * 12).toString() + "\n" +
+				                  "月支出：" + int(salary / 2).toString() + "\n\n" + 
+				                  "粮食不足支付武将俸禄将导致武将忠诚度下降";
+			}
+			
+			private function woodOver():void
+			{
+				type = Build.WOOD;
+				build = gameWubao.buildList.getObjByID(type) as Build;
+				lblWood.toolTip = "月产量：" + PubUnit.getResProduct(build.type, build.level).toString();
+			}
+			
+			private function ironOver():void
+			{
+				type = Build.MINE;
+				build = gameWubao.buildList.getObjByID(type) as Build;
+				lblIron.toolTip = "月产量：" + PubUnit.getResProduct(build.type, build.level).toString();
+			}
+			
+			private function skinOver():void
+			{
+				type = Build.SKIN;
+				build = gameWubao.buildList.getObjByID(type) as Build;
+				lblSkin.toolTip = "月产量：" + PubUnit.getResProduct(build.type, build.level).toString();
+			}
+			
+			private function horseOver():void
+			{
+				type = Build.RANCH;
+				build = gameWubao.buildList.getObjByID(type) as Build;
+				lblHorse.toolTip = "月产量：" + PubUnit.getResProduct(build.type, build.level).toString();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label id="lblMoney" x="111" y="4" styleName="number" height="20" width="95" mouseOver="moneyOver();"/>
+	<mx:Label id="lblFood" x="255" y="4" styleName="number" height="20" width="80" mouseOver="foodOver();"/>
+	<mx:Label id="lblWood" x="384" y="4" styleName="number" height="20" width="75" mouseOver="woodOver();"/>
+	<mx:Label id="lblIron" x="507" y="4" styleName="number" height="20" width="80" mouseOver="ironOver();"/>
+	<mx:Label id="lblSkin" x="638" y="4" styleName="number" height="20" width="75" mouseOver="skinOver();"/>
+	<mx:Label id="lblHorse" x="761" y="4" styleName="number" height="20" width="60" mouseOver="horseOver();"/>
+	
+	<ns1:ExpBar id="ebMoney" x="111" y="20" width="45">
+	</ns1:ExpBar>
+	<ns1:ExpBar id="ebFood" x="255" y="20" width="45">
+	</ns1:ExpBar>
+	<ns1:ExpBar id="ebWood" x="384" y="20" width="45">
+	</ns1:ExpBar>
+	<ns1:ExpBar id="ebIron" x="507" y="20" width="45">
+	</ns1:ExpBar>
+	<ns1:ExpBar id="ebSkin" x="638" y="20" width="45">
+	</ns1:ExpBar>
+	<ns1:ExpBar id="ebHorse" x="761" y="20" width="45">
+	</ns1:ExpBar>
+	
+</mx:Canvas>

@@ -1,0 +1,1188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="576" height="366" fontFamily="新宋体" fontSize="12"
+	 xmlns:ns1="utils.components.*" creationComplete="init();" xmlns:ns2="utils.components.item.*">
+
+	<mx:Script>
+		<![CDATA[
+			import net.tcp.model.wubao.TcpFit;
+			import guid.GuidManager;
+			import net.tcp.events.TcpSucEvent;
+			import net.tcp.model.wubao.TcpStudy;
+			import task.model.Task;
+			import general.model.Skill;
+			import general.model.Zhen;
+			import utils.components.XiulianList;
+			import wubao.model.User;
+			import rob.model.Rob;
+			import sphere.model.Sphere;
+			import net.tcp.model.wubao.TcpTrans;
+			import city.model.City;
+			import wubao.model.Transfer;
+			import utils.TipInfo;
+			import wubao.model.Weapon;
+			import utils.events.ConfirmEvent;
+			import utils.PubUnit;
+			import general.list.GeneralList;
+			import general.model.General;
+			import net.tcp.model.wubao.TcpGrant;
+			import net.tcp.model.wubao.TcpFire;
+			import utils.FormatText;
+			import utils.ui.WinAsk;
+			import utils.WinManager;
+			import wubao.list.UserTsList;
+			import wubao.model.UserTreasure;
+			import net.tcp.TcpManager;
+			import wubao.model.WuBao;
+			import shop.list.TreasureList;
+			import mx.events.ItemClickEvent;
+			import utils.components.events.BagEvent;
+			import utils.GameManager;
+			import mx.collections.ArrayCollection;
+			
+			private var gameWubao:WuBao = null;
+			
+			//要显示的武将信息
+			private var gameGeneral:General = null;
+			
+			private var generalList:GeneralList = null;
+			
+			private var treasureList:UserTsList = null;
+			
+			private var masterID:int = 0;
+			
+			private var winAsk:WinAsk = null;
+			
+			private var selItem:Object;
+			
+			[Bindable]
+			private var zhenList:Array = [];
+			
+			private function init():void
+			{
+				setTitle("武将一览");
+				helpID = 5;
+				
+				gvl1.addEventListener(BagEvent.ItemClick, gvlClick);
+				gsTreasure.addEventListener(BagEvent.ItemClick, bagClick);
+				cvGeneralBag.addEventListener(MouseEvent.CLICK, genBagClick);
+				gs1.addEventListener(BagEvent.ItemClick, gs1Click);
+				w1.addEventListener(MouseEvent.CLICK, w1Click);
+				w2.addEventListener(MouseEvent.CLICK, w2Click);
+				w3.addEventListener(MouseEvent.CLICK, w3Click);
+				w4.addEventListener(MouseEvent.CLICK, w4Click);
+				this.addEventListener(MouseEvent.CLICK, onClick);
+				
+				refresh();
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				generalList = gameWubao.generalList.getSelfGeneral();
+				
+				gvl1.dataProvider = generalList.list;
+				gvl1.labelField = "generalName";
+				gvl1.itemID = "generalID";
+				gvl1.showData();
+				
+				listBar1.selectedIndex = 0;
+				lblCanFit.text = gameWubao.solNum.toString();
+			}
+			
+			public function refreshByIndex(index:int):void
+			{
+				listBar1.selectedIndex = index;
+				
+				if (index == 0)
+					generalInfo.gameGeneral = gameGeneral;
+				else if (index == 1)
+				{
+					showSolider();
+				}
+				else if (index == 2)
+				{
+					showData(1);
+					showGeneralTreasure();
+				}
+			}
+			
+			private function onClick(evt:MouseEvent):void
+			{
+				if (evt.target is BagItem)
+				{
+					var bagItem:BagItem = evt.target as BagItem;
+					if (bagItem != null && bagItem.num > 0)
+						return;
+				}
+			}
+			
+			//武将列表点击
+			private function gvlClick(evt:BagEvent):void
+			{
+				masterID = evt.itemObj.uniqID;
+				gameGeneral = generalList.getObjByID(masterID) as General;
+				generalInfo.gameGeneral = gameGeneral;
+				lblCanFit.text = gameWubao.solNum.toString();
+				
+				showGeneralTreasure();
+				showSolider();
+				showState();
+			}
+			
+			//武将tab页面切换
+			private function list1Click(evt:ItemClickEvent):void
+			{
+				if (evt.index == 0)
+					generalInfo.gameGeneral = gameGeneral;
+				else if (evt.index == 1)
+				{
+					showSolider();
+					GuidManager.guidMgr.gotoNext();
+				}
+				else if (evt.index == 2)
+				{
+					showData(1);
+					showGeneralTreasure();
+				}
+			}
+			
+			//显示武将的宝物
+			private function showGeneralTreasure():void
+			{
+				if (gameGeneral == null) return;
+				
+				taTreasure.htmlText = TipInfo.getTreasureInfo();
+				var userTresure:UserTreasure = null;
+				
+				if (gameGeneral.weaponID > 0)
+				{
+					userTresure = GameManager.gameMgr.userTsList.getObjByID(gameGeneral.weaponID) as UserTreasure;
+					if (userTresure != null)
+					{
+						bag1.obj = userTresure;
+						bag1.num = 1;
+						bag1.imageURL = userTresure.url;
+						bag1.tip = userTresure.tip;
+						bag1.equalFun = "equal";
+					}
+					else
+						bag1.clear();
+				}
+				else
+					bag1.clear();
+				
+				if (gameGeneral.intellBookID > 0)
+				{
+					userTresure = GameManager.gameMgr.userTsList.getObjByID(gameGeneral.intellBookID) as UserTreasure;
+					if (userTresure != null)
+					{
+						bag2.obj = userTresure;
+						bag2.num = 1;
+						bag2.imageURL = userTresure.url;
+						bag2.tip = userTresure.tip;
+						bag2.equalFun = "equal";
+					}
+					else
+						bag2.clear();
+				}
+				else
+					bag2.clear();
+				
+				if (gameGeneral.polityBookID > 0)
+				{
+					userTresure = GameManager.gameMgr.userTsList.getObjByID(gameGeneral.polityBookID) as UserTreasure;
+					if (userTresure != null)
+					{
+						bag3.obj = userTresure;
+						bag3.num = 1;
+						bag3.imageURL = userTresure.url;
+						bag3.tip = userTresure.tip;
+						bag3.equalFun = "equal";
+					}
+					else
+						bag3.clear();
+				}
+				else
+					bag3.clear();
+				
+				if (gameGeneral.horseID > 0)
+				{
+					userTresure = GameManager.gameMgr.userTsList.getObjByID(gameGeneral.horseID) as UserTreasure;
+					if (userTresure != null)
+					{
+						bag4.obj = userTresure;
+						bag4.num = 1;
+						bag4.imageURL = userTresure.url;
+						bag4.tip = userTresure.tip;
+						bag4.equalFun = "equal";
+					}
+					else
+						bag4.clear();
+				}
+				else
+					bag4.clear();
+				
+				bag5.isLock = true;
+				bag5.clear();
+				bag6.isLock = true;
+				bag6.clear();
+				bag7.isLock = true;
+				bag7.clear();
+				bag8.isLock = true;
+				bag8.clear();
+			}
+			
+			//显示背包中的道具
+			private function showData(type:int):void
+			{
+				treasureList = GameManager.gameMgr.userTsList.getAllGeneralBagInfo();
+				if (treasureList == null) return;
+				
+				gsTreasure.dataProvider = treasureList.list;
+				gsTreasure.itemID = "treasureID";
+				gsTreasure.numField = "num";
+				gsTreasure.urlField = "url";
+				gsTreasure.tipField = "tip";
+				gsTreasure.equalFun = "equal";
+				gsTreasure.max = 100;
+				gsTreasure.free = 100 - treasureList.list.length;
+				gsTreasure.showData();
+			}
+			
+			//点击背包中的道具
+			private var selBagItem:BagItem = null;
+			
+			private function bagClick(evt:BagEvent):void
+			{
+				var bagItem:BagItem = evt.bagItem;
+				if (bagItem == null || bagItem.obj == null) return;
+				
+				selBagItem = bagItem;
+				var userTreasure:UserTreasure = null;
+				var type:int = 0;
+				var treasureID:int = 0;
+				
+				userTreasure = bagItem.obj as UserTreasure;
+				if (userTreasure != null)
+				{
+					type = userTreasure.treasure.type;
+					treasureID = userTreasure.treasureID;
+				}
+				else
+					return;
+						
+				if (type == 1)
+				{
+					if (gameGeneral != null)
+					{
+						if (gameGeneral.weaponID <= 0)
+						{
+							userTreasure = GameManager.gameMgr.userTsList.getOneTreasure(type, treasureID);
+							if (userTreasure != null)
+								grantGeneral(userTreasure.uniqID);
+						}
+						else
+						{
+							WinManager.winMgr.showResult("武将已装备了武器");
+							return;
+						}
+					}
+				}	
+						
+				if (type == 2)
+				{
+					if (gameGeneral != null)
+					{
+						if (gameGeneral.intellBookID <= 0)
+						{
+							userTreasure = GameManager.gameMgr.userTsList.getOneTreasure(type, treasureID);
+							if (userTreasure != null)
+								grantGeneral(userTreasure.uniqID);
+						}
+						else
+						{
+							WinManager.winMgr.showResult("武将已装备了经论");
+							return;
+						}
+					}
+				}	
+						
+				if (type == 3)
+				{
+					if (gameGeneral != null)
+					{
+						if (gameGeneral.polityBookID <= 0)
+						{
+							userTreasure = GameManager.gameMgr.userTsList.getOneTreasure(type, treasureID);
+							if (userTreasure != null)
+								grantGeneral(userTreasure.uniqID);
+						}
+						else
+						{
+							WinManager.winMgr.showResult("武将已装备了典籍");
+							return;
+						}
+					}
+				}	
+						
+				if (type == 4)
+				{
+					if (gameGeneral != null)
+					{
+						if (gameGeneral.horseID <= 0)
+						{
+							userTreasure = GameManager.gameMgr.userTsList.getOneTreasure(type, treasureID);
+							if (userTreasure != null)
+								grantGeneral(userTreasure.uniqID);
+						}
+						else
+						{
+							WinManager.winMgr.showResult("武将已装备了坐骑");
+							return;
+						}
+					}
+				}	
+				
+				//忠诚度		
+				if (type == 7)
+				{
+					if (gameGeneral != null)
+					{
+						userTreasure = GameManager.gameMgr.userTsList.getOneTreasure(type, treasureID);
+						var str:String = "确定要使用一个" + FormatText.packegText("“" + userTreasure.treasure.name + "”") + "吗？";
+						winAsk = WinManager.winMgr.showAsk(str);
+						winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmUse)
+					}
+				}
+				
+			}
+			
+			private function confirmUse(evt:ConfirmEvent):void
+			{
+				var userTreasure:UserTreasure = null;
+				var type:int = 0;
+				var treasureID:int = 0;
+				
+				userTreasure = selBagItem.obj as UserTreasure;
+				if (userTreasure != null)
+				{
+					type = userTreasure.treasure.type;
+					treasureID = userTreasure.treasureID;
+					grantGeneral(userTreasure.uniqID);
+				}
+			}
+			
+			//点击武将装备中的道具
+			private var selGenItem:BagItem = null;
+			
+			private function genBagClick(evt:MouseEvent):void
+			{
+				if (evt.target is BagItem)
+				{
+					var bagItem:BagItem = evt.target as BagItem;
+					if (bagItem != null)
+					{
+						if (!bagItem.isFill()) return;
+						
+						selGenItem = bagItem;
+						var userTreasure:UserTreasure = bagItem.obj as UserTreasure;
+						
+						if (userTreasure != null)
+							backTreasure(userTreasure.uniqID);
+					}
+				}
+			}
+			
+			private function grantGeneral(uniqID:int):void
+			{
+				var grant:TcpGrant = new TcpGrant();
+				grant.wbID = gameWubao.uniqID;
+				grant.type = 1;
+				grant.generalID = gameGeneral.uniqID;
+				grant.treasureID = uniqID;
+				TcpManager.tcpMgr.sendGrant(grant);
+			}
+			
+			private function backTreasure(uniqID:int):void
+			{
+				var grant:TcpGrant = new TcpGrant();
+				grant.wbID = gameWubao.uniqID;
+				grant.type = 2;
+				grant.generalID = gameGeneral.uniqID;
+				grant.treasureID = uniqID;
+				TcpManager.tcpMgr.sendGrant(grant);
+			}
+			
+			//将道具赐予武将
+			public function dealGrant(generalID:int, treasureID:int):void
+			{
+				var bagItem:BagItem = null;
+				var userTreasure:UserTreasure = GameManager.gameMgr.userTsList.getObjByID(treasureID) as UserTreasure;
+				if (userTreasure != null)
+				{
+					var grantGen:General = gameWubao.generalList.getObjByID(generalID) as General;
+					if (grantGen != null)
+					{
+						userTreasure.generalID = grantGen.uniqID;
+						userTreasure.isUsed = 1;
+					}
+					
+					bagItem = gsTreasure.getItemByID(userTreasure.treasureID);
+					
+					var type:int = userTreasure.treasure.type;
+					if (type == 1)
+						bag1.add(bagItem, 1);
+					else if (type == 2)
+						bag2.add(bagItem, 1);
+					else if (type == 3)
+						bag3.add(bagItem, 1);
+					else if (type == 4)
+						bag4.add(bagItem, 1);
+					
+					gsTreasure.subItem(bagItem, 1);
+					generalInfo.gameGeneral = grantGen;
+				}
+			}
+			
+			//收回道具
+			public function dealBack(treasureID:int):void
+			{
+				var userTreasure:UserTreasure = GameManager.gameMgr.userTsList.getObjByID(treasureID) as UserTreasure;
+				if (userTreasure != null)
+				{
+					userTreasure.generalID = 0;
+					userTreasure.isUsed = 0;
+					
+					var type:int = userTreasure.treasure.type;
+					if (type == 1)
+					{
+						if (gsTreasure.insert(bag1))
+							bag1.clear();
+					}
+					else if (type == 2)
+					{
+						if (gsTreasure.insert(bag2))
+							bag2.clear();
+					}
+					else if (type == 3)
+					{
+						if (gsTreasure.insert(bag3))
+							bag3.clear();
+					}
+					else if (type == 4)
+					{
+						if (gsTreasure.insert(bag4))
+							bag4.clear();
+					}
+						
+					generalInfo.refresh();
+				}
+			}
+			
+			//部曲
+			private function showSolider():void
+			{
+				var fitAry:Array = [];
+				
+				if (gameGeneral != null)
+				{
+					tiFit.text = gameGeneral.soliderTotal.toString();
+					lblFollows.text = "/" + gameGeneral.follows.toString();
+					zhenList = gameGeneral.getZhenBySolider().list;
+					onKeyUp();
+					var gameZhen:Zhen = GameManager.gameMgr.zhenList.getObjByID(gameGeneral.useZhen) as Zhen;
+					if (gameZhen != null)
+						cbZhen.selectedIndex = zhenList.indexOf(gameZhen);
+						
+					if (gs1 != null)
+					{
+						gs1.dataProvider = gameWubao.store.weaponList.getWpnList().list;
+						gs1.itemID = "uniqID";
+						gs1.numField = "num";
+						gs1.urlField = "imgBmp";
+						gs1.tipField = "tip";
+						gs1.equalFun = "equal";
+						gs1.max = 24;
+						gs1.free = gameWubao.store.left;
+						gs1.showData();
+					}
+					
+					var weapon:Weapon = null;
+					if (gameGeneral.soliderTotal > 0 && gameGeneral.w1Type > 0)
+					{
+						weapon = gameWubao.store.weaponList.getWeapon(gameGeneral.w1Type, gameGeneral.w1Level);
+						if (weapon != null)
+						{
+							w1.obj = weapon;
+							w1.num = gameGeneral.soliderTotal;
+							w1.tip = weapon.tip;
+							w1.imageURL = weapon.imgBmp;
+							w1.equalFun = "equal";
+						}
+					}
+					else
+						w1.clear();
+					
+					if (gameGeneral.soliderTotal > 0 && gameGeneral.w2Type > 0)
+					{
+						weapon = gameWubao.store.weaponList.getWeapon(gameGeneral.w2Type, gameGeneral.w2Level);
+						if (weapon != null)
+						{
+							w2.obj = weapon;
+							w2.num = gameGeneral.soliderTotal;
+							w2.tip = weapon.tip;
+							w2.imageURL = weapon.imgBmp;
+							w2.equalFun = "equal";
+						}
+					}
+					else
+						w2.clear();
+					
+					if (gameGeneral.soliderTotal > 0 && gameGeneral.w3Type > 0)
+					{
+						weapon = gameWubao.store.weaponList.getWeapon(gameGeneral.w3Type, gameGeneral.w3Level);
+						if (weapon != null)
+						{
+							w3.obj = weapon;
+							w3.num = gameGeneral.soliderTotal;
+							w3.tip = weapon.tip;
+							w3.imageURL = weapon.imgBmp;
+							w3.equalFun = "equal";
+						}
+					}
+					else
+						w3.clear();
+					
+					if (gameGeneral.soliderTotal > 0 && gameGeneral.w4Type > 0)
+					{
+						weapon = gameWubao.store.weaponList.getWeapon(gameGeneral.w4Type, gameGeneral.w4Level);
+						if (weapon != null)
+						{
+							w4.obj = weapon;
+							w4.num = gameGeneral.soliderTotal;
+							w4.tip = weapon.tip;
+							w4.imageURL = weapon.imgBmp;
+							w4.equalFun = "equal";
+						}
+					}
+					else
+						w4.clear();
+				}
+			}
+			
+			private function onKeyUp():void
+			{
+				var num:int = int(tiFit.text);
+				var max:int = 0;
+				
+				if (gameWubao.solNum + gameGeneral.soliderTotal > gameGeneral.follows)
+					max = gameGeneral.follows;
+				else
+					max = gameWubao.solNum + gameGeneral.soliderTotal;
+					
+				if (num > max)
+				{
+					num = max;
+					tiFit.text = num.toString();
+				}
+				
+				lblCanFit.text = (gameWubao.solNum + gameGeneral.soliderTotal - num).toString();
+				
+				if (num == 130)
+				{
+					GuidManager.guidMgr.gotoNext();
+					w1.setFocus();
+				}
+			}
+			
+			private function getMax():void
+			{
+				var max:int = 0;
+				
+				if (gameWubao.solNum + gameGeneral.soliderTotal > gameGeneral.follows)
+					max = gameGeneral.follows;
+				else
+					max = gameWubao.solNum + gameGeneral.soliderTotal;
+				
+				tiFit.text = max.toString();
+				lblCanFit.text = (gameWubao.solNum + gameGeneral.soliderTotal - max).toString();
+			}
+			
+			private function zhenChange():void
+			{
+				if (cbZhen.selectedIndex == 1)
+					GuidManager.guidMgr.gotoNext();
+			}
+			
+			private function w1Click(evt:MouseEvent):void
+			{
+				if (!w1.isFill()) return;
+				
+				if (gs1.insert(w1))
+					w1.clear();
+				else
+				{
+					WinManager.winMgr.showResult("无法解除装备");
+					return;
+				}
+			}
+			
+			private function w2Click(evt:MouseEvent):void
+			{
+				if (!w2.isFill()) return;
+				
+				if (gs1.insert(w2))
+					w2.clear();
+				else
+				{
+					WinManager.winMgr.showResult("无法解除装备");
+					return;
+				}
+			}
+			
+			private function w3Click(evt:MouseEvent):void
+			{
+				if (!w3.isFill()) return;
+				
+				if (gs1.insert(w3))
+					w3.clear();
+				else
+				{
+					WinManager.winMgr.showResult("无法解除装备");
+					return;
+				}
+			}
+			
+			private function w4Click(evt:MouseEvent):void
+			{
+				if (!w4.isFill()) return;
+				
+				if (gs1.insert(w4))
+					w4.clear();
+				else
+				{
+					WinManager.winMgr.showResult("无法解除装备");
+					return;
+				}
+			}
+			
+			private function gs1Click(evt:BagEvent):void
+			{
+				var fitNum:int = int(tiFit.text);
+				if (fitNum <= 0) return;
+				
+				var bagItem:BagItem = evt.bagItem;
+				if (bagItem == null || bagItem.obj == null) return;
+				
+				//武将身上的兵装
+				var generalWeapon:Weapon = null;
+				var soliderNum:int = 0;
+				
+				//点击的兵装
+				var weapon:Weapon = null;
+				var type:int = 0;
+				var level:int = 0;
+				
+				weapon = bagItem.obj as Weapon;
+				if (weapon != null)
+				{ 
+					type = weapon.type;
+					level = weapon.level;
+				}
+				else
+					return;
+				
+				//剑,百炼刀
+				if (type == Weapon.JIAN || type == Weapon.DAO)
+				{
+					generalWeapon = w1.obj as Weapon;
+					if (generalWeapon != null)
+					{
+						if (type == generalWeapon.type && level == generalWeapon.level)
+							soliderNum = w1.num;
+						else
+							soliderNum = 0;
+					}
+					else
+						soliderNum = 0;
+					
+					if (bagItem.num + soliderNum < fitNum)
+					{
+						WinManager.winMgr.showResult(weapon.name + "数量不足");
+						return;
+					}
+					
+					w1Click(null);
+					if (w4.obj != null && (w4.obj as Weapon).type != Weapon.MA && (w4.obj as Weapon).type != Weapon.WUSUN) 
+						w4Click(null);
+					w1.add(bagItem, fitNum);
+					gs1.subItem(bagItem, fitNum);
+				}
+				//戟, 弩, 点钢枪, 诸葛弩
+				else if (type == Weapon.JI || type == Weapon.NU || type == Weapon.QIANG || type == Weapon.SHENBI)
+				{
+					generalWeapon = w1.obj as Weapon;
+					if (generalWeapon != null)
+					{
+						if (type == generalWeapon.type && level == generalWeapon.level)
+							soliderNum = w1.num;
+						else
+							soliderNum = 0;
+					}
+					else
+						soliderNum = 0;
+					
+					if (bagItem.num + soliderNum < fitNum)
+					{
+						WinManager.winMgr.showResult(weapon.name + "数量不足");
+						return;
+					}
+					
+					w1Click(null);
+					w2Click(null);
+					if (w4.obj != null && (w4.obj as Weapon).type != Weapon.MA && (w4.obj as Weapon).type != Weapon.WUSUN) 
+						w4Click(null);
+					w1.add(bagItem, fitNum);
+					gs1.subItem(bagItem, fitNum);
+				}
+				//盾，虎纹盾
+				else if (type == Weapon.DUN || type == Weapon.HUWEN)
+				{
+					generalWeapon = w2.obj as Weapon;
+					if (generalWeapon != null)
+					{
+						if (type == generalWeapon.type && level == generalWeapon.level)
+							soliderNum = w2.num;
+						else
+							soliderNum = 0;
+					}
+					else
+						soliderNum = 0;
+					
+					if (bagItem.num + soliderNum < fitNum)
+					{
+						WinManager.winMgr.showResult(weapon.name + "数量不足");
+						return;
+					}
+					
+					if (w1.isFill())
+					{
+						var w1Type:int = (w1.obj as Weapon).type;
+						if (w1Type == Weapon.JI || w1Type == Weapon.NU || w1Type == Weapon.QIANG || w1Type == Weapon.SHENBI)
+							w1Click(null);
+					}
+					
+					w2Click(null);
+					if (w4.obj != null && (w4.obj as Weapon).type != Weapon.MA && (w4.obj as Weapon).type != Weapon.WUSUN) 
+						w4Click(null);
+					w2.add(bagItem, fitNum);
+					gs1.subItem(bagItem, fitNum);
+				}
+				//皮甲，铁甲，鱼鳞甲
+				else if (type == Weapon.PI || type == Weapon.TIE || type == Weapon.YULIN)
+				{
+					generalWeapon = w3.obj as Weapon;
+					if (generalWeapon != null)
+					{
+						if (type == generalWeapon.type && level == generalWeapon.level)
+							soliderNum = w3.num;
+						else
+							soliderNum = 0;
+					}
+					else
+						soliderNum = 0;
+					
+					if (bagItem.num + soliderNum < fitNum)
+					{
+						WinManager.winMgr.showResult(weapon.name + "数量不足");
+						return;
+					}
+					
+					w3Click(null);
+					if (w4.obj != null && (w4.obj as Weapon).type != Weapon.MA && (w4.obj as Weapon).type != Weapon.WUSUN) 
+						w4Click(null);
+					w3.add(bagItem, fitNum);
+					gs1.subItem(bagItem, fitNum);
+				}
+				//甲车，弩车
+				else if (type == Weapon.JIACHE || type == Weapon.NUCHE)
+				{
+					generalWeapon = w4.obj as Weapon;
+					if (generalWeapon != null)
+					{
+						if (type == generalWeapon.type && level == generalWeapon.level)
+							soliderNum = w4.num;
+						else
+							soliderNum = 0;
+					}
+					else
+						soliderNum = 0;
+					
+					if (bagItem.num + soliderNum < fitNum)
+					{
+						WinManager.winMgr.showResult(weapon.name + "数量不足");
+						return;
+					}
+					
+					w1Click(null);
+					w2Click(null);
+					w3Click(null);
+					w4Click(null);
+					w4.add(bagItem, fitNum);
+					gs1.subItem(bagItem, fitNum);
+				}
+				//战马,乌孙马
+				else if (type == Weapon.MA || type == Weapon.WUSUN)
+				{
+					generalWeapon = w4.obj as Weapon;
+					if (generalWeapon != null)
+					{
+						if (type == generalWeapon.type && level == generalWeapon.level)
+							soliderNum = w4.num;
+						else
+							soliderNum = 0;
+					}
+					else
+						soliderNum = 0;
+					
+					if (bagItem.num + soliderNum < fitNum)
+					{
+						WinManager.winMgr.showResult(weapon.name + "数量不足");
+						return;
+					}
+					
+					w4Click(null);
+					w4.add(bagItem, fitNum);
+					gs1.subItem(bagItem, fitNum);
+				}
+				
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+			private function fit():void
+			{
+				if (gameGeneral == null) return;
+				if (gameGeneral.place != 1 && gameGeneral.place != 2)
+				{
+					WinManager.winMgr.showResult("武将不在坞堡或城池内，无法配兵");
+					return;
+				}
+				if (!valid()) return;
+				
+				var fit:TcpFit = new TcpFit();
+				fit.wbID = gameWubao.uniqID;
+				fit.generalID = gameGeneral.uniqID;
+				fit.num = int(tiFit.text);
+				
+				var gameZhen:Zhen = null;
+				gameZhen = zhenList[cbZhen.selectedIndex] as Zhen;
+				fit.zhenID = gameZhen.uniqID;
+				
+				var weapon:Weapon = null;
+				if (w1.obj != null)
+				{
+					weapon = w1.obj as Weapon;
+					if (weapon != null)
+					{
+						fit.w1Type = weapon.type;
+						fit.w1Level = weapon.level;
+					}
+				}
+				
+				if (w2.obj != null)
+				{
+					weapon = w2.obj as Weapon;
+					if (weapon != null)
+					{
+						fit.w2Type = weapon.type;
+						fit.w2Level = weapon.level;
+					}
+				}
+				
+				if (w3.obj != null)
+				{
+					weapon = w3.obj as Weapon;
+					if (weapon != null)
+					{
+						fit.w3Type = weapon.type;
+						fit.w3Level = weapon.level;
+					}
+				}
+				
+				if (w4.obj != null)
+				{
+					weapon = w4.obj as Weapon;
+					if (weapon != null)
+					{
+						fit.w4Type = weapon.type;
+						fit.w4Level = weapon.level;
+					}
+				}
+				
+				TcpManager.tcpMgr.sendFit(fit);
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+			private function valid():Boolean
+			{
+				var fitNum:int = int(tiFit.text);
+				
+				var weapon:Weapon = null;
+				var type:int = 0;
+				
+				weapon = w1.obj as Weapon;
+				if (weapon != null) 
+					type = weapon.type;
+				if (w1.num > 0 && w1.num < fitNum)
+				{
+					WinManager.winMgr.showResult("武器数量不符合");
+					return false;
+				}
+				
+				weapon = w2.obj as Weapon;
+				if (weapon != null) 
+					type = weapon.type;
+				if (w2.num > 0 && w2.num < fitNum)
+				{
+					WinManager.winMgr.showResult("护盾数量不符合");
+					return false;
+				}
+				
+				weapon = w3.obj as Weapon;
+				if (weapon != null) 
+					type = weapon.type;
+				if (w3.num > 0 && w3.num < fitNum)
+				{
+					WinManager.winMgr.showResult("护甲数量不符合");
+					return false;
+				}
+				
+				weapon = w4.obj as Weapon;
+				if (weapon != null) 
+					type = weapon.type;
+				if (w4.num > 0 && w4.num < fitNum)
+				{
+					WinManager.winMgr.showResult("特殊装备数量不符合");
+					return false;
+				}
+				
+				return true;
+			}			
+			
+			private function showState():void
+			{
+				lblInfo.text = "";
+				
+				//正在派遣中
+				if (gameGeneral.place == 4)
+				{
+					var transfer:Transfer = null;
+					transfer = GameManager.gameMgr.tranList.getByGeneralID(gameGeneral.uniqID);
+					
+					var type:int = transfer.type;
+					var gameCity1:City = null;
+					var gameCity2:City = null;
+					var curTime:int = GameManager.gameMgr.gameTime;
+					
+					//坞堡-->城池
+					if (type == 1)
+					{
+						gameCity1 = GameManager.gameMgr.cityList.getObjByID(transfer.toID) as City;
+						if (gameCity1 != null)
+							lblInfo.text = gameGeneral.generalName + "从坞堡前往【" + gameCity1.cityName + "】，在 " + PubUnit.getGameDate(transfer.endTime - curTime + 1) + "后到达";
+					}
+					//城池-->城池
+					else if (type == 2)
+					{
+						gameCity1 = GameManager.gameMgr.cityList.getObjByID(transfer.fromID) as City;
+						gameCity2 = GameManager.gameMgr.cityList.getObjByID(transfer.toID) as City;
+						if (gameCity1 != null && gameCity2 != null)
+							lblInfo.text = gameGeneral.generalName + "从〖" + gameCity1.cityName + "〗前往【" + gameCity2.cityName + "】，在 " + PubUnit.getGameDate(transfer.endTime - curTime + 1) + "后到达";
+					}
+					//城池-->坞堡
+					else if (type == 3)
+					{
+						gameCity1 = GameManager.gameMgr.cityList.getObjByID(transfer.fromID) as City;
+						if (gameCity1 != null)
+							lblInfo.text = gameGeneral.generalName + "从【" + gameCity1.cityName + "】返回坞堡，在 " + PubUnit.getGameDate(transfer.endTime - curTime + 1) + "后到达";
+					}
+				}
+				//巡视中
+				else if (gameGeneral.place == 6 || gameGeneral.place == 7 || gameGeneral.place == 8)
+				{
+						lblInfo.text = gameGeneral.placeName + "中，" + PubUnit.getGameDate(gameGeneral.placeID - GameManager.gameMgr.gameTime) + " 后返回";
+				}
+			}
+			
+			private function sendGeneral():void
+			{
+				var str:String = "";
+				if (gameWubao.sphereID <= 0)
+				{
+					str = "你还没加入任何势力，无法使用派遣功能";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				var gameSphere:Sphere = GameManager.gameMgr.sphereList.getObjByID(gameWubao.sphereID) as Sphere;
+				if (gameSphere != null && gameSphere.cityNum <= 0)
+				{
+					str = "你所加入的势力未占领任何城池，无法使用派遣功能";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				if (gameGeneral != null && gameGeneral.place == 3)
+				{
+					str = "在军团中的武将无法派遣";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				if (gameGeneral != null && gameGeneral.place == 4)
+				{
+					str = "在路途中的武将无法派遣";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				if (gameGeneral != null && gameGeneral.place == 5)
+				{
+					str = "在掠夺中的武将无法派遣";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				if (gameGeneral != null && (gameGeneral.place == 6 || gameGeneral.place == 7 || gameGeneral.place == 8))
+				{
+					str = "在巡视中的武将无法派遣";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				WinManager.winMgr.showCitySel(gameGeneral.uniqID);
+			}
+			
+			private function study():void
+			{
+				WinManager.winMgr.showStudy(gameGeneral);
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+			private function fireGeneral():void
+			{
+				if (generalList.length < 1) return;
+				
+				var str:String = FormatText.packegText("确定要流放武将 ") + FormatText.packegText(gameGeneral.generalName, FormatText.GREEN) +
+				                 FormatText.packegText(" 吗？\n提示：流放后武将不再属于你");
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmFire);
+			}
+			
+			private function confirmFire(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmFire);
+				winAsk = null;
+				
+				var fire:TcpFire = new TcpFire();
+				fire.wbID = gameWubao.uniqID;
+				fire.generalID = gameGeneral.uniqID;
+				TcpManager.tcpMgr.sendFire(fire);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="70" height="288" styleName="lowCanvas" verticalScrollPolicy="off">
+		<ns1:GameVerList id="gvl1" x="0" y="0" height="284">
+		</ns1:GameVerList>
+	</mx:Canvas>
+	
+	<ns1:GameToggleButtonBar id="listBar1" x="86" y="34" dataProvider="vs1" width="480" height="22" itemClick="list1Click(event);">
+	</ns1:GameToggleButtonBar>
+	
+	<mx:ViewStack id="vs1" y="56" width="480" height="266" creationPolicy="all" x="86">
+		<mx:Canvas id="cvWeapon" label="武将属性" width="100%" height="100%" styleName="lowCanvas">
+			<GeneralInfo id="generalInfo" x="8" y="8">
+			</GeneralInfo>
+		</mx:Canvas>
+		
+		<mx:Canvas id="cvsol" label="士兵装备" width="100%" height="100%" styleName="lowCanvas">
+			<mx:Canvas id="cv1" width="200" height="206" styleName="lowCanvas" x="8" y="48">
+				<mx:backgroundImage>@Embed(source='../../images/assets/wubao/win/general.swf')</mx:backgroundImage>
+				<mx:Label text="武 器" width="45" textAlign="center" color="0xFFFFFF" horizontalCenter="-60" top="11"/>
+				<ns2:BagItem id="w1" showNum="false" horizontalCenter="-60" top="28">
+				</ns2:BagItem>
+					
+				<mx:Label text="护 盾" width="45" textAlign="center" color="0xFFFFFF" horizontalCenter="60" top="11"/>
+				<ns2:BagItem id="w2" showNum="false" horizontalCenter="60" top="28">
+				</ns2:BagItem>
+					
+				<mx:Label text="护 甲" width="45" textAlign="center" color="0xFFFFFF" horizontalCenter="0" top="66"/>
+				<ns2:BagItem id="w3" showNum="false" horizontalCenter="0" top="83">
+				</ns2:BagItem>
+				
+				<mx:Label text="特 殊" width="45" textAlign="center" color="0xFFFFFF" horizontalCenter="60" top="121"/>
+				<ns2:BagItem id="w4" showNum="false" horizontalCenter="60" top="138">
+				</ns2:BagItem>
+				
+			</mx:Canvas>
+			<ns1:GameStore id="gs1" width="223" height="206" y="48" x="245" styleName="lowCanvas"/>
+			<mx:Canvas x="8" y="8" width="460" height="34" color="#FFFFFF" styleName="lowCanvas">
+				<mx:Label x="85" y="6" text="配兵：" height="20" width="45"/>
+				<GameTextInput id="tiFit" x="125" y="5" height="20" width="35" isNUM="true" textAlign="right" keyUp="onKeyUp();" fontFamily="Arial"/>
+				<mx:Label id="lblFollows" x="160" y="5" height="20" width="40" fontFamily="Arial"/>
+				<GameButton x="200" y="5" label="Max" btnType="max" height="20" width="40" click="getMax();"/>
+				<mx:Label x="245" y="6" text="阵型：" height="20" width="41"/>
+				<mx:ComboBox id="cbZhen" x="285" y="5" width="60" height="20" dataProvider="{zhenList}" labelField="zhenName" change="zhenChange();" paddingLeft="0" paddingRight="0"></mx:ComboBox>
+				<mx:Label y="6" text="步卒：" height="20" width="41" x="3"/>
+				<mx:Label id="lblCanFit" y="5" height="20" width="35" fontFamily="Arial" x="40"/>
+				<OKButton y="3" click="fit();" x="392"/>
+			</mx:Canvas>
+			<mx:Canvas x="209" y="48" width="35" height="206">
+				<mx:backgroundImage>@Embed(source='../../images/assets/wubao/win/tc.png')</mx:backgroundImage>
+			</mx:Canvas>
+		</mx:Canvas>
+
+		<mx:Canvas id="cvRes" label="武将宝物" width="100%" height="100%" styleName="lowCanvas">
+			<mx:Canvas id="cvGeneralBag" width="231" height="156" x="8" y="8" styleName="lowCanvas" color="#FFFFFF">
+				<ns2:BagItem id="bag1" x="8" y="8" showNum="false" borderStyle="none">
+				</ns2:BagItem>
+				<ns2:BagItem id="bag2" x="63" y="8" showNum="false" borderStyle="none">
+				</ns2:BagItem>
+				<ns2:BagItem id="bag3" x="118" y="8" showNum="false" borderStyle="none">
+				</ns2:BagItem>
+				<ns2:BagItem id="bag4" x="173" y="8" showNum="false" borderStyle="none">
+				</ns2:BagItem>
+				<mx:Label x="8" y="58" text="武器" width="48" textAlign="center" height="20"/>
+				<mx:Label x="118" y="58" text="典籍" width="48" textAlign="center" height="20"/>
+				<mx:Label x="63" y="58" text="经论" width="48" textAlign="center" height="20"/>
+				<mx:Label x="173" y="58" text="坐骑" width="48" textAlign="center" height="20"/>
+				
+				<ns2:BagItem id="bag5" x="8" y="80" showNum="false" borderStyle="none">
+				</ns2:BagItem>
+				<ns2:BagItem id="bag6" x="63" y="80" showNum="false" borderStyle="none">
+				</ns2:BagItem>
+				<ns2:BagItem id="bag7" x="118" y="80" showNum="false" borderStyle="none">
+				</ns2:BagItem>
+				<ns2:BagItem id="bag8" x="173" y="80" showNum="false" borderStyle="none">
+				</ns2:BagItem>
+				<mx:Label x="8" y="130" text="未开放" width="48" textAlign="center" height="20"/>
+				<mx:Label x="118" y="130" text="未开放" width="48" textAlign="center" height="20"/>
+				<mx:Label x="63" y="130" text="未开放" width="48" textAlign="center" height="20"/>
+				<mx:Label x="173" y="130" text="未开放" width="48" textAlign="center" height="20"/>
+			</mx:Canvas>
+			<ns1:GameStore id="gsTreasure" x="245" y="8" width="223" height="156" styleName="lowCanvas">
+			</ns1:GameStore>
+			<mx:TextArea id="taTreasure" x="8" y="172" width="460" height="82" editable="false"/>
+		</mx:Canvas>
+		
+	</mx:ViewStack>
+	
+	<mx:Label id="lblInfo" x="10" width="320" height="20" color="#FFFFFF" y="332" visible="false" includeInLayout="false"/>
+	<GameButton x="410" width="50" height="24" label="派　遣" click="sendGeneral();" y="332" visible="false" includeInLayout="false"/>
+	<GameButton label="流　放" click="fireGeneral();" y="330" x="292"/>
+	<GameButton id="btnGuid" x="325" y="212" width="46" height="20" visible="false" includeInLayout="false"/>
+	<GameButton label="学　习" click="study();" y="330" x="220"/>
+
+</GameWindow>

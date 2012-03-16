@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="45" height="21" xmlns:ns1="utils.components.*" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.FormatText;
+			import utils.GameManager;
+			import net.tcp.model.deal.TcpBuyWeapon;
+			import deal.model.Sell;
+			import utils.events.ConfirmEvent;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import net.tcp.TcpManager;
+			
+			private var _data:Object;
+			
+			private var winAsk:WinAsk = null;
+			
+			private function init():void
+			{
+			}	
+			
+			private function buy():void
+			{
+				
+				var gameSell:Sell = data as Sell;
+				if (gameSell != null)
+				{
+					if (gameSell.type < 100 && GameManager.gameMgr.wubao.store.left < 1)
+					{
+						WinManager.winMgr.showResult("库房空间不够");
+						return;
+					}
+					
+					WinManager.winMgr.showBuy(gameSell);
+				}
+			}	
+			
+			override public function get data():Object
+			{
+				return _data;
+			} 
+			
+			override public function set data(value:Object):void
+			{
+				_data = value;
+				
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton id="btnBuy" x="0" y="0" label="购买" btnType="menu" click="buy();" width="45" height="21"/>
+</mx:Canvas>

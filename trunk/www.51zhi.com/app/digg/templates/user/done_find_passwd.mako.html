@@ -1,0 +1,32 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_title()">找回密码</%def>
+
+<%def name="get_content()">
+  <div id="content">
+    <div id="content_left">
+    	<form action="/user/do_done_find_passwd" method="post">
+    	<div class="table">
+    	    <div class="row">
+            	<div class="col">密码： </div>
+                <div class="col"><input type="password" class="text" name="passwd" value="" /></div>
+            </div>
+            <div class="row">
+            	<div class="col">重复密码： </div>
+                <div class="col"><input type="password" class="text" name="passwd1" value="" /></div>
+                <div class="col"><input type="hidden" class="text" name="uid" value="${c.user._id}" /></div>
+                <div class="col"><input class="button" type="submit" value="提交" /></div>
+            </div>
+        </div>
+    	</form>
+    </div>
+    <div id="content_right">
+        <%namespace file="/home/index.mako.html" name="home" />
+        ${home.get_content_right_add_link()}
+        ${home.get_youxi_big_ads()}
+        
+    </div>
+</div>
+</%def>

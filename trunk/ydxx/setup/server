@@ -1,0 +1,93 @@
+#!/bin/bash
+#
+# Init file for ydxx server daemon
+#
+# chkconfig: 2345 55 25
+# description: ydxx server daemon
+#
+# processname: ydxx
+#
+
+name=ydxx
+PID=/home/server/ydxx/ydxx.pid
+command=/usr/local/sbin/ydxx
+CONFIG=/home/server/ydxx/ydxx.ini
+
+wait_for_pid () {
+    try=0
+
+    while test $try -lt 5 ; do
+
+        case "$1" in
+            'created')
+            if [ -f "$2" ] ; then
+                try=''
+                break
+            fi
+            ;;
+
+            'removed')
+            if [ ! -f "$2" ] ; then
+                try=''
+                break
+            fi
+            ;;
+        esac
+
+        echo -n .
+        try=`expr $try + 1`
+        sleep 1
+
+    done
+
+}
+
+case "$1" in
+    start)
+        echo -n "Starting $name " 
+        ulimit -n 65001
+        $command  $CONFIG
+
+        if [ "$?" != 0 ] ; then
+            echo " failed" 
+            exit 1
+        fi
+
+        wait_for_pid created $PID
+
+        if [ -n "$try" ] ; then
+            echo " failed" 
+            exit 1
+        else
+            echo " done" 
+        fi
+    ;;
+    stop)
+        echo -n "Gracefully shutting down $name " 
+
+        if [ ! -r $PID ] ; then
+            echo "warning, no pid file found - $name is not running ?" 
+            exit 1
+        fi
+
+        kill `cat $PID`
+
+        wait_for_pid removed $PID
+
+        if [ -n "$try" ] ; then
+            echo " failed. Use force-exit" 
+            exit 1
+        else
+            echo " done" 
+        fi
+    ;;
+    restart)
+        $0 stop
+        $0 start
+    ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}" 
+        exit 1
+    ;;
+
+esac

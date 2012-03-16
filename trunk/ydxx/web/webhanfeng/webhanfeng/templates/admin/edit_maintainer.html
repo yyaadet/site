@@ -1,0 +1,38 @@
+<!--运维成员管理编辑　start-->
+<input type="hidden" name="id" id="id" value="${c.admin.id}"/>
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <tr>
+      <td width="6%" height="35" align="right" bgcolor="#f9f0e1" class="gray">　运维名：</td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　
+        <input 
+              class="gray" style="WIDTH: 150px " value="${c.admin.username}" disabled="disabled" /></td>
+    </tr>
+    <tr>
+      <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　当前分组：</td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　
+        %if c.group == None:
+        <input 
+               class="gray" style="WIDTH: 150px " value="无" disabled="disabled" />
+        %else:
+        <input 
+               class="gray" style="WIDTH: 150px " value="${c.group.name}" disabled="disabled" />
+        %endif
+        </td>
+    </tr>
+    <tr>
+      <td height="35" align="right" bgcolor="#f9f0e1" class="gray">更改用户组：</td>
+      <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　            
+        <select name="group_id" id="group_id">
+          %for item in c.groups:
+          <option  value ="${item.id}">${item.name}</option>
+          %endfor
+        </select></td>
+    </tr>
+    <tr>
+      <td height="35" colspan="2" align="left" bgcolor="#f9f0e1" class="gray">　　　　　　　　
+        <a href="#" onclick="selectTab('/admin/maintainer?action=edit&id='+$('#id').val()+'&group_id='+$('#group_id').val())">
+            <img src="/images/pic_24.gif" width="54" height="25" border="0" /></a></td>
+    </tr>
+</table>
+<!--运维成员管理编辑 end-->
+

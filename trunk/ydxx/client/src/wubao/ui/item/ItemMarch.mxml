@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="330" height="24" fontSize="12" backgroundColor="0x808357" creationComplete="init();" backgroundAlpha="0.3">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+			import utils.GameManager;
+			import general.model.Zhen;
+			import general.model.General;
+			import wubao.ui.events.ItemEvent;
+			import mx.controls.Button;
+			
+			private var _gameGeneral:General = null;
+			
+			[Bindable]
+			private var zhenList:Array = null;
+			
+			private function init():void
+			{
+				this.addEventListener(MouseEvent.MOUSE_OVER, onOver);
+				this.addEventListener(MouseEvent.MOUSE_OUT, onOut);
+				this.addEventListener(MouseEvent.CLICK, onClick);
+				lblGeneral.addEventListener(MouseEvent.CLICK, lblClick);
+				lblSolider.addEventListener(MouseEvent.CLICK, lblClick);
+				lblNum.addEventListener(MouseEvent.CLICK, lblClick);
+				
+				if (gameGeneral != null)
+				{
+					var ary:Array = PubUnit.getGeneralInfo(gameGeneral);
+					
+					lblGeneral.text = gameGeneral.generalName;
+					lblGeneral.toolTip = "等级：" + gameGeneral.soliderTrain.toString() + "\n" +
+					                     "士气：" + gameGeneral.soliderSpirit.toString() + "\n" +
+					                     "伤兵：" + gameGeneral.hurtNum.toString() + "\n" +
+					                     "攻击：" + ary[0].toString() + "\n" +
+					                     "防御：" + ary[1].toString() + "\n" +
+					                     "机动：" + ary[2].toString() + "\n" +
+					                     "所在：" + gameGeneral.placeName;
+					                      
+					lblSolider.text = gameGeneral.soliderName;
+					lblNum.text = gameGeneral.soliderTotal.toString();
+					zhenList = gameGeneral.getZhenBySolider().list;
+					
+					var gameZhen:Zhen = GameManager.gameMgr.zhenList.getObjByID(gameGeneral.useZhen) as Zhen;
+					if (gameZhen != null)
+						cbZhen.selectedIndex = zhenList.indexOf(gameZhen);
+				}
+			}
+			
+			private function onOver(evt:MouseEvent):void
+			{
+				this.setStyle("backgroundColor", 0x8a9068);
+			}
+			
+			private function onOut(evt:MouseEvent):void
+			{
+				this.setStyle("backgroundColor", 0x808357);
+			}
+			
+			private function onClick(evt:MouseEvent):void
+			{
+				if (evt.target is CheckBox) return;
+				if (evt.target is Button) return;
+				if (evt.target is TextField) return;
+				
+				cbSel.selected = !cbSel.selected;
+				var e:ItemEvent = new ItemEvent(ItemEvent.ITEM_CLICK);
+				e.item = this;
+				this.dispatchEvent(e);
+			}
+			
+			private function lblClick(evt:MouseEvent):void
+			{
+				cbSel.selected = !cbSel.selected;
+				var e:ItemEvent = new ItemEvent(ItemEvent.ITEM_CLICK);
+				e.item = this;
+				this.dispatchEvent(e);
+			}
+			
+			private function selGeneral():void
+			{
+				var e:ItemEvent = new ItemEvent(ItemEvent.ITEM_CLICK);
+				e.item = this;
+				this.dispatchEvent(e);
+			}
+			
+			public function get gameGeneral():General
+			{
+				return _gameGeneral;
+			}
+			
+			public function set gameGeneral(param:General):void
+			{
+				_gameGeneral = param;
+			}
+			
+			public function get selZhen():Zhen
+			{
+				var gameZhen:Zhen = null;
+				
+				gameZhen = zhenList[cbZhen.selectedIndex] as Zhen;
+				
+				return gameZhen;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:CheckBox id="cbSel" x="4" y="4" click="selGeneral();"/>
+	<mx:Label id="lblGeneral" x="25" y="2" text="" height="20" width="60" textAlign="center"/>
+	<mx:Label id="lblSolider" x="95" y="2" text="" height="20" width="80" textAlign="center"/>
+	<mx:Label id="lblNum" x="185" y="2" text="0" height="20" width="45" textAlign="center"/>
+	<mx:ComboBox id="cbZhen" x="240" y="2" height="20" width="90" dataProvider="{zhenList}" labelField="zhenName"></mx:ComboBox>
+	
+</mx:Canvas>

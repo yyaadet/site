@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="460" height="349" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.GameManager;
+			import mail.list.MailList;
+			
+			private var mailList:MailList = null; 
+					
+			private function init():void
+			{
+				setTitle("同盟请求");
+				helpID = 11;
+			}
+			
+			override public function refresh():void
+			{
+				if (GameManager.gameMgr.mailList == null) return;
+				
+				mailList = GameManager.gameMgr.mailList.getListByType(2);
+				lblTotal.text = "申请数 " + mailList.length.toString();
+				
+				pagination.dataSource = mailList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgSphere;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+			}
+			
+			
+		]]>
+	</mx:Script>
+	
+	<mx:DataGrid id="dgSphere" x="10" y="34" width="440" height="277" headerHeight="25" rowHeight="25" textAlign="center">
+		<mx:columns>
+			<mx:DataGridColumn headerText="势力" dataField="sphereName" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="职位" dataField="levelName" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="威望" dataField="prestige" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="成员" dataField="userNum" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="操作" width="120" sortable="false" draggable="false" resizable="false" itemRenderer="sphere.ui.item.ItemAlliOper">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	<Pagination id="pagination" x="332" y="319">
+	</Pagination>
+	<mx:Label id="lblTotal" text="Label" width="100" height="20" y="319" x="180" textAlign="center"/>
+	
+</GameWindow>

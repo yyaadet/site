@@ -1,0 +1,59 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_title()">
+推荐给身边的好友www.88zuan.com
+</%def>
+
+<%def name="get_content()">
+<div id="content">
+    <div id="content_left">
+    	${self.get_left_list(u'推荐好友')}
+    </div>
+    <div id="content_right">
+    	<div id="content_right_left">
+        	
+            
+            <div class="row"><textarea id="cnt" style="width: 100%; height: 100px;">${c.reffer_url} ${self.get_title()}</textarea></div>
+			<div class="row">* 通过点击以上的分享按钮自动告诉给好朋友</div>
+            <div class="row">* 复制推广编码，系统为您生成专用的链接代码。</div>
+            <div class="row">* 通过QQ、MSN等聊天工具发送给朋友、同事、网友，将会有意外收获哦！</div>
+        </div>
+    </div>
+</div>
+<script>
+function copyToClipboard(txt) {   
+     if(window.clipboardData) {   
+             window.clipboardData.clearData();   
+             window.clipboardData.setData("Text", txt);   
+     } else if(navigator.userAgent.indexOf("Opera") != -1) {   
+          window.location = txt;   
+     } else if (window.netscape) {   
+          try {   
+               netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");   
+          } catch (e) {   
+               alert("被浏览器拒绝！\n请在浏览器地址栏输入'about:config'并回车\n然后将'signed.applets.codebase_principal_support'设置为'true'");   
+          }   
+          var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);   
+          if (!clip)   
+               return;   
+          var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);   
+          if (!trans)   
+               return;   
+          trans.addDataFlavor('text/unicode');   
+          var str = new Object();   
+          var len = new Object();   
+          var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);   
+          var copytext = txt;   
+          str.data = copytext;   
+          trans.setTransferData("text/unicode",str,copytext.length*2);   
+          var clipid = Components.interfaces.nsIClipboard;   
+          if (!clip)   
+               return false;   
+          clip.setData(trans,null,clipid.kGlobalClipboard);   
+          alert("复制成功！")   
+     }   
+}  
+</script>
+</%def>

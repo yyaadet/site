@@ -1,0 +1,28 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+<%namespace file="/user/index.mako.html" name="user" />
+
+
+<%def name="get_title()">最新提交的新闻</%def>
+
+<%def name="get_content()">
+
+<div id="content">
+    <div id="content_left">
+    	<%namespace name="webgame_news" file="/webgame_news/func.mako.html" />
+        ${webgame_news.get_webgame_news_list("newest", c.objs, c.group_id, c.start_page, c.page, c.end_page, limit=c.limit)}
+    </div>
+
+    <div id="content_right">
+    	<%namespace file="/home/index.mako.html" name="home" />
+        ${home.get_content_right_add_link()}
+
+        <%namespace file="/webgame/func.mako.html" name="webgame" />
+        ${webgame.get_webgame_today_hot_list(0)}
+
+        ${home.get_youxi_big_ads()}
+    </div>
+</div>
+</%def>
+

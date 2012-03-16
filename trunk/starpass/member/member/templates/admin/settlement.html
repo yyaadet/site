@@ -1,0 +1,39 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">游戏结算</span>
+</div>
+
+<div class="div_table">
+<table>
+    <tr>
+        <th><span>游戏ID</span></th>
+        <th><span>游戏名</span></th>
+        <th><span>游戏开发商</span></th>
+        <th><span>游戏当前累计收入</span></th>
+        <th><span>游戏当月收入</span></th>
+        <th><span>游戏上月收入</span></th>
+        <th><span>上次结算时间</span></th>
+        <th><span>基本操作</span></th>
+    </tr>
+    
+    %for item in c.data:
+    <tr>
+        <td>${item["id"]}</td>
+        <td>${item["name"]}</td>
+        <td>${item["developer"]}</td>
+        <td>${item["all"]}</td>
+        <td>${item["local"]}</td>
+        <td>${item["last"]}</td>
+        <td>无</td>
+        <td><a href="/admin/game_settlement?game_id=${item['id']}">收入查询<a></td>
+    </tr>
+    %endfor
+    
+</table>
+</div>
+
+
+</%def>

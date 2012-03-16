@@ -1,0 +1,32 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+    <form method="get" action="/admin/friendlink_do_edit" >
+    <div class="row">
+    	<div class="col" style="width: 100px;">名称:</div>
+        <div class="col"><input type="text" class="text" name="name" value="${c.friendlink.name}" /></div>
+    </div>
+    <div class="row" style="height: 160px;">
+    	<div class="col" style="width: 100px;">URL:</div>
+        <div class="col"><textarea name="url" class="text">${c.friendlink.url}</textarea></div>
+    </div>
+    <div class="row">
+    	<div class="col" style="width: 100px;">首页显示:</div>
+        <div class="col">
+        %if int(c.friendlink.is_in_home) == 1:
+        	<input type="radio" name="is_in_home" value="0" />否
+                <input type="radio" name="is_in_home" value="1" checked="checked" />是
+        %else:
+        	<input type="radio" name="is_in_home" value="0" checked="checked" />否
+                <input type="radio" name="is_in_home" value="1" />是
+        %endif
+        </div>
+    </div>
+    <div class="row">
+    	<div class="col" style="width: 100px;"><input type="hidden" name="id" value="${c.friendlink._id}" /></div>
+        <div class="col"><input class="button" type="submit" value="提 交"/></div>
+    </div>
+    </form>
+</%def>

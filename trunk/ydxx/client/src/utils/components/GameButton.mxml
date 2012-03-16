@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Button xmlns:mx="http://www.adobe.com/2006/mxml" width="64" height="24" fontWeight="normal" paddingLeft="0" paddingRight="0" creationComplete="init();"
+	 fontSize="12" fontFamily="新宋体">
+	
+	<mx:Script>
+		<![CDATA[
+		
+			private var _btnType:String = "";
+			
+			private var _htmlText:String = "";
+			
+			private function init():void
+			{
+				this.setStyle("fontWeight", "normal");
+				this.setStyle("paddingLeft", 0);
+				this.setStyle("paddingRight", 0);
+				this.setStyle("paddingTop", 4);
+				this.setStyle("fontFamily", "新宋体");
+				this.setStyle("fontSize", 12);
+			}
+			
+			public function get btnType():String
+			{
+				return _btnType;
+			}
+			
+			[Inspectable(defaultValue="BUTTON", enumeration="menu,xiuPrior,xiuItem,xiuNext,xiuGeneral,canXiu,teamTitle,send,open,close,chatType,max,mapMenu,off,acce,add,fight", type="String")]
+			public function set btnType(param:String):void
+			{
+				_btnType = param;
+				
+				switch(btnType)
+				{
+					//城池--功能菜单
+					case "menu":
+					{
+						this.setStyle("styleName", "cityMenu");
+						break;
+					}
+					
+					//地图--功能菜单
+					case "mapMenu":
+					{
+						this.setStyle("styleName", "mapMenu");
+						break;
+					}
+					
+					//列表向上按钮
+					case "xiuPrior":
+					{
+						this.setStyle("styleName", "xiuPrior");
+						break;
+					}
+					
+					//列表按钮
+					case "xiuItem":
+					{
+						this.setStyle("styleName", "xiuItem");
+						break;
+					}
+					
+					//列表向下按钮
+					case "xiuNext":
+					{
+						this.setStyle("styleName", "xiuNext");
+						break;
+					}
+					
+					//技能阵法按钮
+					case "xiuGeneral":
+					{
+						this.setStyle("styleName", "xiuGeneral");
+						break;
+					}
+					
+					//技能阵法按钮
+					case "canXiu":
+					{
+						this.setStyle("styleName", "canXiu");
+						break;
+					}
+					
+					//编成标题按钮
+					case "teamTitle":
+					{
+						this.setStyle("styleName", "teamTitle");
+						break;
+					}
+					
+					//聊天发送按钮
+					case "send":
+					{
+						this.setStyle("styleName", "send");
+						break;
+					}
+					
+					//聊天展开按钮
+					case "open":
+					{
+						this.setStyle("styleName", "open");
+						break;
+					}
+					
+					//聊天关闭按钮
+					case "close":
+					{
+						this.setStyle("styleName", "close");
+						break;
+					}
+					
+					//聊天类型选择按钮
+					case "chatType":
+					{
+						this.setStyle("styleName", "chatType");
+						break;
+					}
+					
+					//最大
+					case "max":
+					{
+						this.setStyle("styleName", "max");
+						break;
+					}
+					
+					//势力官位申请
+					case "off":
+					{
+						this.setStyle("styleName", "off");
+						break;
+					}
+					
+					//升级加速
+					case "acce":
+					{
+						this.setStyle("styleName", "acce");
+						break;
+					}
+					
+					//升级加速
+					case "add":
+					{
+						this.setStyle("styleName", "add");
+						break;
+					}
+					
+					//战斗
+					case "fight":
+					{
+						this.setStyle("styleName", "fight");
+						break;
+					}
+					
+					default:
+					{
+						break;
+					}
+				}
+			}
+			
+			public function get htmlText():String
+			{
+				return _htmlText;
+			}
+			
+			public function set htmlText(param:String):void
+			{
+				_htmlText = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+</mx:Button>

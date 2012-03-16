@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link type="text/css" rel="stylesheet" href="/css/master.css" />
+<title>申请内测资格</title>
+<script type="text/javascript">
+    function isInt(str){
+    var reg = /^(-|\+)?\d+$/ ;
+    return reg.test(str);
+    }
+    function isMail(mail) 
+{ 
+return(new RegExp(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/).test(mail)); 
+}  
+function check(){
+    age = document.getElementById("age").value;
+    profession = document.getElementById("profession").value;
+    email = document.getElementById("email").value;
+    game_hour = document.getElementById("game_hour").value;
+    reason = document.getElementById("reason").value;
+    if (!isInt(age)){
+        alert('年龄要为整数');
+        return false;
+        }
+    if (!isInt(game_hour)){
+        alert('游戏时间为整数');
+        return false;
+        }
+    if (profession == ''){
+        alert('行业不能为空');
+        return false;
+        }
+    if (!isMail(email)){
+        alert('邮箱错误');
+        return false;
+        }
+    if (reason.length < 20){
+        alert('请详细描述申请理由');
+        return false;
+        }
+    if (reason.length > 150){
+        alert('理由不超过150字');
+        return false;
+        }
+    return true;
+    }
+</script>
+</head>
+
+<body>
+<div id="sq_big">
+    <div class="sq_top"><img src="/images/sq_top.gif"/></div>
+    <div class="sq_left"><img src="/images/sq_left.gif"/></div>
+    <div class="sq_right">
+     <form name="apply_for_form" method="post" onsubmit="return check();">
+        <input type="hidden" name="action" value="apply_for" />
+        <input type="hidden" name="uid" value="${c.uid}" />
+        <input type="hidden" id="error" value="${c.error}" />
+       <div class="right_big">
+       <ul>
+       <li><strong>年 龄：</strong><input name="age" type="text" id="age" class="textfieldr" /></li>
+       <li><strong>职 业：</strong><input name="profession" type="text" id="profession" size="10" class="textfieldr"/></li>
+       <li><strong>平均每天上线时间：</strong><input name="game_hour" type="text" id="game_hour" size="10" class="textfieldc"/></li>
+       <li><strong>性　别：</strong>
+         <input type="radio" name="sex" id="radio3" value="1" checked="checked" /> 
+  男　
+  <input type="radio" name="sex" id="radio4" value="0" />
+  女
+</li>
+       <li><strong>您现在的所在地：</strong>
+    <select name="place" style="WIDTH: 120px">
+    <option value="广东省">广东省</option>
+    <option value="上海市">上海市</option>
+    <option value="北京市" selected="selected">北京市</option>
+    <option value="天津市">天津市</option>
+    <option value="河北省">河北省</option>
+    <option value="山西省">山西省</option>
+    <option value="内蒙古">内蒙古</option>
+    <option value="辽宁省">辽宁省</option>
+    <option value="吉林省">吉林省</option>
+    <option value="黑龙江省">黑龙江省</option>
+    <option value="江苏省">江苏省</option>
+    <option value="浙江省">浙江省</option>
+    <option value="安徽省">安徽省</option>
+    <option value="福建省">福建省</option>
+    <option value="江西省">江西省</option>
+    <option value="山东省">山东省</option>
+    <option value="河南省">河南省</option>
+    <option value="湖北省">湖北省</option>
+    <option value="湖南省">湖南省</option>
+    <option value="广西">广西</option>
+    <option value="四川省">四川省</option>
+    <option value="贵州省">贵州省</option>
+    <option value="云南省">云南省</option>
+    <option value="西藏自治区">西藏自治区</option>
+    <option value="陕西省">陕西省</option>
+    <option value="甘肃省">甘肃省</option>
+    <option value="青海省">青海省</option>
+    <option value="宁夏">宁夏</option>
+    <option value="新疆">新疆</option>
+    <option value="香港">香港</option>
+    <option value="台湾省">台湾省</option>
+    <option value="澳门">澳门</option>
+    <option value="重庆市">重庆市</option>
+    <option value="海南省">海南省</option>
+    <option value="国外">国外</option>
+    <option value="其他">其他</option>
+  </select></li>
+  <li><strong>Email：</strong>
+         <input name="email" type="text" id="email" size="10" class="textfielde"/></li>
+       <li><strong>收入水平：</strong>
+         <input type="radio" name="income" id="radio3" value="2000以下" />
+2000- 
+<input type="radio" name="income" id="radio4" value="2000-5000" checked="checked"/>
+2000-5000
+ 
+<input type="radio" name="income" id="radio5" value="5000-10000" />
+5000-10000
+
+ 
+ <input type="radio" name="income" id="radio6" value="10000以上" /> 
+10000+
+</li>
+       <li><strong>来源地：</strong>  
+    <input type="radio" name="know_from" id="radio7" value="网友推荐" checked="checked"/>
+    网友推荐　
+    <input type="radio" name="know_from" id="radio8" value="搜索引擎" />
+    搜索引擎　
+    <input type="radio" name="know_from" id="radio9" value="官网" />
+    官网  </li>
+       <li><strong>申请理由（20-150字）：</strong><textarea name="reason" cols="40"  id="reason" class="textarea"></textarea>
+       </li>
+       </ul>
+       </div>
+       
+       <div class="bd_bottons">
+        <input type="image"  src="/images/jh_botton.gif"  /></div>
+       </form>
+    </div>
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="220" height="294" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import net.http.HttpManager;
+			import utils.WinManager;
+			import utils.PubUnit;
+			import utils.GameManager;
+			import wubao.model.User;
+			
+			private function init():void
+			{
+				setTitle("重置密码");
+			}
+			
+			override public function refresh():void
+			{
+				var gameUser:User = GameManager.gameMgr.user;
+				tiQues.text = PubUnit.mibaoList[gameUser.quesType].ques;
+				
+				tiAns.text = "";
+				tiPw.text = "";
+				tipw1.text = "";
+			}
+			
+			private function send():void
+			{
+				if (tiAns.text == "")
+				{
+					WinManager.winMgr.showResult("请输入密保答案");
+					return;
+				}
+				
+				if (tiPw.text == "" || tipw1.text == "" || tiPw.text != tipw1.text ||
+				    tiPw.text.length != 6 || tipw1.text.length != 6)
+				{
+					WinManager.winMgr.showResult("密码格式不正确");
+					return;
+				}
+				
+				HttpManager.httpMgr.findLock(tiAns.text, tiPw.text);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="200" height="220" styleName="winCanvas">
+		<mx:Label x="10" y="10" text="您的密保问题"/>
+		<mx:TextInput id="tiQues" x="10" y="28" editable="false"/>
+		<mx:Label x="10" y="55" text="请输入您的密保答案"/>
+		<mx:TextInput id="tiAns" x="10" y="74"/>
+		
+		<mx:Label x="10" y="115" text="请输入六位数字作为新密码"/>
+		<GameTextInput id="tiPw" x="10" y="137" width="149" isNUM="true" displayAsPassword="true" maxChars="6"/>
+		<mx:Label x="10" y="167" text="请再次输入新密码"/>
+		<GameTextInput id="tipw1" x="10" y="189" width="149" isNUM="true" displayAsPassword="true" maxChars="6"/>
+	</mx:Canvas>
+	
+	<OKButton x="42" y="260" click="send();"/>
+	<GameButton x="114" y="260" label="关　闭" click="super.closeWin(event);"/>
+	
+</GameWindow>

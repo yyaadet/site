@@ -1,0 +1,24 @@
+#-*- encoding: utf-8 -*-
+<%inherit file="/home/base.mako.html" />
+
+<%def name="get_title()">
+友情链接
+</%def>
+
+<%def name="get_content()">
+<div id="content">
+
+<div id="content_left">
+    <strong>友情链接</strong>
+</div>
+<div id="content_right">
+   <div class="table">
+   		<div class="row" style="height: 26px;">
+        %for obj in c.fls:
+        <div class="col"><a href="${obj.url}" target="_blank">${obj.name}</a></div>
+        %endfor
+        </div>
+   </div>
+</div>
+</div>
+</%def>

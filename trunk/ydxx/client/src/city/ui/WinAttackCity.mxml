@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="380" height="200" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.GameManager;
+			import city.model.City;
+			import net.tcp.TcpManager;
+			import net.tcp.model.war.TcpAttack;
+			
+			private var _cityID:int = 0;
+			
+			private function init():void
+			{
+				setTitle("宣　战");
+			}
+			
+			override public function refresh():void
+			{
+				var gameCity:City = GameManager.gameMgr.cityList.getObjByID(cityID) as City;
+				if (gameCity != null)
+				{
+					//lblInfo.text = "确定要对【" + gameCity.cityName + "】宣战吗？";
+				}
+			}
+			
+			private function sendAttack():void
+			{
+				var tcpAttack:TcpAttack = new TcpAttack();
+				tcpAttack.cityID = cityID;
+				TcpManager.tcpMgr.sendAttackCity(tcpAttack);
+				
+				this.visible = false;
+				this.includeInLayout = false;
+			}
+			
+			public function get cityID():int
+			{
+				return _cityID;
+			}
+			
+			public function set cityID(param:int):void
+			{
+				_cityID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:TextArea x="10" y="34" width="360" height="124" editable="false" text="　　占领城池需要由势力君主在每天上午09：00 - 12：00预先宣战，且只能宣战一次。如目标城池为NPC势力所占有，则需要势力的威望值要高于NPC。&#xa;　　宣战之后，双方势力成员的主界面将出现战场图标。在战斗开始前15分钟进行倒计时的时候，势力成员可点击图标进入战场，倒计时结束后即开始战斗。&#xa;&#xa;　　你确定要宣战吗？"/>
+	<OKButton x="158" y="166" click="sendAttack();"/>
+	
+</GameWindow>

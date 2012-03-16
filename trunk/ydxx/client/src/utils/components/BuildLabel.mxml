@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="75" height="22" color="0xFFFFFF" fontSize="12" backgroundColor="#22241F" backgroundAlpha="0.8" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.GameManager;
+			import utils.PubUnit;
+			import wubao.model.Build;
+			
+			private var _build:Build = null;
+			
+			private var leftValue:int = 0;
+			
+			private var totalvalue:int = 0;
+			
+			private var progressColor:uint = 0x4F82A8;
+			
+			private function init():void
+			{
+				this.mouseChildren = false;
+			}
+			
+			public function setLabel(level:int, buildName:String, isShowLevel:Boolean):void
+			{
+				lblLevel.visible = isShowLevel;
+				lblLevel.includeInLayout = isShowLevel;	
+				lblName.text = buildName;
+			}
+			
+			public function showProgress():void
+			{
+				cvProg.graphics.clear();
+				if (build == null) return;
+				
+				var buildAry:Array = [];
+				buildAry = PubUnit.getBuildNeed(build.type, build.level);
+				
+				leftValue = build.endTime - GameManager.gameMgr.gameTime;
+				if (build.type == 11)
+					totalvalue = buildAry[2];
+				else
+					totalvalue = buildAry[3];
+				
+				if (leftValue <= 0) return;
+				
+				var per:Number = leftValue / totalvalue;
+				var left:int = cvProg.width * per;
+				
+//				cvProg.graphics.beginFill(progressColor);
+//				cvProg.graphics.drawRect(0, 0, left, cvProg.height);
+//				cvProg.graphics.endFill();
+			}
+			
+			public function get build():Build
+			{
+				return _build;
+			}
+			
+			public function set build(param:Build):void
+			{
+				_build = param;
+				
+				lblLevel.text = _build.level >= PubUnit.getBuildMax(_build.type)? "" : _build.level.toString();
+				lblName.text = _build.name;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvLevel" x="1" y="1" width="21" height="20" backgroundColor="#4F82A8">
+		<mx:Label id="lblLevel" x="0" y="0" width="21" height="20" textAlign="center" text="0">
+		</mx:Label>
+	</mx:Canvas>
+	
+	<mx:Canvas id="cvProg" x="23" y="1" width="51" height="20">
+		<mx:Label id="lblName" x="0" y="0" width="51" height="20" textAlign="center" text=""/>	
+	</mx:Canvas>
+	
+</mx:Canvas>

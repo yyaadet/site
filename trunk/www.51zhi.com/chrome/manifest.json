@@ -1,0 +1,17 @@
+{
+  "name": "巨游分享",
+  "description": "发现最流行的互联网游戏、资讯、应用服务",
+  "version": "1",
+  "app": {
+    "launch": {
+      "web_url": "http://www.51zhi.com"
+    }
+  },
+  "icons": {
+    "128": "128.jpg"
+  },
+  "permissions": [
+    "unlimitedStorage",
+    "notifications"
+  ]
+}

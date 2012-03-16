@@ -1,0 +1,49 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">编辑游戏</span>
+</div>
+
+<div class="content_content">
+<form action="/admin/edit_game" method="post">
+    <input type="hidden" name="act" value="edit" />
+    <input type="hidden" name="game_id" value="${c.game.id}" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="game_name">游戏名称</label>
+    <input type="text" id="game_name" name="game_name" value="${c.game.name}" />
+    </p>
+    
+    <p>
+    <label for="developer">开&nbsp;发&nbsp;商</label>
+    <input type="text" id="developer" name="developer" value="${c.game.developer}" />
+    </p>
+    
+    <p>
+    <label for="website">&nbsp;&nbsp;&nbsp;&nbsp;主页</label>
+    <input type="text" size="60" id="website" name="website" value="${c.game.website}"/>
+    </p>
+    
+    <p>
+    <label for="description">&nbsp;&nbsp;&nbsp;&nbsp;描述</label>
+    <textarea rows="5" cols="60"  id="description" name="description" >${c.game.description}</textarea>
+    </p>
+    
+    <p>
+    <label for="pic_url">图片地址</label>
+    <input type="text" size="60" id="pic_url" name="pic_url" value="${c.game.pic_url}"/>
+    </p>
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+</div>
+
+</%def>

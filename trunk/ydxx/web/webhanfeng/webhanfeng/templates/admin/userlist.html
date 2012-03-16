@@ -1,0 +1,138 @@
+    <!--玩家例表　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <input id="upon" type="hidden" value=${c.upon}>
+    <tr>
+      <td height="30" colspan="13" bgcolor="#FFFFFF"><table width="100%" height="45" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td  align="left" bgcolor="#f9f0e1"><ul class="img">
+            <li>
+            <input 
+                  name="s_name" class="gray" id="s_name" style="WIDTH: 150px " value=${c.s_name} >  </li>   
+             <li><a href="#" onclick="selectTab('/admin/user_list?action=search&flag=search&s_name='+$('#s_name').val())"><img src="/images/pic_15.gif" width="76" height="25" border="0" /></a></li>
+             
+            <li> 排列类型   &nbsp;
+                <select id="select" style="WIDTH: 90px " onchange="selectTab('/admin/user_list?action=sort&flag=sort&upon='+this.value
+                    +'&sort='+$('input[name=\'sort\']:checked').val())">
+                <option value="id" >ID</option>
+                <option value="money" >游戏币</option>
+                <option value="last_login_time" >最后登录时间</option>
+                <option value="first_login_time" >注册游戏时间</option>
+                <option value="consume" >消费游戏币</option>
+                <option value="vip_total_hour" >VIP总时间</option>
+                <option value="vip_used_hour" >VIP消耗时间</option>
+                <option value="online_second" >在线时长</option>
+                </select>
+            </li>
+            <li>
+            %if c.sort == "asc":
+            升序<input type="radio" name="sort"  value="asc" checked=checked/>
+            降序<input type="radio" name="sort" value="desc" />
+            %elif c.sort == "desc":
+            升序<input type="radio" name="sort"  value="asc" />
+            降序<input type="radio" name="sort" value="desc" checked=checked/>
+            %else:
+            升序<input type="radio" name="sort"  value="asc" checked=checked/>
+            降序<input type="radio" name="sort" value="desc" />
+            %endif
+            </li>
+             </ul></td>
+          </tr>
+      </table></td>
+    </tr>
+    <tr>
+      <td height="30" align="center" bgcolor="#ac7e43" class="white_bc">ID</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">运营商ID</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">HASHID</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">角色名称</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">可用游戏币</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">赠送游戏币</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">最后登录时间</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">最后登录IP</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">注册时间</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">VIP总时间</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">VIP消耗时间</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">累计消费虚拟币</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">在线时长</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">操作</td>
+    </tr>
+    %for item in c.data:
+        <%
+            day = 24*60*60
+            hour = 60*60
+            minute = 60
+            online_day = item.online_second / day
+            online_hour = (item.online_second - online_day*day) / hour
+            online_minute = (item.online_second - online_day*day - online_hour*hour) / minute
+            online_second = item.online_second - online_day*day - online_hour*hour - online_minute*minute
+            online_date = str(online_day) + u"天" + str(online_hour) + u"时" + str(online_minute) + u"分" + str(online_second) + u"秒"
+            
+            vip_day = 12
+            vip_month = 12*30
+            vip_year = 12*30*12
+            t_year = item.vip_total_hour / vip_year
+            t_month = (item.vip_total_hour - t_year*vip_year) / vip_month
+            t_day = (item.vip_total_hour - t_year*vip_year - t_month*vip_month) / vip_day
+            t_hour = item.vip_total_hour - t_year*vip_year - t_month*vip_month - t_day*vip_day
+            total_vip = str(t_year)+u'年'+str(t_month)+u'月'+str(t_day)+u'日'+str(t_hour)+u'时'
+            
+            u_year = item.vip_used_hour / vip_year
+            u_month = (item.vip_used_hour - u_year*vip_year) / vip_month
+            u_day = (item.vip_used_hour - u_year*vip_year - u_month*vip_month) / vip_day
+            u_hour = item.vip_used_hour - u_year*vip_year - u_month*vip_month - u_day*vip_day
+            used_vip = str(u_year)+u'年'+str(u_month)+u'月'+str(u_day)+u'日'+str(u_hour)+u'时'
+        %>
+    <tr>
+      <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.id}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.oid}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.hash_id}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.name}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.money}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.gold}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${readable_time(item.last_login_time)}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.last_login_ip}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${readable_time(item.first_login_time)}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${total_vip}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${used_vip}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${item.consume}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${online_date}</td>
+      %if item.is_locked == 1:
+      <td align="center" bgcolor="#f9f0e1" class="gray">
+        <a href="#" class="menu" onclick="$.post('/admin/lock_user',{id:'${item.id}', action:'unlock'},function(data){selectTab('${c.self_url}')});">解锁</a>
+      </td>
+      %else:
+      <td align="center" bgcolor="#f9f0e1" class="gray">
+        <a href="#" class="menu" onclick="$.post('/admin/lock_user',{id:'${item.id}', action:'lock'},function(data){selectTab('${c.self_url}')});">锁定</a></td>
+      %endif
+    </tr>
+    %endfor
+    
+    %if c.flag == "search":
+        <%namespace file="/admin/mypager.html" import="*" />
+        ${footer_page("/admin/user_list?action=search&flag=search&s_name="+c.s_name+"&page=")}
+    %elif c.flag == "online":
+        <%namespace file="/admin/mypager.html" import="*" />
+        ${footer_page("/admin/user_list?action=online&flag=online&page=")}
+    %elif c.flag == "locked":
+        <%namespace file="/admin/mypager.html" import="*" />
+        ${footer_page("/admin/user_list?action=locked&flag=locked&page=")}
+    %elif c.flag == "point":
+        <%namespace file="/admin/mypager.html" import="*" />
+        ${footer_page("/admin/user_list?action=point&flag=point&page=")}
+    %elif c.flag == "onlinetime":
+        <%namespace file="/admin/mypager.html" import="*" />
+        ${footer_page("/admin/user_list?action=onlinetime&flag=onlinetime&page=")}
+    %elif c.flag == "sort":
+        <%namespace file="/admin/mypager.html" import="*" />
+        ${footer_page("/admin/user_list?action=sort&flag=sort&upon="+c.upon+"&sort="+c.sort+"&page=")}
+    %else:
+        <%namespace file="/admin/mypager.html" import="*" />
+        ${footer_page("/admin/user_list?page=")}
+    %endif
+    
+</table>
+<script>
+v = $("#upon").val();
+$("#select").val(v); 
+</script>
+<!--玩家例表 end-->
+

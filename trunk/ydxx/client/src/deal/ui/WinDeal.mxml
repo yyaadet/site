@@ -1,0 +1,1087 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="570" height="393" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import wubao.model.Build;
+			import wubao.model.User;
+			import utils.FormatText;
+			import mx.controls.TextInput;
+			import mx.utils.StringUtil;
+			import wubao.model.Weapon;
+			import deal.list.SellList;
+			import net.tcp.model.deal.TcpBill;
+			import deal.ui.item.ItemBill;
+			import deal.list.BillList;
+			import mx.events.ItemClickEvent;
+			import utils.TipInfo;
+			import net.tcp.model.deal.TcpSell;
+			import net.tcp.TcpManager;
+			import net.tcp.model.deal.TcpSys;
+			import utils.events.ConfirmEvent;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import utils.components.GameButton;
+			import utils.GameManager;
+		
+			import wubao.model.WuBao;
+			import utils.PubUnit;
+		
+			private var gameWubao:WuBao = null;
+			
+			private var winAsk:WinAsk = null;
+			
+			private var tiNum:TextInput = null;
+			
+			private function init():void
+			{
+				setTitle("市　场");
+				helpID = 39;
+				iniSys();
+				taSys.htmlText = TipInfo.getDealSys();
+				refresh();
+				
+				var i:int = 0;
+				var len:int = nsNum.numChildren;
+				
+				for (i = 0; i < len; i++)
+				{
+					if (nsNum.getChildAt(i) is TextInput)
+					{
+						tiNum = nsNum.getChildAt(i) as TextInput;
+						tiNum.addEventListener(KeyboardEvent.KEY_UP, onNumUp);
+						break;
+					}
+				}
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				list1.selectedIndex = 0;
+				nsNum.value = 0;
+				tiPrice.text = "";
+				resetSys();
+			}
+			
+			private function listClick(evt:ItemClickEvent):void
+			{
+				if (evt.index == 0)
+					resetSys();
+				else if (evt.index == 1)
+					showBill();
+				else if (evt.index == 2)
+					showSell();
+			}
+		
+			//=====================================================================================
+			// 系统交易
+			//=====================================================================================
+			
+			private var sysType:int = 0;
+			private var sysNum:int = 0;
+			
+			private function iniSys():void
+			{
+				//购买
+				tiBuyFood.addEventListener(KeyboardEvent.KEY_UP, buyUp);
+				tiBuyWood.addEventListener(KeyboardEvent.KEY_UP, buyUp);
+				tiBuyIron.addEventListener(KeyboardEvent.KEY_UP, buyUp);
+				tiBuySkin.addEventListener(KeyboardEvent.KEY_UP, buyUp);
+				tiBuyHorse.addEventListener(KeyboardEvent.KEY_UP, buyUp);
+				
+				maxBuyFood.addEventListener(MouseEvent.CLICK, maxBuyClick);
+				maxBuyWood.addEventListener(MouseEvent.CLICK, maxBuyClick);
+				maxBuyIron.addEventListener(MouseEvent.CLICK, maxBuyClick);
+				maxBuySkin.addEventListener(MouseEvent.CLICK, maxBuyClick);
+				maxBuyHorse.addEventListener(MouseEvent.CLICK, maxBuyClick);
+				
+				buyFood.addEventListener(MouseEvent.CLICK, buyClick);
+				buyWood.addEventListener(MouseEvent.CLICK, buyClick);
+				buyIron.addEventListener(MouseEvent.CLICK, buyClick);
+				buySkin.addEventListener(MouseEvent.CLICK, buyClick);
+				buyHorse.addEventListener(MouseEvent.CLICK, buyClick);
+				
+				//卖出
+				tiSellFood.addEventListener(KeyboardEvent.KEY_UP, sellUp);
+				tiSellWood.addEventListener(KeyboardEvent.KEY_UP, sellUp);
+				tiSellIron.addEventListener(KeyboardEvent.KEY_UP, sellUp);
+				tiSellSkin.addEventListener(KeyboardEvent.KEY_UP, sellUp);
+				tiSellHorse.addEventListener(KeyboardEvent.KEY_UP, sellUp);
+				
+				maxSellFood.addEventListener(MouseEvent.CLICK, maxSellClick);
+				maxSellWood.addEventListener(MouseEvent.CLICK, maxSellClick);
+				maxSellIron.addEventListener(MouseEvent.CLICK, maxSellClick);
+				maxSellSkin.addEventListener(MouseEvent.CLICK, maxSellClick);
+				maxSellHorse.addEventListener(MouseEvent.CLICK, maxSellClick);
+				
+				sellFood.addEventListener(MouseEvent.CLICK, sellClick);
+				sellWood.addEventListener(MouseEvent.CLICK, sellClick);
+				sellIron.addEventListener(MouseEvent.CLICK, sellClick);
+				sellSkin.addEventListener(MouseEvent.CLICK, sellClick);
+				sellHorse.addEventListener(MouseEvent.CLICK, sellClick);
+			}
+			
+			public function resetSys():void
+			{
+				tiBuyFood.text = "0";
+				tiBuyWood.text = "0";
+				tiBuyIron.text = "0";
+				tiBuySkin.text = "0";
+				tiBuyHorse.text = "0";
+				
+				lblBuyFood.text = "0";
+				lblBuyWood.text = "0";
+				lblBuyIron.text = "0";
+				lblBuySkin.text = "0";
+				lblBuyHorse.text = "0";
+				
+				tiSellFood.text = "0";
+				tiSellWood.text = "0";
+				tiSellIron.text = "0";
+				tiSellSkin.text = "0";
+				tiSellHorse.text = "0";
+				
+				lblSellFood.text = "0";
+				lblSellWood.text = "0";
+				lblSellIron.text = "0";
+				lblSellSkin.text = "0";
+				lblSellHorse.text = "0";
+				
+				var price:int = 0;
+				price = PubUnit.moneyToRes(WuBao.FOOD);
+				lblBuyFoodPrice.text = price.toString();
+				
+				price = PubUnit.moneyToRes(WuBao.WOOD);
+				lblBuyWoodPrice.text = price.toString();
+				
+				price = PubUnit.moneyToRes(WuBao.IRON);
+				lblBuyIronPrice.text = price.toString();
+				
+				price = PubUnit.moneyToRes(WuBao.SKIN);
+				lblBuySkinPrice.text = price.toString();
+				
+				price = PubUnit.moneyToRes(WuBao.HORSE);
+				lblBuyHorsePrice.text = price.toString();
+				
+				price = PubUnit.resToMoney(WuBao.FOOD);
+				lblSellFoodPrice.text = price.toString();
+				
+				price = PubUnit.resToMoney(WuBao.WOOD);
+				lblSellWoodPrice.text = price.toString();
+				
+				price = PubUnit.resToMoney(WuBao.IRON);
+				lblSellIronPrice.text = price.toString();
+				
+				price = PubUnit.resToMoney(WuBao.SKIN);
+				lblSellSkinPrice.text = price.toString();
+				
+				price = PubUnit.resToMoney(WuBao.HORSE);
+				lblSellHorsePrice.text = price.toString();
+			}
+			
+			//购买资源
+			private function buyUp(evt:KeyboardEvent):void
+			{
+				var ti1:GameTextInput = evt.currentTarget as GameTextInput;
+				if (ti1 == null) return;
+				
+				var num:int = 0;
+				var max:int = 0;
+				var price:int = 0;
+				var total:int = 0;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				if (ti1.id == "tiBuyFood")
+				{
+					price = PubUnit.moneyToRes(WuBao.FOOD);
+					max = gameWubao.money / price;
+					
+					num = int(tiBuyFood.text);
+					if (num > max)
+					{
+						num = max;
+						tiBuyFood.text = num.toString();
+					}
+						
+					total = num * price;
+					lblBuyFood.text = total.toString();
+				}
+				else if (ti1.id == "tiBuyWood")
+				{
+					price = PubUnit.moneyToRes(WuBao.WOOD);
+					max = gameWubao.money / price;
+					
+					num = int(tiBuyWood.text);
+					if (num > max)
+					{
+						num = max;
+						tiBuyWood.text = num.toString();
+					}
+						
+					total = num * price;
+					lblBuyWood.text = total.toString();
+				}
+				else if (ti1.id == "tiBuyIron")
+				{
+					price = PubUnit.moneyToRes(WuBao.IRON);
+					max = gameWubao.money / price;
+					
+					num = int(tiBuyIron.text);
+					if (num > max)
+					{
+						num = max;
+						tiBuyIron.text = num.toString();
+					}
+						
+					total = num * price;
+					lblBuyIron.text = total.toString();
+				}
+				else if (ti1.id == "tiBuySkin")
+				{
+					price = PubUnit.moneyToRes(WuBao.SKIN);
+					max = gameWubao.money / price;
+					
+					num = int(tiBuySkin.text);
+					if (num > max)
+					{
+						num = max;
+						tiBuySkin.text = num.toString();
+					}
+						
+					total = num * price;
+					lblBuySkin.text = total.toString();
+				}
+				else if (ti1.id == "tiBuyHorse")
+				{
+					price = PubUnit.moneyToRes(WuBao.HORSE);
+					max = gameWubao.money / price;
+					
+					num = int(tiBuyHorse.text);
+					if (num > max)
+					{
+						num = max;
+						tiBuyHorse.text = num.toString();
+					}
+						
+					total = num * price;
+					lblBuyHorse.text = total.toString();
+				}
+			} 
+			
+			private function maxBuyClick(evt:MouseEvent):void
+			{
+				var btn1:GameButton = evt.currentTarget as GameButton;
+				if (btn1 == null) return;
+				
+				var num:int = 0;
+				var max:int = 0;
+				var price:int = 0;
+				var total:int = 0;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				if (btn1.id == "maxBuyFood")
+				{
+					price = PubUnit.moneyToRes(WuBao.FOOD);
+					max = gameWubao.money / price;
+					total = max * price;
+					tiBuyFood.text = max.toString();
+					lblBuyFood.text = total.toString();
+				}
+				else if (btn1.id == "maxBuyWood")
+				{
+					price = PubUnit.moneyToRes(WuBao.WOOD);
+					max = gameWubao.money / price;
+					total = max * price;
+					tiBuyWood.text = max.toString();
+					lblBuyWood.text = total.toString();
+				}
+				else if (btn1.id == "maxBuyIron")
+				{
+					price = PubUnit.moneyToRes(WuBao.IRON);
+					max = gameWubao.money / price;
+					total = max * price;
+					tiBuyIron.text = max.toString();
+					lblBuyIron.text = total.toString();
+				}
+				else if (btn1.id == "maxBuySkin")
+				{
+					price = PubUnit.moneyToRes(WuBao.SKIN);
+					max = gameWubao.money / price;
+					total = max * price;
+					tiBuySkin.text = max.toString();
+					lblBuySkin.text = total.toString();
+				}
+				else if (btn1.id == "maxBuyHorse")
+				{
+					price = PubUnit.moneyToRes(WuBao.HORSE);
+					max = gameWubao.money / price;
+					total = max * price;
+					tiBuyHorse.text = max.toString();
+					lblBuyHorse.text = total.toString();
+				}
+			}
+			
+			private function buyClick(evt:MouseEvent):void
+			{
+				var btn1:GameButton = evt.currentTarget as GameButton;
+				if (btn1 == null) return;
+				
+				var num:int = 0;
+				var str:String = "";
+				
+				if (btn1.id == "buyFood")
+				{
+					num = int(tiBuyFood.text);
+					if (num <= 0) return;
+					str = "确定要购买" + num.toString() + PubUnit.resList[WuBao.FOOD] + "吗？";
+					sysType = WuBao.FOOD;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+				}
+				else if (btn1.id == "buyWood")
+				{
+					num = int(tiBuyWood.text);
+					if (num <= 0) return;
+					str = "确定要购买" + num.toString() + PubUnit.resList[WuBao.WOOD] + "吗？";
+					sysType = WuBao.WOOD;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+				}
+				else if (btn1.id == "buyIron")
+				{
+					num = int(tiBuyIron.text);
+					if (num <= 0) return;
+					str = "确定要购买" + num.toString() + PubUnit.resList[WuBao.IRON] + "吗？";
+					sysType = WuBao.IRON;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+				}
+				else if (btn1.id == "buySkin")
+				{
+					num = int(tiBuySkin.text);
+					if (num <= 0) return;
+					str = "确定要购买" + num.toString() + PubUnit.resList[WuBao.SKIN] + "吗？";
+					sysType = WuBao.SKIN;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+				}
+				else if (btn1.id == "buyHorse")
+				{
+					num = int(tiBuyHorse.text);
+					if (num <= 0) return;
+					str = "确定要购买" + num.toString() + PubUnit.resList[WuBao.HORSE] + "吗？";
+					sysType = WuBao.HORSE;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+				}
+			}
+			
+			private function confirmBuy(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+				
+				var tcpSys:TcpSys = new TcpSys();
+				tcpSys.wbID = gameWubao.uniqID;
+				tcpSys.type = 1;
+				tcpSys.resType = sysType;
+				tcpSys.resNum = sysNum;
+				TcpManager.tcpMgr.sendDealSys(tcpSys);
+			}
+			
+			//卖出资源
+			private function sellUp(evt:KeyboardEvent):void
+			{
+				var ti1:GameTextInput = evt.currentTarget as GameTextInput;
+				if (ti1 == null) return;
+				
+				var num:int = 0;
+				var max:int = 0;
+				var price:Number = 0;
+				var total:int = 0;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				if (ti1.id == "tiSellFood")
+				{
+					price = PubUnit.resToMoney(WuBao.FOOD);
+					num = int(tiSellFood.text);
+					
+					if (num > gameWubao.food)
+					{
+						num = gameWubao.food;
+						tiSellFood.text = num.toString();
+					}
+						
+					total = num * price;
+					lblSellFood.text = total.toString();
+				}
+				else if (ti1.id == "tiSellWood")
+				{
+					price = PubUnit.resToMoney(WuBao.WOOD);
+					num = int(tiSellWood.text);
+					
+					if (num > gameWubao.wood)
+					{
+						num = gameWubao.wood;
+						tiSellWood.text = num.toString();
+					}
+						
+					total = num * price;
+					lblSellWood.text = total.toString();
+				}
+				else if (ti1.id == "tiSellIron")
+				{
+					price = PubUnit.resToMoney(WuBao.IRON);
+					num = int(tiSellIron.text);
+					
+					if (num > gameWubao.iron)
+					{
+						num = gameWubao.iron;
+						tiSellIron.text = num.toString();
+					}
+						
+					total = num * price;
+					lblSellIron.text = total.toString();
+				}
+				else if (ti1.id == "tiSellSkin")
+				{
+					price = PubUnit.resToMoney(WuBao.SKIN);
+					num = int(tiSellSkin.text);
+					
+					if (num > gameWubao.skin)
+					{
+						num = gameWubao.skin;
+						tiSellSkin.text = num.toString();
+					}
+						
+					total = num * price;
+					lblSellSkin.text = total.toString();
+				}
+				else if (ti1.id == "tiSellHorse")
+				{
+					price = PubUnit.resToMoney(WuBao.HORSE);
+					num = int(tiSellHorse.text);
+					
+					if (num > gameWubao.horse)
+					{
+						num = gameWubao.horse;
+						tiSellHorse.text = num.toString();
+					}
+						
+					total = num * price;
+					lblSellHorse.text = total.toString();
+				}
+			}
+			
+			private function maxSellClick(evt:MouseEvent):void
+			{
+				var btn1:GameButton = evt.currentTarget as GameButton;
+				if (btn1 == null) return;
+				
+				var num:int = 0;
+				var max:int = 0;
+				var price:int = 0;
+				var total:int = 0;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				if (btn1.id == "maxSellFood")
+				{
+					price = PubUnit.resToMoney(WuBao.FOOD);
+					max = gameWubao.food;
+					total = max * price;
+					tiSellFood.text = max.toString();
+					lblSellFood.text = total.toString();
+				}
+				else if (btn1.id == "maxSellWood")
+				{
+					price = PubUnit.resToMoney(WuBao.WOOD);
+					max = gameWubao.wood;
+					total = max * price;
+					tiSellWood.text = max.toString();
+					lblSellWood.text = total.toString();
+				}
+				else if (btn1.id == "maxSellIron")
+				{
+					price = PubUnit.resToMoney(WuBao.IRON);
+					max = gameWubao.iron;
+					total = max * price;
+					tiSellIron.text = max.toString();
+					lblSellIron.text = total.toString();
+				}
+				else if (btn1.id == "maxSellSkin")
+				{
+					price = PubUnit.resToMoney(WuBao.SKIN);
+					max = gameWubao.skin;
+					total = max * price;
+					tiSellSkin.text = max.toString();
+					lblSellSkin.text = total.toString();
+				}
+				else if (btn1.id == "maxSellHorse")
+				{
+					price = PubUnit.resToMoney(WuBao.HORSE);
+					max = gameWubao.horse;
+					total = max * price;
+					tiSellHorse.text = max.toString();
+					lblSellHorse.text = total.toString();
+				}
+			}
+			
+			private function sellClick(evt:MouseEvent):void
+			{
+				var btn1:GameButton = evt.currentTarget as GameButton;
+				if (btn1 == null) return;
+				
+				var num:int = 0;
+				var str:String = "";
+				
+				if (btn1.id == "sellFood")
+				{
+					num = int(tiSellFood.text);
+					if (num <= 0) return;
+					str = "确定要出售" + num.toString() + PubUnit.resList[WuBao.FOOD] + "吗？";
+					sysType = WuBao.FOOD;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmSell);
+				}
+				else if (btn1.id == "sellWood")
+				{
+					num = int(tiSellWood.text);
+					if (num <= 0) return;
+					str = "确定要出售" + num.toString() + PubUnit.resList[WuBao.WOOD] + "吗？";
+					sysType = WuBao.WOOD;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmSell);
+				}
+				else if (btn1.id == "sellIron")
+				{
+					num = int(tiSellIron.text);
+					if (num <= 0) return;
+					str = "确定要出售" + num.toString() + PubUnit.resList[WuBao.IRON] + "吗？";
+					sysType = WuBao.IRON;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmSell);
+				}
+				else if (btn1.id == "sellSkin")
+				{
+					num = int(tiSellSkin.text);
+					if (num <= 0) return;
+					str = "确定要出售" + num.toString() + PubUnit.resList[WuBao.SKIN] + "吗？";
+					sysType = WuBao.SKIN;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmSell);
+				}
+				else if (btn1.id == "sellHorse")
+				{
+					num = int(tiSellHorse.text);
+					if (num <= 0) return;
+					str = "确定要出售" + num.toString() + PubUnit.resList[WuBao.HORSE] + "吗？";
+					sysType = WuBao.HORSE;
+					sysNum = num;
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmSell);
+				}
+			}
+			
+			private function confirmSell(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmSell);
+				
+				var tcpSys:TcpSys = new TcpSys();
+				tcpSys.wbID = gameWubao.uniqID;
+				tcpSys.type = 2;
+				tcpSys.resType = sysType;
+				tcpSys.resNum = sysNum;
+				TcpManager.tcpMgr.sendDealSys(tcpSys);
+			}
+			
+			//=====================================================================================
+			// 挂单交易
+			//=====================================================================================
+			
+			private var billList:BillList = null;
+			
+			[Bindable]
+			private var resList:Array = [{type:1, res:"粮食"}, {type:2, res:"木料"}, {type:3, res:"矿石"}, {type:4, res:"马匹"}, {type:5, res:"皮革"}];
+			
+			public function showBill():void
+			{
+				cvBillBuy.removeAllChildren();
+				cvBillSell.removeAllChildren();
+				
+				billList = GameManager.gameMgr.billList;
+				if (billList == null || billList.length < 1)
+					return;
+				
+				var i:int = 0;
+				var itemBill:ItemBill = null;
+				var resType:int = 0;
+				
+				for (i = 0; i < 5; i++)
+				{
+					itemBill = new ItemBill();
+					itemBill.x = i * (itemBill.width + 10);
+					itemBill.y = 0;
+					cvBillSell.addChild(itemBill);
+					resType = i + 1;
+					itemBill.billList = billList.getList(2, resType);
+				}
+				
+				for (i = 0; i < 5; i++)
+				{
+					itemBill = new ItemBill();
+					itemBill.x = i * (itemBill.width + 10);
+					itemBill.y = 0;
+					cvBillBuy.addChild(itemBill);
+					resType = i + 1;
+					itemBill.billList = billList.getList(1, resType);
+				}
+			}
+			
+			private function sendBill():void
+			{
+				var sendNum:int = GameManager.gameMgr.billList.getSelfList().length;
+				if (sendNum >= 5)
+				{
+					WinManager.winMgr.showResult("挂单数最多5笔");
+					return;
+				}
+				
+				if (nsNum.value <= 0)
+				{
+					WinManager.winMgr.showResult("数量不能为0");
+					return;
+				}
+				
+				var obj:Object = resList[cbRes.selectedIndex];
+				var resType:int = obj.type;
+				
+				var min:int = getPriceMin(resType);
+				var max:int = getPriceMax(resType);
+				
+				if (int(tiPrice.text) < min)
+				{
+					WinManager.winMgr.showResult("单价不能低于" + min.toString());
+					return;
+				}
+					
+				if (int(tiPrice.text) > max)
+				{
+					WinManager.winMgr.showResult("单价不能高于" + max.toString());
+					return;
+				}
+				
+				var build:Build = gameWubao.buildList.getObjByID(Build.YST) as Build;
+				if (build != null && build.level < 20)
+				{
+					WinManager.winMgr.showResult("20级以下无法发布交易");
+					return;
+				}
+				
+				if (build != null && build.level < 40)
+				{	
+					var str:String = FormatText.packegText("发布一次交易需要耗费 5 金币（40级以后免费），确定要发布吗？");
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmSendBill);
+				}
+				else
+					confirmSendBill(null);
+			}
+			
+			private function confirmSendBill(evt:ConfirmEvent):void
+			{
+				var type:int = 0;
+				var price:int = 0;
+				var resNum:int = 0;
+				
+				var obj:Object = resList[cbRes.selectedIndex];
+				var resType:int = obj.type;
+				
+				type = rbBuy.selected ? 1 : 2;
+				price = int(tiPrice.text);
+				resNum = nsNum.value * 100;
+				
+				if (resNum < 1 || price < 1) return;
+				
+				var tcpBill:TcpBill = new TcpBill();
+				tcpBill.wbID = gameWubao.uniqID;
+				tcpBill.type = type;
+				tcpBill.resType = resType;
+				tcpBill.resNum = resNum;
+				tcpBill.price = price;
+				
+				TcpManager.tcpMgr.sendDealBill(tcpBill);
+			}
+			
+			private function showMyBill():void
+			{
+				WinManager.winMgr.showBillList();
+			}
+			
+			private function onNumUp(evt:KeyboardEvent):void
+			{
+				var obj:Object = resList[cbRes.selectedIndex];
+				var resType:int = obj.type;
+				var max:int = getNumMax(resType);
+				
+				if (nsNum.value > max)
+				{
+					nsNum.value = max;
+					tiNum.text = max.toString();
+				}
+			}
+			
+			private function numChange():void
+			{
+				var obj:Object = resList[cbRes.selectedIndex];
+				var resType:int = obj.type;
+				var max:int = getNumMax(resType);
+				
+				if (nsNum.value > max)
+					nsNum.value = max;
+			}
+			
+			private function resChange():void
+			{
+				onNumUp(null);
+			}
+			
+			private function getNumMax(resType:int):int
+			{
+				var ret:int = PubUnit.resFactorList[resType] * 5;
+				nsNum.maximum = ret;
+				return ret;
+			}
+			
+			private function getPriceMax(resType:int):int
+			{
+				return PubUnit.moneyToRes(resType);
+			}
+			
+			private function getPriceMin(resType:int):int
+			{
+				return PubUnit.resToMoney(resType);
+			}
+			
+			//=====================================================================================
+			// 装备交易
+			//=====================================================================================
+			
+			private var sellList:SellList = null;
+			
+			public function showSell():void
+			{
+				sellList = GameManager.gameMgr.sellList.getList();
+				lblTotal.text = "总条数 " + sellList.length.toString();
+				
+				pagination.dataSource = sellList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgSell;
+				pagination.dataUIProvider = "dataProvider";
+				pagination.refresh(pagination.showPage);
+			}
+			
+			private function showMySell():void
+			{
+				WinManager.winMgr.showSellList();
+			}
+			
+			private function search():void 
+			{
+				if (StringUtil.trim(tiName.text).length == 0)
+				{
+					showSell();
+					return;
+				}
+				
+				sellList = sellList.getSearch(StringUtil.trim(tiName.text));
+				lblTotal.text = "总条数 " + sellList.length.toString();
+				
+				pagination.dataSource = sellList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgSell;
+				pagination.dataUIProvider = "dataProvider";
+				pagination.refresh();
+			}
+			
+			private function sellWeapon():void
+			{
+				WinManager.winMgr.showStore();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<GameToggleButtonBar id="list1" x="10" y="34" height="22" width="550" dataProvider="vs1" itemClick="listClick(event);">
+	</GameToggleButtonBar>
+	
+	<mx:ViewStack x="10" id="vs1" width="550" height="327" creationPolicy="all" y="56">
+		<mx:Canvas label="卫氏商行" width="100%" height="100%" styleName="lowCanvas">
+			<mx:Canvas x="8" y="24" width="312" height="132" styleName="winCanvas">
+				<mx:Canvas x="5" y="5" width="300" height="20">
+					<mx:Label x="0" y="0" text="粮食：" height="20" width="41"/>
+					<GameTextInput id="tiBuyFood" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblBuyFoodPrice" x="105" y="0" text="0" width="41" textAlign="right" editable="false" height="20"/>
+					<mx:TextInput id="lblBuyFood" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxBuyFood" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="buyFood" x="250" y="0" height="20" width="50" label="购买" btnType="max"/>
+				</mx:Canvas>
+				<mx:Canvas x="5" y="30" width="300" height="20">
+					<mx:Label x="0" y="0" text="木料：" height="20" width="41"/>
+					<GameTextInput id="tiBuyWood" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblBuyWoodPrice" x="105" y="0" text="0" width="41" textAlign="right" height="20" editable="false"/>
+					<mx:TextInput id="lblBuyWood" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxBuyWood" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="buyWood" x="250" y="0" height="20" width="50" label="购买" btnType="max"/>
+				</mx:Canvas>
+				<mx:Canvas x="5" y="55" width="300" height="20">
+					<mx:Label x="0" y="0" text="矿石：" height="20" width="41"/>
+					<GameTextInput id="tiBuyIron" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblBuyIronPrice" x="105" y="0" text="0" width="41" textAlign="right" height="20" editable="false"/>
+					<mx:TextInput id="lblBuyIron" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxBuyIron" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="buyIron" x="250" y="0" height="20" width="50" label="购买" btnType="max"/>
+				</mx:Canvas>
+				<mx:Canvas x="5" y="80" width="300" height="20">
+					<mx:Label x="0" y="0" text="皮革：" height="20" width="41"/>
+					<GameTextInput id="tiBuySkin" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblBuySkinPrice" x="105" y="0" text="0" width="41" textAlign="right" height="20" editable="false"/>
+					<mx:TextInput id="lblBuySkin" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxBuySkin" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="buySkin" x="250" y="0" height="20" width="50" label="购买" btnType="max"/>
+				</mx:Canvas>
+				<mx:Canvas x="5" y="105" width="300" height="20">
+					<mx:Label x="0" y="0" text="马匹：" height="20" width="41"/>
+					<GameTextInput id="tiBuyHorse" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblBuyHorsePrice" x="105" y="0" text="0" width="41" textAlign="right" height="20" editable="false"/>
+					<mx:TextInput id="lblBuyHorse" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxBuyHorse" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="buyHorse" x="250" y="0" height="20" width="50" label="购买" btnType="max"/>
+				</mx:Canvas>
+			</mx:Canvas>
+			
+			<mx:Canvas x="8" width="312" height="132" styleName="winCanvas" y="183">
+				<mx:Canvas x="5" y="5" width="300" height="20">
+					<mx:Label x="0" y="0" text="粮食：" height="20" width="41"/>
+					<GameTextInput id="tiSellFood" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblSellFoodPrice" x="105" y="0" text="0" width="41" textAlign="right" height="20" editable="false"/>
+					<mx:TextInput id="lblSellFood" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxSellFood" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="sellFood" x="250" y="0" height="20" width="50" label="出售" btnType="max"/>
+				</mx:Canvas>
+				<mx:Canvas x="5" y="30" width="300" height="20">
+					<mx:Label x="0" y="0" text="木料：" height="20" width="41"/>
+					<GameTextInput id="tiSellWood" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblSellWoodPrice" x="105" y="0" text="0" width="41" textAlign="right" height="20" editable="false"/>
+					<mx:TextInput id="lblSellWood" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxSellWood" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="sellWood" x="250" y="0" height="20" width="50" label="出售" btnType="max"/>
+				</mx:Canvas>
+				<mx:Canvas x="5" y="55" width="300" height="20">
+					<mx:Label x="0" y="0" text="矿石：" height="20" width="41"/>
+					<GameTextInput id="tiSellIron" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblSellIronPrice" x="105" y="0" text="0" width="41" textAlign="right" height="20" editable="false"/>
+					<mx:TextInput id="lblSellIron" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxSellIron" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="sellIron" x="250" y="0" height="20" width="50" label="出售" btnType="max"/>
+				</mx:Canvas>
+				<mx:Canvas x="5" y="80" width="300" height="20">
+					<mx:Label x="0" y="0" text="皮革：" height="20" width="41"/>
+					<GameTextInput id="tiSellSkin" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblSellSkinPrice" x="105" y="0" text="0" width="41" textAlign="right" height="20" editable="false"/>
+					<mx:TextInput id="lblSellSkin" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxSellSkin" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="sellSkin" x="250" y="0" height="20" width="50" label="出售" btnType="max"/>
+				</mx:Canvas>
+				<mx:Canvas x="5" y="105" width="300" height="20">
+					<mx:Label x="0" y="0" text="马匹：" height="20" width="41"/>
+					<GameTextInput id="tiSellHorse" x="40" y="0" height="20" width="60" isNUM="true" textAlign="right" text="0" backgroundColor="#333333" backgroundAlpha="0.5"/>
+					<mx:TextInput id="lblSellHorsePrice" x="105" y="0" text="0" width="41" textAlign="right" height="20" editable="false"/>
+					<mx:TextInput id="lblSellHorse" x="150" y="0" width="70" height="20" textAlign="right" editable="false"/>
+					<GameButton id="maxSellHorse" x="220" y="0" height="20" width="30" label="max" btnType="max"/>
+					<GameButton id="sellHorse" x="250" y="0" height="20" width="50" label="出售" btnType="max"/>
+				</mx:Canvas>
+			</mx:Canvas>
+			
+			<mx:TextArea id="taSys" height="307" width="210" y="8" editable="false" x="328"/>
+			<mx:Label x="10" y="5" text="购买资源" height="20"/>
+			<mx:Label x="10" y="164" text="出售资源" height="20"/>
+			<mx:Label x="125" y="5" text="单价"/>
+			<mx:Label x="165" y="5" text="总价（钱币）"/>
+			<mx:Label x="125" y="164" text="单价"/>
+			<mx:Label x="165" y="164" text="总价（钱币）"/>
+		</mx:Canvas>
+		
+		<mx:Canvas label="资源交易所" width="100%" height="100%" styleName="lowCanvas">
+			<mx:Label x="57" y="3" text="粮食" color="#FFFFFF" width="30"/>
+			<mx:Label x="162" y="3" text="木料" color="#FFFFFF" width="30"/>
+			<mx:Label x="267" y="3" text="矿石" color="#FFFFFF" width="30"/>
+			<mx:Label x="372" y="3" text="马匹" color="#FFFFFF" width="30"/>
+			<mx:Label x="477" y="3" text="皮革" color="#FFFFFF" width="30"/>
+			
+			<mx:Label x="3" y="67" text="卖" color="#FFFFFF" width="15" height="20"/>
+			<mx:Label x="3" y="92" text="出" color="#FFFFFF" width="15" height="20"/>
+			<mx:Label x="3" y="117" text="价" color="#FFFFFF" width="15" height="20"/>
+			<mx:Label x="3" y="187" text="买" color="#FFFFFF" width="15" height="20"/>
+			<mx:Label x="3" y="212" text="入" color="#FFFFFF" width="15" height="20"/>
+			<mx:Label x="3" y="237" text="价" color="#FFFFFF" width="15" height="20"/>
+			
+			<mx:Canvas x="22" y="23" width="517" height="22" styleName="winCanvas">
+				<mx:Label x="5" y="1" text="单价 | 手数" color="#FFFFFF" width="85" textAlign="center"/>
+				<mx:Label x="110" y="1" text="单价 | 手数" color="#FFFFFF" width="85" textAlign="center"/>
+				<mx:Label x="215" y="1" text="单价 | 手数" color="#FFFFFF" width="85" textAlign="center"/>
+				<mx:Label x="320" y="1" text="单价 | 手数" color="#FFFFFF" width="85" textAlign="center"/>
+				<mx:Label y="1" text="单价 | 手数" color="#FFFFFF" width="85" textAlign="center" x="425"/>
+			</mx:Canvas>
+			
+			<mx:Canvas id="cvBillSell" x="23" y="45" width="515" height="114">
+			</mx:Canvas>
+			<mx:Canvas id="cvBillBuy" x="23" y="165" width="515" height="114">
+			</mx:Canvas>
+			<mx:Canvas x="8" width="530" height="30" styleName="lowCanvas" y="285">
+				<mx:RadioButton id="rbSell" x="3" y="3" label="卖" color="#FFFFFF" width="40" height="20" selected="true"/>
+				<mx:RadioButton id="rbBuy" x="43" y="3" label="买" color="#FFFFFF" width="40" height="20"/>
+				<mx:ComboBox id="cbRes" x="83" y="2" width="67" dataProvider="{resList}" labelField="res" paddingLeft="0" paddingRight="0" height="22" borderColor="#919876" change="resChange();"></mx:ComboBox>
+				<mx:Label x="155" y="4" text="数量：" color="#FFFFFF" width="41" height="20"/>
+				<mx:NumericStepper id="nsNum" x="195" y="2" width="50" stepSize="1" minimum="0" value="0" maximum="10000" height="22" textAlign="right" borderColor="#919876" change="numChange();"/>
+				<mx:Label x="245" y="4" text="手　单价：" color="#FFFFFF" width="65" height="20"/>
+				<GameTextInput id="tiPrice" x="305" y="2" width="52" isNUM="true" text="0" height="22" textAlign="right"/>
+				<GameButton x="405" y="2" label="发布" width="60" btnType="off" click="sendBill();" height="22"/>
+				<GameButton x="465" y="2" label="我的交易" btnType="off" click="showMyBill();" height="22" width="60"/>
+				<mx:Label x="355" y="4" text="（钱币）" height="20" width="53"/>
+			</mx:Canvas>
+		</mx:Canvas>
+		
+		<mx:Canvas label="自由市场" width="100%" height="100%" styleName="lowCanvas">
+		
+			<mx:DataGrid id="dgSell" x="8" y="8" width="530" height="277" headerHeight="25" rowHeight="25" textAlign="center">
+				<mx:columns>
+					<mx:DataGridColumn headerText="商品" dataField="typeName" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="等级" dataField="level" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="数量" dataField="num" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="金币" dataField="price" width="80" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="单价" dataField="dan" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="出售者" dataField="userName" width="80" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="剩余时间" dataField="leftTime" width="80" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="" width="50" sortable="false" draggable="false" resizable="false" itemRenderer="deal.ui.item.ItemBuy">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+			
+		<Pagination id="pagination" x="420" y="293">
+		</Pagination>
+		<GameButton label="我的交易" btnType="off" click="showMySell();" width="60" y="293" x="114" height="22"/>
+		<GameTextInput id="tiName" x="8" y="293" width="50" height="22" isCH="true"/>
+		<GameButton x="62" label="搜索" click="search();" height="22" width="50" btnType="off" y="293"/>
+		<mx:Label id="lblTotal" y="293" width="100" height="20" textAlign="center" x="227"/>
+		<GameButton x="176" label="出售" height="22" width="50" btnType="off" y="293" click="sellWeapon();"/>
+		
+		</mx:Canvas>
+	</mx:ViewStack>
+	
+</GameWindow>

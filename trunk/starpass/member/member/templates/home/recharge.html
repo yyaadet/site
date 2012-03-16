@@ -1,0 +1,49 @@
+<%inherit file="index2.html" />
+
+
+
+<%def name="html_content_title()">
+我要充值
+</%def>
+
+
+
+
+<%def name="html_content()">
+
+<div class="congzhi_pic">
+          <div align="left"><img src="/images/chongzhi_01.jpg"/><br />
+            <br />
+        <font size="+1" color="#FF6600" style="font-weight:bolder">请选择充值类型：<br />
+        <br />
+        </font>
+        <table width="685" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            %if c.alipay_used == "0":
+            <td height="106" align="left" valign="top"><a href="#"><img src="/images/yingh_01.jpg" width="120" height="85" border="0" /></a></td>
+            %else:
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=4"><img src="/images/yingh_01.jpg" width="120" height="85" border="0" /></a></td>
+            %endif
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=2"><img src="/images/yingh_02.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=3"><img src="/images/yingh_03.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=5"><img src="/images/yingh_04.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=6"><img src="/images/yingh_05.jpg" width="120" height="85" border="0" /></a></td>
+          </tr>
+          <tr>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=7"><img src="/images/yingh_06.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=8"><img src="/images/yingh_07.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=9"><img src="/images/yingh_08.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=10"><img src="/images/yingh_09.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=11"><img src="/images/yingh_10.jpg" width="120" height="85" border="0" /></a></td>
+          </tr>
+          <tr>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=12"><img src="/images/yingh_11.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=13"><img src="/images/yingh_12.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=14"><img src="/images/yingh_13.jpg" width="120" height="85" border="0" /></a></td>
+            <td height="106" align="left" valign="top"><a href="/home/recharge?act=one&way=1"><img src="/images/yingh_17.jpg" width="120" height="85" border="0" /></a></td>
+            </tr>
+        </table>
+          </div>
+        </div>
+
+</%def>

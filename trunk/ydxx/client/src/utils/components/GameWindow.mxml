@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300" fontFamily="新宋体" fontSize="12" color="0xFFFFFF" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.WinManager;
+			import images.AssetsManager;
+			import mx.events.FlexEvent;
+			import mx.controls.Label;
+			import mx.controls.Button;
+			import mx.controls.Image;
+			
+			protected var btnClose:Button = null;
+			protected var _helpID:int = 0;
+			
+			private function init():void
+			{
+				drawWin();
+				drawButton();
+				
+				WinManager.winMgr.winList.push(this);
+			}
+			
+			private function drawWin():void
+			{
+				//填充中间背景
+				this.graphics.beginFill(0x525c36, 0.9);
+				this.graphics.drawRect(5, 30, this.width - 10, this.height - 35);
+				this.graphics.endFill();
+				
+				//左上角
+				var leftTop:Class = AssetsManager.assetsMgr.WIN_LEFT_TOP;
+				var leftTopBmp:Bitmap = new leftTop();
+				var tx:int = 0;
+				var ty:int = 0;
+				drawUI(leftTopBmp.bitmapData, tx, ty,leftTopBmp.width, leftTopBmp.height, false);
+				
+				//右上角
+				var rightTop:Class = AssetsManager.assetsMgr.WIN_RIGHT_TOP;
+				var rightTopBmp:Bitmap = new rightTop();
+				tx = this.width - rightTopBmp.width;
+				ty = 0;
+				drawUI(rightTopBmp.bitmapData, tx, ty,rightTopBmp.width, rightTopBmp.height, false);
+				
+				//标题
+				var title:Class = AssetsManager.assetsMgr.WIN_TOP;
+				var titleBmp:Bitmap = new title();
+				var cvTitle:Canvas = new Canvas();
+				cvTitle.x = leftTopBmp.width;
+				cvTitle.y = 0;
+				cvTitle.width = this.width - leftTopBmp.width - rightTopBmp.width;
+				cvTitle.height = titleBmp.height;
+				this.addChild(cvTitle);
+				cvTitle.addEventListener(MouseEvent.MOUSE_DOWN, titleDown);
+				cvTitle.addEventListener(MouseEvent.MOUSE_UP, titleUp);
+				cvTitle.setStyle("backgroundImage", title);
+				cvTitle.setStyle("backgroundSize", "100%");
+				
+				//左下角
+				var leftBottom:Class = AssetsManager.assetsMgr.WIN_LEFT_BOTTOM;
+				var leftBottomBmp:Bitmap = new leftBottom();
+				tx = 0;
+				ty = this.height - leftBottomBmp.height;
+				drawUI(leftBottomBmp.bitmapData, tx, ty,leftBottomBmp.width, leftBottomBmp.height, false);
+				
+				//右下角
+				var rightBottom:Class = AssetsManager.assetsMgr.WIN_RIGHT_BOTTOM;
+				var rightBottomBmp:Bitmap = new rightBottom();
+				tx = this.width - rightBottomBmp.width;
+				ty = this.height - rightBottomBmp.height;
+				drawUI(rightBottomBmp.bitmapData, tx, ty, rightBottomBmp.width, rightBottomBmp.height, false);
+				
+				//左侧边框
+				var left:Class = AssetsManager.assetsMgr.WIN_LEFT;
+				var leftBmp:Bitmap = new left();
+				tx = 0;
+				ty = leftTopBmp.height;
+				drawUI(leftBmp.bitmapData, tx, ty, leftBmp.width, this.height - leftTopBmp.height - leftBottomBmp.height, true);
+				   
+				//右侧边框
+				var right:Class = AssetsManager.assetsMgr.WIN_RIGHT;
+				var rightBmp:Bitmap = new right();
+				tx = this.width - rightBmp.width;
+				ty = rightTopBmp.height;
+				drawUI(rightBmp.bitmapData, tx, ty, rightBmp.width, this.height - rightTopBmp.height - rightBottomBmp.height, true);
+				   
+				//底
+				var bottom:Class = AssetsManager.assetsMgr.WIN_BOTTOM;
+				var bottomBmp:Bitmap = new bottom();
+				tx = leftBottomBmp.width;
+				ty = this.height - bottomBmp.height;
+				drawUI(bottomBmp.bitmapData, tx, ty, this.width - leftBottomBmp.width - rightBottomBmp.width, bottomBmp.height, true);
+			}
+			
+			private function titleDown(evt:MouseEvent):void
+			{
+				this.startDrag();
+			}
+			
+			private function titleUp(evt:MouseEvent):void
+			{
+				this.stopDrag();
+			}
+			
+			private function drawUI(picData:BitmapData, tx:int, ty:int, tWidth:int, tHeight:int, repeat:Boolean = false):void
+			{
+				var matrix:Matrix = new Matrix();
+				matrix.translate(tx, ty);
+				
+				this.graphics.beginBitmapFill(picData, matrix, repeat);
+				this.graphics.drawRect(tx, ty, tWidth, tHeight);
+				this.graphics.endFill();
+			}
+			
+			private function drawButton():void
+			{
+				btnClose = new Button();
+				btnClose.width = 19;
+				btnClose.height = 19;
+				btnClose.x = this.width - btnClose.width - 17;
+				btnClose.y = 5;
+				btnClose.useHandCursor = true;
+				btnClose.buttonMode = true;
+				this.addChild(btnClose);
+				btnClose.setStyle("styleName", "winClose");
+				btnClose.addEventListener(MouseEvent.CLICK, closeWin);
+				
+			}
+			
+			public function refresh():void
+			{
+				//
+			}
+			
+			protected function closeWin(evt:MouseEvent):void
+			{
+				this.visible = false;
+				this.includeInLayout = false;
+			}
+			
+			protected function showHelp(evt:MouseEvent):void
+			{
+				
+			}
+			
+			public function isShowClose(flag:Boolean):void
+			{
+				if (btnClose != null)
+				{
+					btnClose.visible = flag;
+					btnClose.includeInLayout = flag;
+				}
+			}
+			
+			public function isShowHelp(flag:Boolean):void
+			{
+			}
+			
+			private var lblTitle:Label = null;
+			public function setTitle(title:String):void
+			{
+				if (lblTitle == null)
+				{
+					lblTitle = new Label();
+					lblTitle.setStyle("fontSize", 16);
+					lblTitle.setStyle("fontFamily", "新宋体");
+					this.addChild(lblTitle);
+					lblTitle.addEventListener(MouseEvent.MOUSE_DOWN, titleDown);
+					lblTitle.addEventListener(MouseEvent.MOUSE_UP, titleUp);
+				}
+				
+				lblTitle.addEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+				lblTitle.text = title;
+			}
+			
+			private function onComp(evt:FlexEvent):void
+			{
+				lblTitle.removeEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+				
+				lblTitle.x = int((this.width - lblTitle.width) / 2);
+				lblTitle.y = 5;
+				lblTitle.height = 20;
+				lblTitle.setStyle("color", 0xFFFFFF);
+				
+				var glowFT:GlowFilter = new GlowFilter();
+				
+				glowFT.color = 0x000000;
+				glowFT.alpha = 1;
+				glowFT.strength = 4;
+		
+				lblTitle.filters = [glowFT];
+			}
+			
+			public function clear():void
+			{
+				this.graphics.clear();
+				this.removeAllChildren();
+			}
+			
+			public function get helpID():int
+			{
+				return _helpID;
+			}
+			
+			public function set helpID(param:int):void
+			{
+				_helpID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+</mx:Canvas>

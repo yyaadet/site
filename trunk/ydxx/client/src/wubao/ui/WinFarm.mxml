@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="490" height="250" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.WinManager;
+			import utils.TipInfo;
+			import mx.events.FlexEvent;
+			import utils.PubUnit;
+			import wubao.model.Build;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var build:Build = null;
+			
+			private var isInit:Boolean = false;
+			
+			private function init():void
+			{
+				helpID = 32;
+				taInfo.htmlText = TipInfo.getFarmInfo();
+				isInit = true;
+				refresh();
+			}
+			
+			private function onComp(evt:FlexEvent):void
+			{
+				lblLevel.removeEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+				
+				lblLevel.x = cvImage.width - lblLevel.width - 5;
+				lblLevel.y = 5;
+				
+				PubUnit.drawBackground(lblLevel);
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				var type:int = Build.FARM;
+				var resMax:int = 0
+				
+				lu1.type = type;
+				lu1.refresh();
+				
+				if (gameWubao != null)
+				{
+					build = gameWubao.buildList.getObjByID(type) as Build;
+					resMax = PubUnit.getResMax(build.type, build.level);
+					lblCur.text = gameWubao.food.toString() + " / " + resMax.toString() + " 石";
+				
+					if (build != null)	
+					{
+						lblLevel.addEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+						lblLevel.text = build.level.toString();
+						lblProduct.text = (PubUnit.getResProduct(build.type, build.level) - gameWubao.people * 12).toString() + " 石";
+					}
+					
+					if (isInit)
+						setTitle(build.title);
+				}
+			}
+			
+			private function showSell():void
+			{
+				WinManager.winMgr.showSellRes(WuBao.FOOD);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	
+	<mx:Canvas id="cvImage" x="10" y="34" width="128" height="128">
+		<mx:backgroundImage>@Embed(source='../../images/assets/wubao/win/farm.swf')</mx:backgroundImage>
+		<mx:Label id="lblLevel" fontSize="16" fontWeight="bold" fontFamily="Arial" textAlign="center"/>
+	</mx:Canvas>
+	
+	<mx:Canvas x="146" y="34" width="334" height="60">
+		<mx:Label x="5" y="5" text="年产粮食：" height="20" width="65"/>
+		<mx:Label id="lblProduct" x="70" y="4" height="20" width="180" styleName="number"/>
+			
+		<mx:Label x="5" y="30" text="库存粮食：" height="20" width="65"/>
+		<mx:Label id="lblCur" x="70" y="29" height="20" width="180" styleName="number"/>
+		<GameButton x="265" y="5" label="出　售" click="showSell();"/>
+	</mx:Canvas>
+		
+	<mx:TextArea id="taInfo" x="146" y="97" width="334" height="65" editable="false"/>
+	
+	<LevelUp id="lu1" x="10" y="170">
+	</LevelUp>
+	
+</GameWindow>

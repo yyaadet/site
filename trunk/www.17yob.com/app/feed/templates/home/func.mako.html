@@ -1,0 +1,36 @@
+#-*- encoding: utf-8 -*-
+
+<%def name="get_section(sid)" cached="True" cache_timeout="600" cache_type="file" cache_key="${sid}">
+<% from feed.model.group import SubGroups %>
+<div class="table sect">
+    <div class="row section_title"> <a href="/news/group?group_id=${sid}" title="点击查看更多">【${SubGroups[sid]['name']}】</a></div>
+    <ul>
+    <% 
+    from feed.model.news import News
+    import pymongo
+    import time
+    now = int(time.time())
+    objs = News.query({'group_id': sid}, limit = 7, sort=[(("timestamp", pymongo.DESCENDING))])
+    %>
+    %for obj in objs:
+        <li class="section_line"><a href="${h.static_news_detail_url(obj._id)}" title="${obj.title}" target="_blank">${h.short_text(obj.title, 30)}</a> <label class="tip_text">${h.diff_time(obj.timestamp, now)}前 人气：${obj.view_num}</label></li>
+    %endfor
+    </ul>
+</div>
+</%def>
+
+<%def name="get_today_update_rss_list()" cached="True" cache_timeout="600" cache_type="file" cache_key="home_get_today_update_rss_list">
+<%
+from feed.model.rss import Rss
+import pymongo
+
+objs = Rss.query({'is_del': 0}, limit=20, sort=[('today_fetch_num', pymongo.DESCENDING)])
+%>
+<div class="rss_section">
+    <div class="rss_section_title">今日订阅更新榜</div>
+    %for obj in objs:
+       <div class="rss_section_line"><a href="/news/rss?rss_id=${obj._id}">${h.short_text(obj.name, 10)}</a> <label class="tip_text">${obj.today_fetch_num}，${obj.uname}订阅</label></div>
+    %endfor
+</div>
+</%def>
+

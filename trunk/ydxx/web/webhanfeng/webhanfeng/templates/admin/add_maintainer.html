@@ -1,0 +1,44 @@
+<!--运维成员管理－增加运维　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <input type="hidden" id="error" value="${c.error}" />
+    <tr>
+      <td width="6%" height="35" align="right" bgcolor="#f9f0e1" class="gray">　用户组：</td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　
+        <select name="group_id" id="group_id">
+          %for item in c.groups:
+          <option  value ="${item.id}">${item.name}</option>
+          %endfor
+        </select></td>
+    </tr>
+    <tr>
+      <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　运维名：</td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　
+        <input 
+              name="username" id="username" class="gray" style="WIDTH: 150px " /></td>
+    </tr>
+    <tr>
+      <td height="35" align="right" bgcolor="#f9f0e1" class="gray">密　码：</td>
+      <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　            
+        <input 
+              name="password" id="password" type="password" class="gray" style="WIDTH: 150px " /></td>
+    </tr>
+    <tr>
+      <td height="35" align="right" bgcolor="#f9f0e1" class="gray">确认密码：</td>
+      <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　
+        <input 
+              name="passwordconfirm" id="passwordconfirm" type="password" class="gray" style="WIDTH: 150px " /></td>
+    </tr>
+    <tr>
+      <td height="35" colspan="2" align="left" bgcolor="#f9f0e1" class="gray">　　　　　　　　
+        <a href="#" onclick="selectTab('/admin/maintainer?action=add&group_id='+$('#group_id').val()
+            +'&username='+$('#username').val()
+            +'&passwordconfirm='+$('#passwordconfirm').val()
+            +'&password='+$('#password').val())">
+            <img src="/images/pic_24.gif" width="54" height="25" border="0" /></a></td>
+    </tr>
+</table>
+<script type="text/javascript">
+    error = document.getElementById("error").value;
+    if(error==""){}else{alert(error);}
+</script>
+<!--运维成员管理－增加运维 end-->

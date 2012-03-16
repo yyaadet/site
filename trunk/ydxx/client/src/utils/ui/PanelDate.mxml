@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="245" height="115" backgroundImage="@Embed(source='../../images/assets/main/bg.png')" creationComplete="init();" xmlns:ns1="utils.ui.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import guid.GuidManager;
+			import images.AssetsManager;
+			import wubao.model.WuBao;
+			import wubao.model.Build;
+			import utils.TipInfo;
+			import task.model.Task;
+			import utils.PubUnit;
+			import utils.WinManager;
+			import wubao.model.User;
+			import city.model.City;
+			import utils.GameManager;
+			import utils.SceneManager;
+			
+			private var gameUser:User = null;
+			
+			private var build:Build = null;
+			
+			private function init():void
+			{
+				lblYear.addEventListener(MouseEvent.MOUSE_MOVE, onMove);
+			}
+
+			private function onMove(evt:MouseEvent):void
+			{
+				lblYear.toolTip = GameManager.gameMgr.gameYear.toString() + "年" + GameManager.gameMgr.gameMonth.toString() + "月" + 
+				               GameManager.gameMgr.gameDay.toString() + "日" + GameManager.gameMgr.gameHour.toString() + "时";
+			}
+		
+			public function refreshInfo():void
+			{
+				lblYear.text = GameManager.gameMgr.gameYear.toString();
+				
+				gameUser = GameManager.gameMgr.user;
+				if (gameUser == null) return;
+				
+				//显示季节
+				if (season.month != GameManager.gameMgr.gameMonth)
+				{
+					season.month = GameManager.gameMgr.gameMonth;
+					season.showSeason();
+				}
+				
+				lblUser.text = gameUser.userName;
+				lblLevel.text = gameUser.level.toString();
+				lblVip.text = "VIP";
+				
+				cvLock.toolTip = "金币锁";
+				if (gameUser.isLock)
+				{
+					cvLock.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_LOCK);
+				}
+				else
+				{
+					cvLock.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_LOCK1);
+				}
+				
+				gameUser.vipUsed ++;		            
+				if (gameUser.vipTotal <= gameUser.vipUsed || !gameUser.isVip)
+				{
+					lblVip.toolTip = TipInfo.getVIPInfo();
+					lblVip.setStyle("color", 0x666666);
+				}
+				else
+				{
+					lblVip.toolTip = "剩余时间：" + PubUnit.getGameDate(gameUser.vipTotal - gameUser.vipUsed) + "\n\n" + TipInfo.getVIPInfo();
+					lblVip.setStyle("color", 0xFFAF28);
+				}
+			}
+			
+			//刷新按钮是否可用
+			//议事堂等级小于20 无法使用地区功能
+			//小于30 无法使用世界功能
+			//小于10 无法使用城池功能
+			public function refreshMenu():void
+			{
+				var gameWubao:WuBao = GameManager.gameMgr.wubao;
+				build = gameWubao.buildList.getObjByID(Build.YST) as Build;
+				
+				if (build.level < PubUnit.AreaLimit)
+				{
+					cvArea.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_AREA_D);
+					cvArea.toolTip = "需要议事堂" + PubUnit.AreaLimit.toString() + "级";
+				}
+				else
+				{
+					cvArea.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_AREA);
+					cvArea.toolTip = "";
+				}
+					
+				if (build.level < PubUnit.WorldLimit)
+				{
+					cvWorld.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_WORLD_D);
+					cvWorld.toolTip = "需要议事堂" + PubUnit.WorldLimit.toString() + "级";
+				}
+				else
+				{
+					cvWorld.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_WORLD);
+					cvWorld.toolTip = "";
+				}
+			}
+			
+			private function enterMap():void
+			{
+				if (build.level < PubUnit.WorldLimit) return;
+				
+				var cityID:int = 0;
+				var gameCity:City = null;
+				
+				//进地图之前如果在坞堡场景
+				if (SceneManager.sceneMgr.curScene == SceneManager.SCENE_WUBAO ||
+				    SceneManager.sceneMgr.curScene == SceneManager.SCENE_BATTLE || 
+				    SceneManager.sceneMgr.curScene == SceneManager.SCENE_ATTACK_CITY)
+					SceneManager.sceneMgr.enterMap(true);
+				//进地图之前如果在地区场景
+				else if (SceneManager.sceneMgr.curScene == SceneManager.SCENE_AREA)
+				{
+					cityID = SceneManager.sceneMgr.sceneArea.cityID;
+					gameCity = GameManager.gameMgr.cityList.getObjByID(cityID) as City;
+					if (gameCity != null)
+						SceneManager.sceneMgr.enterMap(false, gameCity.mapX, gameCity.mapY);
+				}
+			}
+			
+			private function enterWubao():void
+			{
+				SceneManager.sceneMgr.enterWubao();
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+			private function showWar():void
+			{
+				SceneManager.sceneMgr.enterBattle();
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+			private function showArea():void
+			{
+				if (build.level < PubUnit.AreaLimit) return;
+				
+				var cityID:int = 0;
+				cityID = GameManager.gameMgr.wubao.cityID;
+				SceneManager.sceneMgr.enterArea(cityID);
+			}
+			
+			private function showLock():void
+			{
+				if (gameUser.isLock)
+				{
+					WinManager.winMgr.showLockMain();
+				}
+				else
+				{
+					WinManager.winMgr.showLock();
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvWar" x="150" y="28" width="48" height="48" toolTip="" backgroundImage="@Embed(source='../../images/assets/main/war.png')" useHandCursor="true" buttonMode="true" click="showWar();">
+	</mx:Canvas>
+	
+	<mx:Canvas id="cvWubao" x="100" y="41" width="48" height="48" toolTip="" backgroundImage="@Embed(source='../../images/assets/main/wubao.png')" useHandCursor="true" buttonMode="true" click="enterWubao();">
+	</mx:Canvas>
+	
+	<mx:Canvas id="cvArea" x="50" y="54" width="48" height="48" toolTip="" backgroundImage="@Embed(source='../../images/assets/main/area.png')" useHandCursor="true" buttonMode="true" click="showArea();">
+	</mx:Canvas>
+	
+	<mx:Canvas id="cvWorld" x="0" y="67" width="48" height="48" toolTip="" backgroundImage="@Embed(source='../../images/assets/main/world.png')" useHandCursor="true" buttonMode="true" click="enterMap();">
+	</mx:Canvas>
+	
+	<ns1:Season id="season" x="3" y="3" width="52" height="52">
+	</ns1:Season>
+	
+	<mx:Label id="lblYear" x="11" y="33" height="20" color="#555555" width="36" fontFamily="Arial" textAlign="center" fontSize="16" fontWeight="bold"/>
+	
+	<mx:Label id="lblUser" x="85" y="2" height="20" width="60" color="#FFAF28" textAlign="center" fontFamily="新宋体" fontWeight="normal" fontSize="12"/>
+	<mx:Label id="lblVip" x="100" y="20" height="20" width="30" color="#FFAF28" textAlign="center" fontFamily="Arial" fontWeight="bold" fontSize="12"/>
+	<mx:Canvas id="cvLock" x="65" y="27" height="20" width="20" buttonMode="true" useHandCursor="true" click="showLock();">
+	</mx:Canvas>
+	<mx:Label id="lblLevel" x="159" y="0" width="30" color="#FFAF28" textAlign="center" fontFamily="Arial" fontWeight="bold" fontSize="12" toolTip="等级"/>
+
+</mx:Canvas>

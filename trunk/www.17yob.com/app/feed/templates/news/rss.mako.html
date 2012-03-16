@@ -1,0 +1,33 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+
+
+<%def name="get_title()">
+${c.rss.name}  
+%if c.page:
+| 第${c.page}页
+%endif
+ - 
+</%def>
+
+
+<%def name="get_content()">
+<%namespace file="/news/func.mako.html" name="news" />
+<%namespace file="/home/func.mako.html" name="home" />
+<%namespace file="/rss/func.mako.html" name="rss" />
+
+<div id="content">
+    <div id="left">
+        ${rss.get_rss_info(c.rss)}
+    </div>
+    
+    <div id="mid">
+        ${news.get_news_list_by_rss(c.objs, c.rss_id, c.start_page, c.page, c.end_page)}
+    </div>
+    
+    <div id="right">
+	${home.get_today_update_rss_list()}
+    </div>
+</div>
+</%def>

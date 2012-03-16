@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link type="text/css" rel="stylesheet" href="/css/master.css" />
+<title>激活游戏</title>
+</head>
+
+<body>
+<div id="jh_big">
+  <div class="jh_top">
+      <div class="jh_tleft"><img src="/images/jh_tlogo.gif"></div>
+      <div class="jh_tright"><img src="/images/jh_tj.gif"></div>
+  </div>
+  <div class="jh_bt">
+      <div class="jh_bleft"><img src="/images/jh_bl.gif"></div>
+      <div class="jh_bright">
+         <div class="bd">
+            <div class="bd_t">
+                <div class="bd_left">
+                <form name="act">
+                        <input type="hidden" name="uid" value="${c.uid}">
+                        <input type="hidden" name="action" value="activate">
+                        <input type="text" name="invite_code" />
+                    </form></div>
+                <div class="bd_right">${c.error}激活成功</div>
+           </div>
+            <div class="bd_ta">
+               <div class="bd_botton"><img src="/images/jh_botton.gif" onclick="act.submit();"></div>
+               <div class="bd_bottonw"><a href="/home/apply_for?uid=${c.uid}"><img src="/images/sq_botton.gif" border="0"></a></div>
+               </div>
+        </div>
+      </div>
+  </div>
+</div>
+</body>
+</html>

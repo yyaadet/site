@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="520" height="393" creationComplete="init();" xmlns:item="utils.components.item.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.events.ConfirmEvent;
+			import utils.ui.WinAsk;
+			import utils.WinManager;
+			import wubao.model.User;
+			import utils.SceneManager;
+			import net.http.HttpManager;
+			import net.tcp.TcpManager;
+			import net.tcp.model.TcpMail;
+			import mail.model.Mail;
+			import mx.controls.CheckBox;
+			import utils.GameManager;
+			import mail.list.MailList;
+			
+			private var mailList:MailList = null;
+			
+			private var type:int = 0;
+			
+			[Bindable]
+			private var mailData:MailList = null;
+			
+			private var showData:Array = [];
+			
+			private var mailIndex:int = 0;
+			
+			private var curShowMail:Mail = null;
+			
+			private var isSelAll:Boolean = false;
+			
+			private var winAsk:WinAsk = null;
+			
+			private function init():void
+			{
+				helpID = 22;
+				setTitle("邮　件");
+			}
+			
+			override public function refresh():void
+			{
+				listBar1.selectedIndex = 0;
+				
+				mailList = GameManager.gameMgr.mailList;
+				if (mailList == null) return;
+				type = 3;
+				getMailData(type);
+				
+				hideMailInfo();
+			}
+			
+			public function writeMail(userName:String):void
+			{
+				mailList = GameManager.gameMgr.mailList;
+				hideMailInfo();
+				listBar1.selectedIndex = 2;
+				tiRec.text = userName;
+			}
+			
+			private function onChange():void
+			{
+				var index:int = listBar1.selectedIndex;
+				
+				if (index == 0)
+					type = 3;
+				else if (index == 1)
+					type = 0;
+				
+				isSelAll = false;
+				hideMailInfo();
+				getMailData(type);
+			}
+			
+			private function getMailData(type:int):void
+			{
+				if (mailList == null) return;
+				
+				mailList.setDefault();
+				mailData = mailList.getListByType(type);
+				
+				if (type == 3)
+				{
+					lblTotal.text = "总条数 " + mailData.length.toString();
+						
+					pagination.dataSource = mailData;
+					pagination.pageNum = 10;
+					pagination.dataUI = dgSys;
+					pagination.dataUIProvider = "dataProvider";
+					
+					pagination.refresh();
+				}
+				else
+				{
+					lblTotal1.text = "总条数 " + mailData.length.toString();
+					
+					pagination1.dataSource = mailData;
+					pagination1.pageNum = 10;
+					pagination1.dataUI = dgRec;
+					pagination1.dataUIProvider = "dataProvider";
+					
+					pagination1.refresh();
+				}
+			}
+			
+			public function checkClick(evt:MouseEvent):void
+			{
+				if (evt.target is CheckBox)
+				{
+					var cb1:CheckBox = evt.target as CheckBox;
+					var gameMail:Mail = cb1.data as Mail;
+					if (gameMail != null)
+						gameMail.isSel = cb1.selected;
+				}
+				
+				evt.stopPropagation();
+			}
+			
+			private function showMailInfo():void
+			{
+				cvRec.visible = true;
+				cvRec.includeInLayout = true;
+				
+				getShowData();
+				if (type == 3)
+					mailIndex = dgSys.selectedIndex;
+				else if (type == 0)
+					mailIndex = dgRec.selectedIndex;
+					
+				showMail();
+			}
+			
+			private function showMail():void
+			{
+				if (showData != null && showData.length > 0)
+				{
+					if (type == 3)
+						btnBack.enabled = false;
+					else if (type == 0)
+						btnBack.enabled = true;
+						
+					curShowMail = showData[mailIndex] as Mail;
+				}
+					
+				if (showMail != null)
+				{
+					lblSender.text = curShowMail.senderName;
+					lblRecTitle.text = curShowMail.title;
+					taRecContent.htmlText = curShowMail.content;
+				}
+				
+				HttpManager.httpMgr.readMail(curShowMail.uniqID);
+				mailList.setRead(curShowMail.uniqID);
+				SceneManager.sceneMgr.refreshPanelTip();
+			}
+			
+			private function showPrior():void
+			{
+				if (mailIndex == 0) return;
+				
+				mailIndex --;
+				showMail();
+			}
+			
+			private function showNext():void
+			{
+				if (mailIndex >= showData.length - 1) return;
+				
+				mailIndex ++;
+				showMail();
+			}
+			
+			private function hideMailInfo():void
+			{
+				cvRec.visible = false;
+				cvRec.includeInLayout = false;
+			}
+			
+			private function selAll():void
+			{
+				var i:int = 0;
+				var len:int = 0;
+				var gameMail:Mail = null;
+				
+				getShowData();
+				len = showData.length;
+				
+				if (len <= 0) return;
+				
+				for (i = 0; i < len; i++)
+				{
+					gameMail = showData[i] as Mail;
+					if (gameMail != null)
+						gameMail.isSel = !isSelAll;
+				} 
+				
+				isSelAll = !isSelAll;
+			}
+			
+			//获取当前显示页的数据集合
+			private function getShowData():void
+			{
+				if (type == 3)
+					showData = pagination.showData as Array;
+				else if (type == 0)
+					showData = pagination1.showData as Array;
+			}
+			
+			private function delMail():void
+			{
+				getShowData();
+				
+				var i:int = 0;
+				var len:int = 0;
+				var mailCount:int = 0;
+				var gameMail:Mail = null;
+				
+				len = showData.length;
+				for (i = 0; i < len; i++)
+				{
+					gameMail = showData[i] as Mail;
+					if (gameMail != null && gameMail.isSel == true)
+					{
+						mailCount ++;
+					}	
+				}
+				
+				var str:String = "";
+				str = "确定要删除这" + mailCount.toString() + "封邮件吗?"
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmDelMail);
+			}
+			
+			private function confirmDelMail(evt:ConfirmEvent):void
+			{
+				var i:int = 0;
+				var len:int = 0;
+				var gameMail:Mail = null;
+				len = showData.length;
+				
+				for (i = 0; i < len; i++)
+				{
+					gameMail = showData[i] as Mail;
+					if (gameMail != null && gameMail.isSel == true)
+					{
+						HttpManager.httpMgr.delMail(gameMail.uniqID);
+						mailList.removeObjByID(gameMail.uniqID);
+					}	
+				}
+				 
+				onChange();
+				SceneManager.sceneMgr.refreshPanelTip();
+			}
+			
+			public function clearMail():void
+			{
+				tiRec.text = "";
+				tiSendTitle.text = "";
+				taSendContent.text = "";
+			}
+			
+			private function sendMail():void
+			{
+				if (tiRec.text == "") return;
+				if (tiSendTitle.text == "") return;
+				if (taSendContent.text == "") return;
+				
+				var gameUser:User = GameManager.gameMgr.userList.getUserByName(tiRec.text);
+				if (gameUser == null)
+				{
+					WinManager.winMgr.showResult("没有找到玩家 " + tiRec.text);
+					return;
+				}
+				
+				var tcpMail:TcpMail = new TcpMail();
+				tcpMail.userID = gameUser.uniqID;
+				tcpMail.type = 0;
+				tcpMail.title = tiSendTitle.text;
+				tcpMail.content = taSendContent.text;
+				
+				TcpManager.tcpMgr.sendMail(tcpMail);
+			}
+			
+			private function backMail():void
+			{
+				hideMailInfo();
+				listBar1.selectedIndex = 2;
+				tiRec.text = lblSender.text;
+			}
+			
+			private function delCurMail():void
+			{
+				if (showMail == null) return;
+				
+				var str:String = "";
+				str = "确定要删除这封邮件吗?"
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmDelCur);
+			}
+			
+			private function confirmDelCur(evt:ConfirmEvent):void
+			{
+				HttpManager.httpMgr.delMail(curShowMail.uniqID);
+				mailList.removeObjByID(curShowMail.uniqID);
+				onChange();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<GameToggleButtonBar id="listBar1" x="14" y="34" dataProvider="vs1" height="22" width="300">
+	</GameToggleButtonBar>
+	
+	<mx:ViewStack x="10" id="vs1" width="500" height="327" creationPolicy="all" change="onChange();" y="56">
+		<mx:Canvas label="系统" width="100%" height="100%" styleName="lowCanvas">
+			<mx:DataGrid id="dgSys" x="8" y="8" width="480" height="277" headerHeight="25" rowHeight="25" itemClick="showMailInfo();">
+				<mx:columns>
+					<mx:DataGridColumn headerText="" width="20" sortable="false" draggable="false" resizable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<CenteredCheckBox selected="{data.isSel}" click="outerDocument.checkClick(event);">
+								</CenteredCheckBox>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="状态" dataField="isReadStr" width="50" textAlign="center" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2" fontWeight="{data.isRead == 0 ? 'bold' : 'normal'}">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="发件人" dataField="senderName" width="80" textAlign="center" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="主题" dataField="title" width="180" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="日期" dataField="mailDate" width="150" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:Label id="lblTotal" y="293" text="总条数" width="80" textAlign="center" height="20" horizontalCenter="0"/>
+			<Pagination id="pagination" x="370" y="293" height="20">
+			</Pagination>
+			<GameButton x="8" y="293" label="全　选" btnType="off" click="selAll();" height="22"/>
+			<GameButton x="80" label="删　除" btnType="off" click="delMail();" height="22" y="293"/>
+			
+		</mx:Canvas>
+		
+		<mx:Canvas label="收信" width="100%" height="100%" styleName="lowCanvas">
+			<mx:DataGrid id="dgRec" x="8" y="8" width="480" height="277" headerHeight="25" rowHeight="25" itemClick="showMailInfo();">
+				<mx:columns>
+					<mx:DataGridColumn headerText="" width="20" sortable="false" draggable="false" resizable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<CenteredCheckBox selected="{data.isSel}" click="outerDocument.checkClick(event);">
+								</CenteredCheckBox>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="状态" dataField="isReadStr" width="50" textAlign="center" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2" fontWeight="{data.isRead == 0 ? 'bold' : 'normal'}">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="发件人" dataField="senderName" width="80" textAlign="center" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="主题" dataField="title" width="180" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="日期" dataField="mailDate" width="150" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+			<GameButton x="8" y="293" label="全　选" btnType="off" click="selAll();" height="22"/>
+			<GameButton x="80" y="293" label="删　除" btnType="off" click="delMail();" height="22"/>
+			<mx:Label id="lblTotal1" x="208" text="总条数" width="80" textAlign="center" height="20" y="293"/>
+			<Pagination id="pagination1" x="370" y="293">
+			</Pagination>
+			
+		</mx:Canvas>
+		
+		<mx:Canvas label="写信" width="100%" height="100%" styleName="lowCanvas">
+			<mx:Label x="8" y="11" text="收件人：" width="55" height="22"/>
+			<GameTextInput id="tiRec" x="63" y="8" width="338" isCH="true" height="22"/>
+			
+			<mx:Label x="8" y="36" text="标　题：" height="22" width="55"/>
+			<mx:TextInput id="tiSendTitle" x="63" y="33" width="338" maxChars="20"/>
+			
+			<mx:TextArea id="taSendContent" x="8" y="60" width="480" height="223" maxChars="500"/>
+			
+			<GameButton x="352" label="清　除" click="clearMail();" y="291"/>
+			<GameButton label="发　送" click="sendMail();" y="291" x="424"/>
+			<mx:Label x="409" y="34" text="最多20个字符" height="20"/>
+			<mx:Label x="8" y="291" text="最多200个字符" height="20"/>
+			<mx:Label x="409" y="9" text="玩家名称" height="20"/>
+		</mx:Canvas>
+	</mx:ViewStack>
+	
+	<mx:Canvas id="cvRec" x="10" y="56" width="500" height="327" styleName="lowCanvas" backgroundAlpha="1" visible="false" includeInLayout="false" backgroundColor="#91985b">
+		<mx:Label x="8" y="8" text="发件人：" height="20"/>
+		<mx:Label id="lblSender" x="63" y="8" width="265" height="20"/>
+		
+		<mx:Label x="8" y="33" text="标　题：" height="20"/>
+		<mx:Label id="lblRecTitle" x="63" y="33" width="423" height="20"/>
+		
+		<mx:TextArea id="taRecContent" x="8" y="60" width="480" height="223" editable="false"/>
+		
+		<GameButton x="10" y="289" label="上　封" click="showPrior();"/>
+		<GameButton x="82" y="289" label="下　封" click="showNext();"/>
+		<GameButton x="292" y="289" label="删　除" click="delCurMail();"/>
+		<GameButton id="btnBack" x="358" y="289" label="回　复" click="backMail();"/>
+		<GameButton x="424" label="返　回" click="hideMailInfo();" y="289"/>
+	</mx:Canvas>
+</GameWindow>

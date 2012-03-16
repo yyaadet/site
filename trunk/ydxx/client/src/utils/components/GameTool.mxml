@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Button xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import mx.effects.Move;
+			import mx.core.UIComponent;
+			
+			private var _btnType:String = "";
+			
+			//红
+			private const RED:uint = 0xFF0000;
+			//绿
+			private const GREEN:uint = 0x00FF00;
+			//蓝
+			private const BLUE:int = 0x0000FF;
+			
+			private var timer:Timer = new Timer(500);
+			private var flag:Boolean = false;
+			
+			private function init():void
+			{
+				this.addEventListener(MouseEvent.MOUSE_OVER, mouseOver);
+				this.addEventListener(MouseEvent.MOUSE_OUT, mouseOut);
+				timer.addEventListener(TimerEvent.TIMER, onTimer);
+				
+				this.buttonMode = true;
+				this.useHandCursor = true;
+			}
+			
+			private function mouseOver(evt:MouseEvent):void
+			{
+				addGlow(this, GREEN);
+			}
+			
+			private function mouseOut(evt:MouseEvent):void
+			{
+				clearGlow(this);
+			}
+			
+			/**
+			 * 给对象添加滤镜 
+			 * @param obj
+			 * @param objColor
+			 * 
+			 */		
+			private function addGlow(obj:Object, objColor:uint = 0xFFFFFF):void
+			{
+				var glowFT:GlowFilter = new GlowFilter();
+				
+				glowFT.color = objColor;
+				glowFT.alpha = 1;
+				glowFT.strength = 1;
+		
+				obj.filters = [glowFT];
+			}
+			
+			/**
+			 * 清除对象的滤镜 
+			 * @param obj
+			 * 
+			 */		
+			private function clearGlow(obj:Object):void
+			{
+				obj.filters = null;
+			}
+			
+			private function onTimer(evt:TimerEvent):void
+			{
+				flag = !flag;
+				if (flag)
+					this.alpha = 0.4;
+				else
+					this.alpha = 1;
+			}
+			
+			/**
+			 * 开始闪动 
+			 * 
+			 */
+			public function startFlash():void
+			{
+				timer.start();
+			}
+			
+			/**
+			 * 停止闪动 
+			 * 
+			 */
+			public function stopFlash():void
+			{
+				timer.stop();
+				this.alpha = 1;
+			}
+			
+			public function get btnType():String
+			{
+				return _btnType;
+			}
+			
+			[Inspectable(defaultValue="BUTTON", enumeration="index,help,buy,sphere,mail,msg,system,out,exit,rank,set,list", type="String")]
+			public function set btnType(param:String):void
+			{
+				_btnType = param;
+				
+				switch(_btnType)
+				{
+					case "index":
+					{
+						this.setStyle("styleName", "index");
+						this.toolTip = "首页";
+						break;
+					}
+					
+					case "help":
+					{
+						this.setStyle("styleName", "help");
+						this.toolTip = "帮助";
+						break;
+					}
+					
+					case "buy":
+					{
+						this.setStyle("styleName", "buy");
+						this.toolTip = "商城";
+						break;
+					}
+					
+					case "sphere":
+					{
+						this.setStyle("styleName", "sphere");
+						this.toolTip = "势力";
+						break;
+					}
+					
+					case "mail":
+					{
+						this.setStyle("styleName", "mail");
+						this.toolTip = "书函";
+						break;
+					}
+					
+					case "msg":
+					{
+						this.setStyle("styleName", "msg");
+						this.toolTip = "驿报";
+						break;
+					}
+					
+					case "system":
+					{
+						this.setStyle("styleName", "system");
+						this.toolTip = "系统";
+						break;
+					}
+					
+					case "out":
+					{
+						this.setStyle("styleName", "out");
+						this.toolTip = "登出";
+						break;
+					}
+					
+					case "exit":
+					{
+						this.setStyle("styleName", "exit");
+						this.toolTip = "结束游戏";
+						break;
+					}
+					
+					case "rank":
+					{
+						this.setStyle("styleName", "rank");
+						this.toolTip = "排行榜";
+						break;
+					}
+					
+					case "set":
+					{
+						this.setStyle("styleName", "set");
+						this.toolTip = "系统设置";
+						break;
+					}
+					
+					case "list":
+					{
+						this.setStyle("styleName", "sphere");
+						this.toolTip = "一览";
+						break;
+					}
+					
+				}
+			}
+			
+		]]>
+	</mx:Script>
+</mx:Button>

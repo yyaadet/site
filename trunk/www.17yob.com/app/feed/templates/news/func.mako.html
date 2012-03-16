@@ -1,0 +1,107 @@
+## -*- coding: utf-8 -*-
+
+<!-- 推荐阅读 -->
+<%def name="get_news_recommand(news)">
+<%
+from feed.model.news import News
+import pymongo
+
+objs = []
+limit = 5
+if news.group_id:
+    objs = News.query({'group_id': news.group_id}, limit = limit, sort=[('score', pymongo.DESCENDING)])
+    if not objs:
+    	objs = News.query({'group_id': news.group_id}, limit = limit, sort=[('score', pymongo.DESCENDING)])
+else:
+	objs = News.query({}, limit = limit, sort=[('score', pymongo.DESCENDING)])
+if news in objs:
+    objs.remove(news)
+%>
+<div class="sect" style="margin-bottom: 10px;">
+    <div class="row section_title" style="text-align:center;">
+        推荐阅读
+    </div>
+
+%for obj in objs:
+    <div class="row section_line">
+           <%
+            url = h.static_news_detail_url(obj._id)
+            %>
+            <a href="${url}" title="${obj.title}" target="_blank">${h.short_text(obj.title, 10)}</a>
+    </div>
+%endfor
+</div>
+</%def>
+<!-- end -->
+
+<%def name="get_news_list_by_group(objs, group_id, start_page, page, end_page)">
+<% 
+from feed.model.group import SubGroups 
+import time
+
+now = int(time.time())
+%>
+%for obj in objs:
+<div class="table" style="width: 98%;">
+    <div class="row title"><h2><a href="/news/go?id=${obj._id}" target="_blank">${obj.title}</h2></a></div>
+    <div class="row tip_text">${obj.url} <a href="${h.static_news_detail_url(obj._id)}" target="_blank">快照</a></div>
+    <div class="row tip_text">来自订阅：${obj.feed_name} 类型：${SubGroups[obj.group_id]['name']} 订阅者：${obj.uname} 人气： ${obj.view_num} 围观： ${obj.go_num}  添加于${h.diff_time(obj.timestamp, now)}前</div>
+    <div class="row article"><p>${obj.cnt|n}</p></div>
+</div>
+%endfor
+
+<!-- page -->
+<div class="table" style="font-size: 14px;">
+    <div class="row">
+        %if start_page != 1:
+        <div class="col" style="width: 50px;"><a href="/news/group?page=${start_page - 1}&group_id=${group_id}">上10页</a></div>
+        %endif
+        %for i in range(start_page, end_page + 1):
+        <div class="col" style="min-width: 0;width: 25px; text-align: center;">
+            %if i == page:
+            <strong><a href="/news/group?page=${i}&group_id=${group_id}">[${i}]</a></strong>
+            %else:
+            <a href="/news/group?page=${i}&group_id=${group_id}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col" style="width: 50px;"><a href="/news/group?page=${end_page + 1}&group_id=${group_id}">下10页</a></div>
+    </div>
+</div>
+</%def>
+
+<%def name="get_news_list_by_rss(objs, rss_id, start_page, page, end_page)">
+<% 
+from feed.model.group import SubGroups 
+import time
+
+now = int(time.time())
+%>
+%for obj in objs:
+<div class="table" style="width: 98%;">
+    <div class="row title"><h2><a href="/news/go?id=${obj._id}" target="_blank">${obj.title}</h2></a></div>
+    <div class="row tip_text">${obj.url} <a href="${h.static_news_detail_url(obj._id)}" target="_blank">快照</a></div>
+    <div class="row tip_text">来自订阅：${obj.feed_name} 类型：${SubGroups[obj.group_id]['name']} 订阅者：${obj.uname} 人气： ${obj.view_num} 围观： ${obj.go_num}  添加于${h.diff_time(obj.timestamp, now)}前</div>
+    <div class="row article"><p>${obj.cnt|n}</p></div>
+</div>
+%endfor
+
+<!-- page -->
+<div class="table" style="font-size: 14px;">
+    <div class="row">
+        %if start_page != 1:
+        <div class="col" style="width: 50px;"><a href="/news/rss?page=${start_page - 1}&rss_id=${rss_id}">上10页</a></div>
+        %endif
+        %for i in range(start_page, end_page + 1):
+        <div class="col" style="min-width: 0;width: 25px; text-align: center;">
+            %if i == page:
+            <strong><a href="/news/rss?page=${i}&rss_id=${rss_id}">[${i}]</a></strong>
+            %else:
+            <a href="/news/rss?page=${i}&rss_id=${rss_id}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col" style="width: 50px;"><a href="/news/rss?page=${end_page + 1}&rss_id=${rss_id}">下10页</a></div>
+    </div>
+</div>
+</%def>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="395" height="200" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import guid.GuidManager;
+			import utils.TipInfo;
+			import general.list.GeneralList;
+			import utils.components.events.BagEvent;
+			import wubao.model.Build;
+			import utils.events.ConfirmEvent;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import net.tcp.model.wubao.TcpView;
+			import net.tcp.TcpManager;
+			import net.tcp.model.wubao.TcpStopView;
+			import utils.PubUnit;
+			import general.model.General;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var generalList:GeneralList = null;
+			
+			private var gameGeneral:General = null;
+			
+			private var generalID:int = 0;
+			
+			private var winAsk:WinAsk = null;
+			
+			private var selIndex:int = 0;
+			
+			private function init():void
+			{
+				setTitle("训　练");
+				helpID = 4;
+				
+				gvl1.addEventListener(BagEvent.ItemClick, gvlClick);
+				refresh();
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				generalList = gameWubao.generalList.getViewList();
+				gvl1.dataProvider = generalList.list;
+				gvl1.labelField = "generalName";
+				gvl1.itemID = "generalID";
+				gvl1.indexClick = selIndex + 1;
+				gvl1.showData();
+				
+				var build:Build = gameWubao.buildList.getObjByID(Build.CAMP) as Build;
+				lblInfo.text = build.level.toString() + " 级（训练增加 " + PubUnit.getTrainExp().toString() + " 经验）"; 
+				
+				taDes.htmlText = TipInfo.getTrainInfo();
+				cbDouble.selected = false;
+				cbDouble.visible = false;
+				cbDouble.includeInLayout = false;
+			}
+			
+			//武将列表点击
+			private function gvlClick(evt:BagEvent):void
+			{
+				generalID = evt.itemObj.uniqID;
+				gameGeneral = generalList.getObjByID(generalID) as General;
+				if (gameGeneral == null) return;
+				
+				selIndex = generalList.indexOf(generalID);
+				lblLevel.text = gameGeneral.soliderTrain.toString() + " 级";
+				lblEB.text = gameGeneral.killNum.toString() + "/" + PubUnit.getExpExchange(gameGeneral.soliderTrain).toString();
+			}
+			
+			private function start():void
+			{
+				if (gameGeneral == null)
+				{
+					WinManager.winMgr.showResult("请选择武将");
+					return;
+				}
+				
+				var isDouble:int = cbDouble.selected == true ? 1 : 0;
+				
+				if (isDouble == 1)
+				{
+					var str:String = "确定要花费10金币获得双倍经验吗？";
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmTrain);
+					return;
+				}
+				
+				sendTrain(0);
+			}
+			
+			private function confirmTrain(evt:ConfirmEvent):void
+			{
+				sendTrain(1);
+			}
+			
+			private function sendTrain(type:int):void
+			{
+				var view:TcpView = new TcpView();
+				view.generalID = gameGeneral.uniqID;
+				view.type = type;
+				TcpManager.tcpMgr.sendTrain(view);
+				
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="70" height="156" styleName="lowCanvas" verticalScrollPolicy="off">
+		<GameVerList id="gvl1" x="0" y="0" height="152">
+		</GameVerList>
+	</mx:Canvas>
+	
+	<mx:Canvas x="85" y="34" width="300" height="80" styleName="lowCanvas">
+		<mx:Label id="lblLevel" x="48" y="8" width="50" height="20"/>
+		<mx:Label x="8" y="28" text="经验：" height="20" width="45"/>
+		<mx:Label x="8" y="8" text="等级：" height="20" width="41"/>
+		<mx:CheckBox id="cbDouble" x="145" y="6" label="双倍经验" width="75"/>
+		<GameButton id="btnStart" x="230" y="5" label="训　练" click="start();"/>
+		<mx:Label id="lblEB" x="48" y="28" width="100"/>
+		<mx:Label id="lblInfo" x="48" y="48" width="238" height="20"/>
+		<mx:Label x="8" y="48" text="军营：" height="20" width="41"/>
+	</mx:Canvas>
+	<mx:TextArea id="taDes" x="85" width="300" height="72" editable="false" y="118"/>
+	
+</GameWindow>

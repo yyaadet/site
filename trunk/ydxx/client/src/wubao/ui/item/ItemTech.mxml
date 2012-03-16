@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="436" height="110" fontSize="12" xmlns:ns1="utils.components.*" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import images.AssetsManager;
+			import utils.TipInfo;
+			import net.tcp.model.wubao.TcpLevelUp;
+			import net.tcp.model.wubao.TcpAcce;
+			import mx.events.FlexEvent;
+			import net.tcp.TcpManager;
+			import wubao.model.Build;
+			import utils.PubUnit;
+			import utils.FormatText;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			import wubao.model.Tech;
+			
+			private var _data:Object;  
+			
+			private var gameWubao:WuBao = null;
+			
+			private var tech:Tech = null;
+			
+			private var isInit:Boolean = false;
+			
+			private function init():void
+			{
+				isInit = true;
+				refresh();
+			}
+			
+			private function onComp(evt:FlexEvent):void
+			{
+				lblLevel.removeEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+				
+				lblLevel.x = 103 - lblLevel.width - 5;
+				lblLevel.y = 7;
+				
+				PubUnit.drawBackground(lblLevel);
+			}
+			
+			public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				tech = data as Tech;
+				var needAry:Array = PubUnit.getTechNeed(tech.type, tech.level);
+				
+				if (tech == null) return;
+				
+				lblLevel.text = tech.level.toString() + "级" + tech.name;
+				lblLevel.addEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+				taInfo.htmlText = TipInfo.getTechInfo(tech);
+				img1.imageURL = tech.imgBmp;
+				
+				if (tech.level >= PubUnit.getTechMax(tech.type))
+				{
+					lblPre.htmlText = FormatText.packegText("已升至最高等级", FormatText.WHITE);
+					lblTime.htmlText = FormatText.packegText("已升至最高等级", FormatText.WHITE);
+					lblInfo.text = "";
+					btnStudy.label = "研究";
+					btnStudy.enabled = false;
+					
+					return;
+				}
+				
+				var info:String = "书院 ";
+				var preBuild:Build = gameWubao.buildList.getObjByID(needAry[0]) as Build;
+				
+				if (preBuild.level < needAry[1])
+					info += FormatText.packegText(needAry[1].toString(), FormatText.RED);
+				else
+					info += FormatText.packegText(needAry[1].toString(), FormatText.GREEN);
+					
+				
+				if (gameWubao.money < needAry[2])
+					info += " 级 所需：钱币 " + FormatText.packegText(needAry[2].toString(), FormatText.RED);
+				else
+					info += " 级 所需：钱币 " + FormatText.packegText(needAry[2].toString(), FormatText.GREEN);
+				
+				lblPre.htmlText = info;
+				
+				lblTime.htmlText = PubUnit.getGameDate(needAry[3]);
+				
+				if (tech.endTime < 1)
+				{
+					lblInfo.visible = false;
+					lblInfo.includeInLayout = false;
+					btnStudy.label = "研究";
+				}
+				else
+				{
+					lblInfo.visible = true;
+					lblInfo.includeInLayout = true;
+					var costTime:int = tech.endTime - GameManager.gameMgr.gameTime;
+					lblInfo.htmlText = PubUnit.getGameDate(costTime) + "后完成，加速花费金币 " + PubUnit.getAcceCoin(costTime);
+					btnStudy.label = "加速";
+				}
+				
+				if (btnStudy.label == "研究")
+				{	
+					if (preBuild.level < needAry[1] || gameWubao.money < needAry[2])
+						btnStudy.enabled = false;
+					else
+						btnStudy.enabled = true;
+				}
+				else 
+					btnStudy.enabled = true;
+				
+			}
+			
+			private function study():void
+			{
+				if (btnStudy.label == "研究")
+				{
+					var lu:TcpLevelUp = new TcpLevelUp();
+					lu.wbID = gameWubao.uniqID;
+					lu.type = 2;
+					lu.typeID = tech.type;
+					
+					TcpManager.tcpMgr.sendLevelUP(lu);
+				}
+				else
+				{
+					var acce:TcpAcce = new TcpAcce();
+					acce.wbID = gameWubao.uniqID;
+					acce.type = 2;
+					acce.typeID = tech.type;
+					
+					TcpManager.tcpMgr.sendAcce(acce);
+				}
+			}
+			
+			override public function get data():Object
+			{   
+            	return _data;   
+		    }
+		      
+	        override public function set data(value:Object):void
+	        {   
+	            _data = value; 
+	            
+	            if (isInit)
+	            	refresh();  
+	        }   
+
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="2" y="0" width="434" height="108" styleName="lowCanvas">
+		<ns1:GameImage id="img1" x="3" y="3" width="98" height="98">
+		</ns1:GameImage>
+		<mx:Label id="lblLevel"/>
+		
+		<mx:Canvas id="cvInfo" x="107" y="40" width="320" height="60" styleName="winCanvas">
+			<mx:Label x="5" y="0" text="前提：" height="18" width="41"/>
+			<mx:Label id="lblPre" x="41" y="0" height="18" width="220" textAlign="left"/>
+			
+			<ns1:GameButton id="btnStudy" x="273" y="6" label="升级" width="40" height="24" click="study();"/>
+			
+			<mx:Label x="5" y="20" text="耗时：" height="18" width="41"/>
+			<mx:Label id="lblTime" x="41" y="20" height="18" width="220" textAlign="left"/>
+			
+			<mx:Label id="lblInfo" x="5" y="40" height="18" width="300" textAlign="left"/>
+		</mx:Canvas>
+		
+		<mx:TextArea id="taInfo" x="107" y="3" height="36" width="320" textAlign="left" editable="false"/>
+	</mx:Canvas>
+	
+</mx:Canvas>

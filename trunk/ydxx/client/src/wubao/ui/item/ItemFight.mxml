@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="40" height="21" xmlns:ns1="utils.components.*" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import wubao.ui.events.FightUserEvent;
+			import utils.GameManager;
+			import wubao.model.User;
+		
+			import sphere.events.FireUserEvent;
+			
+			private var _data:Object;
+			
+			private function init():void
+			{
+			}	
+				
+			private function fightUser():void
+			{
+				var fightEvent:FightUserEvent = new FightUserEvent(FightUserEvent.FIGHT_USER);
+				fightEvent.user = data;
+				this.parentDocument.dispatchEvent(fightEvent);
+			}
+			
+			override public function get data():Object
+			{
+				return _data;
+			} 
+			
+			override public function set data(value:Object):void
+			{
+				_data = value;
+				
+				btnFight.visible = true;
+				var gameUser:User = data as User;
+				var self:User = GameManager.gameMgr.user;
+				
+				if (gameUser != null)
+				{
+					if (self.rank == 0)
+						btnFight.visible = true;
+					else if (gameUser.uniqID == self.uniqID || gameUser.rank > self.rank)
+						btnFight.visible = false;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton id="btnFight" x="0" y="0" label="挑 战" btnType="menu" click="fightUser();" width="40" height="21"/>
+</mx:Canvas>

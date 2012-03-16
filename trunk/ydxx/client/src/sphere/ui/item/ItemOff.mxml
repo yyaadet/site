@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="55" height="50" xmlns:ns1="utils.components.*" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+			import wubao.model.User;
+			import wubao.model.Official;
+			import utils.events.ConfirmEvent;
+			import net.tcp.TcpManager;
+			import net.tcp.model.sphere.TcpApplyOff;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import sphere.model.Sphere;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+		
+			import utils.FormatText;
+			
+			private var _data:Object;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var gameSphere:Sphere = null;
+			
+			private var isInit:Boolean = false;
+			
+			private function init():void
+			{
+				isInit = true;
+				refresh();
+			}
+			
+			private function refresh():void
+			{
+				var gameOff:Official = data as Official;
+				if (gameOff == null) return;
+				
+				lblName.text = gameOff.grantName;
+				btnApply.label = gameOff.offName;
+				
+				var str:String = "";
+				
+				str = FormatText.packegText("名称 ") +  FormatText.packegText(gameOff.offName, FormatText.GREEN) + "\n" +
+				      FormatText.packegText("统率 ") +  FormatText.packegText(gameOff.follows.toString(), FormatText.GREEN) + "\n" +
+				      FormatText.packegText("俸禄 ") +  FormatText.packegText(gameOff.salary.toString(), FormatText.GREEN) + "\n" +
+				      FormatText.packegText("所需爵位 ") +  FormatText.packegText(PubUnit.dignitieList[gameOff.dig].name.toString(), FormatText.GREEN) + "\n" +
+				      FormatText.packegText("所需势力等级 ") +  FormatText.packegText(gameOff.levelName, FormatText.GREEN);
+				
+				btnApply.toolTip = str;
+				  
+				gameWubao = GameManager.gameMgr.wubao;
+				gameSphere = GameManager.gameMgr.sphereList.getObjByID(gameWubao.sphereID) as Sphere;
+				if (gameWubao == null || gameSphere == null)
+				{
+					btnApply.enabled = false;
+					return;
+				}
+				
+				if (gameWubao.sphereID > 0 && gameWubao.prestige >= data.dig && gameSphere.level >= gameOff.levelID)
+					btnApply.enabled = true;
+				else
+					btnApply.enabled = false;
+			}
+			
+			private	var winAsk:WinAsk = null;
+			private function applyOff():void
+			{
+				var str:String = "";
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				
+				if (gameWubao.sphereID <= 0)
+				{
+					str = "势力等级不够，无法申请";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				gameSphere = GameManager.gameMgr.sphereList.getObjByID(gameWubao.sphereID) as Sphere;
+				
+				if (gameSphere != null && gameSphere.level < data.levelID)
+				{
+					str = "势力等级不够，无法申请";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				if (gameWubao.digID < data.dig)
+				{
+					str = "您的爵位等级不够，无法申请";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				var gameOff:Official = data as Official;
+				if (gameOff != null)
+				{
+					if (gameOff.grantID == GameManager.gameMgr.userID && gameOff.grantID > 0)
+					{
+						str = "官位已申请";
+						WinManager.winMgr.showResult(str);
+						return;
+					}
+					
+					var selfOff:Official = null;
+					selfOff = GameManager.gameMgr.offList.getObjByID(gameWubao.offID) as Official;
+					if (selfOff != null)
+					{
+						if (selfOff.levelID >= gameOff.levelID)
+						{
+							str = "您申请的官位必须高于您当前的官位";
+							WinManager.winMgr.showResult(str);
+							return;
+						}
+					}
+					
+					var gameUser:User = gameSphere.userList.getObjByID(gameOff.grantID) as User;
+					if (gameUser != null && gameUser.prestige > gameWubao.prestige)
+					{
+						str = "您的声望不如 " + gameUser.userName + " 的声望高，无法申请";
+						WinManager.winMgr.showResult(str);
+						return;
+					}
+				}
+				
+				str = FormatText.packegText("确定要申请 ") +  
+				      FormatText.packegText(data.offName, FormatText.GREEN) + 
+				      FormatText.packegText(" 吗？");
+				      
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmApply); 
+			}
+			
+			private function confirmApply(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmApply); 
+				
+				var applyOff:TcpApplyOff = new TcpApplyOff();
+				applyOff.wbID = gameWubao.uniqID;
+				applyOff.sphereID = gameSphere.uniqID;
+				applyOff.offID = data.uniqID;
+				TcpManager.tcpMgr.sendApplyOff(applyOff);
+			}
+			
+			override public function get data():Object
+			{
+				return _data;
+			} 
+			
+			override public function set data(value:Object):void
+			{
+				_data = value;
+				
+	            if (isInit)
+	            	refresh();  
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label id="lblName" x="0" y="25" width="55" height="20" textAlign="center"/>
+	<ns1:GameButton id="btnApply" x="0" y="0" width="55" btnType="off" click="applyOff();" height="22"/>
+	
+</mx:Canvas>

@@ -1,0 +1,77 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+<div id="content" >
+	${self.get_menu()}
+
+        ${self.get_user_list(c.objs, c.start_page, c.page, c.end_page)}
+</div>
+</%def>
+
+<%def name="get_menu(name='')">
+<%
+menus = []
+%>
+<div class="table">
+	<div class="row">
+    	%for menu in menus:
+        <a href="${menu['url']}">${menu['name']}</a> |
+        %endfor
+    </div>
+</div>
+</%def>
+
+<%def name="get_user_list(objs, start_page, page, end_page, show_page=True)">
+<table cellpadding="0" cellspacing="0" border="0" id="mytable">
+<tr>
+   <th>名称</th>
+   <th>Email</th>
+   <th>人气</th>
+   <th>积分</th>
+   <th>注册时间</th>
+   <th>最后登录</th>
+   <th>权限</th>
+</tr>
+%for obj in objs:
+<tr>
+   <td>${obj.name}</td>
+   <td>::${obj.email}</td>
+   <td>${obj.visited_num}</td>
+   <td>${obj.score}</td>
+   <td>${h.fmt_time(obj.reg_timestamp)}</td>
+   <td>${h.fmt_time(obj.last_login_timestamp)}</td>
+   <td>
+        %if obj.is_admin:
+        <a href="/admin/user_set_is_admin?uid=${obj._id}">取消管理员权限</a>
+        %else:
+        <a href="/admin/user_set_is_admin?uid=${obj._id}">升级成为管理员</a>
+        %endif
+   </td>
+</tr>
+%endfor
+</table>
+
+
+%if show_page:
+<!-- page -->
+<div class="table">
+    <div class="row">
+        %if c.start_page != 1:
+        <div class="col" style="width: 50px;"><a href="/admin/user_list?page=${start_page - 1}">上一页</a></div>
+        %endif
+        %for i in range(start_page, end_page + 1):
+        <div class="col" style="min-width: 0;width: 20px;">
+            %if i == c.page:
+            <strong><a href="/admin/user_list?page=${i}">[${i}]</a></strong>
+            %else:
+            <a href="/admin/user_list?page=${i}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col" style="width: 50px;"><a href="/admin/user_list?page=${end_page + 1}">下一页</a></div>
+    </div>
+</div>
+%endif
+</%def>

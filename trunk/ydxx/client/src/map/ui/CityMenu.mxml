@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="71" height="103" xmlns:ns1="utils.components.*" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import sphere.list.DipList;
+			import utils.SceneManager;
+			import utils.WinManager;
+			import utils.GameManager;
+			import city.model.City;
+			
+			private var _cityID:int = 0;
+			
+			private function init():void
+			{
+				setButton();
+			}
+			
+			public function setButton():void
+			{
+			}
+			
+			private function showGeneralList():void
+			{
+				WinManager.winMgr.showConsult(cityID);
+				cancel();
+			}
+			
+			private function attackCity():void
+			{
+				WinManager.winMgr.showAttackCity(cityID);
+				cancel();
+			}
+			
+			private function enterArea():void
+			{
+				SceneManager.sceneMgr.enterArea(cityID);
+			}
+			
+			private function cancel():void
+			{
+				this.visible = false;
+				this.includeInLayout = false;
+			}
+			
+			public function get cityID():int
+			{
+				return _cityID;
+			}
+			
+			public function set cityID(param:int):void
+			{
+				_cityID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton id="btnAttackCity" x="0" y="0" btnType="mapMenu" label="宣　战" click="attackCity();" width="71" height="25"/>
+	<ns1:GameButton id="btnEnter" x="0" y="26" btnType="mapMenu" label="武　将" click="showGeneralList();" width="71" height="25"/>
+	<ns1:GameButton id="btnArea" x="0" y="52" btnType="mapMenu" label="地　区" click="enterArea();" width="71" height="25"/>
+	<ns1:GameButton x="0" y="78" btnType="mapMenu" label="取　消" click="cancel();" width="71" height="25"/>
+	
+</mx:Canvas>

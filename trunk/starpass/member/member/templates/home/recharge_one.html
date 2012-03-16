@@ -1,0 +1,127 @@
+<%inherit file="index2.html" />
+
+
+
+<%def name="html_content_title()">
+我要充值
+</%def>
+
+
+
+
+<%def name="html_content()">
+<form action="/home/recharge">
+<input type="hidden" name="act" value="two">
+<input type="hidden" name="way" value="${c.way}">
+<table width="672" border="0" cellpadding="0" cellspacing="1" bgcolor="#DEDEDE">
+         <tr>
+           <td height="35" colspan="2" align="left" bgcolor="#FFFFFF">
+           %if c.way == 1:
+                <span class="table_t">　网银支付</span>
+           %elif c.way == 2:
+                <span class="table_t">　中国移动通信账户支付</span>
+           %elif c.way == 3:
+                <span class="table_t">　联通卡支付</span>
+           %elif c.way == 4:
+                <span class="table_t">　支付宝支付</span>
+           %elif c.way == 5:
+                <span class="table_t">　骏网一卡通支付</span>
+           %elif c.way == 6:
+                <span class="table_t">　征途卡支付</span>
+           %elif c.way == 7:
+                <span class="table_t">　盛大卡支付</span>
+           %elif c.way == 8:
+                <span class="table_t">　Q币卡支付</span>
+           %elif c.way == 9:
+                <span class="table_t">　久游一卡通支付</span>
+           %elif c.way == 10:
+                <span class="table_t">　网易一卡通支付</span>
+           %elif c.way == 11:
+                <span class="table_t">　完美一卡通支付</span>
+           %elif c.way == 12:
+                <span class="table_t">　搜狐一卡通支付</span>
+           %elif c.way == 13:
+                <span class="table_t">　易宝一卡通支付</span>
+           %elif c.way == 14:
+                <span class="table_t">　电信支付</span>
+           %endif
+           </td>
+          </tr>
+          %if c.err != "":
+          <tr>
+           <td width="129" height="35" align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span> 错误信息：
+           </dl></td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <font color="#C2001A">${c.err}</font>
+           </dl>
+           </td>
+          </tr>
+          %endif
+         <tr>
+           <td width="129" height="35" align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>您的充值的帐号：
+           </dl></td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <font color="#C2001A"><input type="text" name="username"></font>
+           </dl>
+           </td>
+         </tr>
+         <tr>
+           <td height="35" align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span> 再次输入充值账号：
+           </dl></td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <font color="#C2001A"><input type="text" name="username2"></font>
+           </dl>
+           </td>
+         </tr>
+         <tr>
+           <td height="35" align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>您的充值金额为：
+           </dl></td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <font color="#C2001A">
+             <input type="text" name="rmb" />
+             </font>
+           </dl>
+           </td>
+         </tr>
+         
+         <!--
+         <tr>
+           <td height="35" align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>所得平台币为：
+           </dl></td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <font color="#C2001A"><span name="gold" id="gold">0</span></font>
+           </dl>
+           </td>
+         </tr>
+         -->
+         
+         <tr>
+           <td height="35" align="left" bgcolor="#FFFFFF">&nbsp;</td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <input type="image" src="/images/botton_05.jpg" border="0"/></a>
+           </dl>
+           </td>
+         </tr>
+       </table>
+       </form>
+
+<div class="zhekou">
+<p>
+<h2>折扣说明</h2>
+</p>
+%for i in c.li:
+    充值大于等于${i[0]}，折扣为${i[1]}折！<br />
+%endfor
+</div>
+</%def>

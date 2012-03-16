@@ -1,0 +1,10 @@
+
+    [paste.paster_command]
+    run = zuan.commands:RunCommand
+    
+    [paste.app_factory]
+    main = zuan.config.middleware:make_app
+
+    [paste.app_install]
+    main = pylons.util:PylonsInstaller
+    

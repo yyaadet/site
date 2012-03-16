@@ -1,0 +1,702 @@
+﻿/*
+/*
+//------------------------------
+//  Button
+//------------------------------
+*/
+
+Button
+{
+	disabledSkin: Embed(source="skin/Button_disabledSkin.png",scaleGridLeft="4",scaleGridTop="3",scaleGridRight="51",scaleGridBottom="17");
+	downSkin: Embed(source="skin/Button_downSkin.png",scaleGridLeft="4",scaleGridTop="3",scaleGridRight="49",scaleGridBottom="18");
+	overSkin: Embed(source="skin/Button_overSkin.png",scaleGridLeft="4",scaleGridTop="3",scaleGridRight="49",scaleGridBottom="18");
+	upSkin: Embed(source="skin/Button_upSkin.png",scaleGridLeft="4",scaleGridTop="3",scaleGridRight="49",scaleGridBottom="18");
+	
+	color: #FFFFFF;
+	textRollOverColor: #000000;
+	textSelectedColor: #000000;
+	disabledColor: #D4CFCF;
+}
+
+
+ToggleButtonBar 
+{ 
+    buttonStyleName: "buttonBarButton"; 
+    firstButtonStyleName: "firstButtonBarButton"; 
+    lastButtonStyleName: "lastButtonBarButton"; 
+    fontSize: 12;
+    tabHeight:20;
+    color:#000000;
+	selectedButtonTextStyleName: toggleButtonBarSelectedButtonText;
+}
+
+/*
+//------------------------------ 
+//  ButtonBarButtons 
+//------------------------------ 
+*/ 
+
+.firstButtonBarButton 
+{ 
+    disabledSkin: Embed(source="skin/ButtonBar_buttonDisabledSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    downSkin: Embed(source="skin/ButtonBar_buttonDownSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    overSkin: Embed(source="skin/ButtonBar_buttonOverSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedDisabledSkin: Embed(source="skin/ButtonBar_buttonSelectedDisabledSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedDownSkin: Embed(source="skin/ButtonBar_buttonSelectedUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedOverSkin: Embed(source="skin/ButtonBar_buttonSelectedUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedUpSkin: Embed(source="skin/ButtonBar_buttonSelectedUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    upSkin: Embed(source="skin/ButtonBar_buttonUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19");
+	textRollOverColor: #E9F707; 
+}
+
+.buttonBarButton 
+{ 
+    disabledSkin: Embed(source="skin/ButtonBar_buttonDisabledSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    downSkin: Embed(source="skin/ButtonBar_buttonDownSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    overSkin: Embed(source="skin/ButtonBar_buttonOverSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedDisabledSkin: Embed(source="skin/ButtonBar_buttonSelectedDisabledSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedDownSkin: Embed(source="skin/ButtonBar_buttonSelectedUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedOverSkin: Embed(source="skin/ButtonBar_buttonSelectedUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedUpSkin: Embed(source="skin/ButtonBar_buttonSelectedUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    upSkin: Embed(source="skin/ButtonBar_buttonUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19");
+	textRollOverColor: #E9F707; 
+}
+
+.lastButtonBarButton 
+{ 
+    disabledSkin: Embed(source="skin/ButtonBar_buttonDisabledSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    downSkin: Embed(source="skin/ButtonBar_buttonDownSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    overSkin: Embed(source="skin/ButtonBar_buttonOverSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedDisabledSkin: Embed(source="skin/ButtonBar_buttonSelectedDisabledSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedDownSkin: Embed(source="skin/ButtonBar_buttonSelectedUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedOverSkin: Embed(source="skin/ButtonBar_buttonSelectedUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    selectedUpSkin: Embed(source="skin/ButtonBar_buttonSelectedUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19"); 
+    upSkin: Embed(source="skin/ButtonBar_buttonUpSkin.png",
+		scaleGridLeft="5", scaleGridTop="6", scaleGridRight="41", scaleGridBottom="19");
+	textRollOverColor: #E9F707; 
+}
+
+.toggleButtonBarSelectedButtonText
+{
+	color: #E9F707;
+}
+
+Canvas
+{
+	modalTransparency: 0;
+	modalTransparencyBlur: 0;
+}
+
+/*
+//------------------------------
+//  CheckBox
+//------------------------------
+*/
+CheckBox
+{
+	disabledIcon: Embed(source="skin/CheckBox_disabledIcon.png");
+	downIcon: Embed(source="skin/CheckBox_downIcon.png");
+	overIcon: Embed(source="skin/CheckBox_overIcon.png");
+	selectedDisabledIcon: Embed(source="skin/CheckBox_selectedDisabledIcon.png");
+	selectedDownIcon: Embed(source="skin/CheckBox_selectedDownIcon.png");
+	selectedOverIcon: Embed(source="skin/CheckBox_selectedOverIcon.png");
+	selectedUpIcon: Embed(source="skin/CheckBox_selectedUpIcon.png");
+	upIcon: Embed(source="skin/CheckBox_upIcon.png");
+	textRollOverColor: #FFFFFF;
+	textSelectedColor: #FFFFFF;
+}		
+
+/*
+//------------------------------
+//  ComboBox
+//------------------------------
+*/
+
+ComboBox
+{
+	upSkin: Embed(source="skin/ComboBoxArrow_upSkin.png",scaleGridRight="35",scaleGridLeft="2",scaleGridTop="3",scaleGridBottom="18"); 
+	overSkin: Embed(source="skin/ComboBoxArrow_overSkin.png",scaleGridRight="35",scaleGridLeft="2",scaleGridTop="3",scaleGridBottom="18"); 
+	downSkin: Embed(source="skin/ComboBoxArrow_downSkin.png",scaleGridRight="35",scaleGridLeft="2",scaleGridTop="3",scaleGridBottom="18"); 
+	 
+	backgroundAlpha: 0.2;
+    color: #FFFFFF;
+    fillAlphas: 0.8, 0.8, 0.8, 0.8;
+    fillColors: #494425, #696338, #696338, #696338;
+    selectionColor: #cfc89d;
+    rollOverColor: #aba57b;
+    themeColor: #009dff;
+    alternatingItemColors: #494425, #696338;
+    fontSize: 12;
+    fontWeight: normal;
+}		
+
+
+/*
+//------------------------------
+//  DataGrid
+//------------------------------
+*/
+DataGrid
+{
+	columnDropIndicatorSkin: Embed(source="skin/DataGrid_columnDropIndicatorSkin.png");
+	columnResizeSkin: Embed(source="skin/DataGrid_columnResizeSkin.png");
+	headerSeparatorSkin: Embed(source="skin/DataGrid_headerSeparatorSkin.png");
+	sortArrowSkin: Embed(source="skin/DataGrid_sortArrowSkin.png");
+	stretchCursor: Embed(source="skin/DataGrid_stretchCursor.png");
+	
+	backgroundAlpha: 0.2;
+    horizontalGridLines: false;
+	verticalGridLines: false;
+    fontSize: 12;
+    alternatingItemColors: #8a9068, #808357;
+    headerColors: #808357, #808357;
+    rollOverColor: #a3ab8c;
+	selectionColor: #a3ab8c;
+    borderColor: #a3ab8c;
+    color: #FFFFFF;
+    textSelectedColor: #000000;
+	
+    headerStyleName: "mydataGridHeaderStyle";
+}
+
+.mydataGridHeaderStyle {
+   color: #e3d71f;
+   fontWeight: normal;
+   fontSize: 12;
+   fontStyle: normal;
+   textDecoration: none;
+   letterSpacing: 0;
+   textAlign: center;
+}
+
+/*
+//------------------------------
+//  NumericStepper
+//------------------------------
+*/
+
+NumericStepper
+{
+	downArrowDisabledSkin: Embed(source="skin/NumericStepperDownArrow_DisabledSkin.png");
+	downArrowDownSkin: Embed(source="skin/NumericStepperDownArrow_DownSkin.png");
+	downArrowOverSkin: Embed(source="skin/NumericStepperDownArrow_OverSkin.png");
+	downArrowUpSkin: Embed(source="skin/NumericStepperDownArrow_UpSkin.png");
+	upArrowDisabledSkin :Embed(source="skin/NumericStepperUpArrow_DisabledSkin.png");
+	upArrowDownSkin: Embed(source="skin/NumericStepperUpArrow_DownSkin.png");
+	upArrowOverSkin: Embed(source="skin/NumericStepperUpArrow_OverSkin.png");
+	upArrowUpSkin: Embed(source="skin/NumericStepperUpArrow_UpSkin.png");
+	
+	height:20;
+	borderStyle: solid;
+   	borderColor: #969797;
+   	backgroundAlpha: 0;
+   	cornerRadius: 0;
+   	textIndent: 0;
+   	iconColor: #111111;
+   	color: #FFFFFF;
+   	themeColor: none;
+   	fontSize: 12;
+}
+
+
+
+/*
+//------------------------------
+//  RadioButton
+//------------------------------
+*/
+
+RadioButton
+{
+
+	disabledIcon: Embed(source="skin/RadioButton_disabledIcon.png");
+	downIcon: Embed(source="skin/RadioButton_downIcon.png");
+	overIcon: Embed(source="skin/RadioButton_overIcon.png");
+	selectedDisabledIcon: Embed(source="skin/RadioButtonSelected_disabledIcon.png");
+	selectedDownIcon: Embed(source="skin/RadioButtonSelected_downIcon.png");
+	selectedOverIcon: Embed(source="skin/RadioButtonSelected_overIcon.png");
+	selectedUpIcon: Embed(source="skin/RadioButtonSelected_upIcon.png");
+	upIcon: Embed(source="skin/RadioButton_upIcon.png");
+	textRollOverColor: #FFFFFF;
+	textSelectedColor: #FFFFFF;
+
+}
+
+/*
+//------------------------------
+//  ScrollBar
+//------------------------------
+*/
+
+ScrollBar
+{
+
+	downArrowDisabledSkin: Embed(source="skin/ScrollArrowDown_disabledSkin.png");
+	downArrowDownSkin: Embed(source="skin/ScrollArrowDown_downSkin.png");
+	downArrowOverSkin: Embed(source="skin/ScrollArrowDown_overSkin.png");
+	downArrowUpSkin: Embed(source="skin/ScrollArrowDown_upSkin.png");
+	thumbDownSkin: Embed(source="skin/ScrollThumb_downSkin.png",scaleGridTop="1",scaleGridLeft="1",scaleGridRight="7",scaleGridBottom="19");
+	thumbIcon: Embed(source="skin/ScrollBar_thumbIcon.png",scaleGridTop="1",scaleGridLeft="1",scaleGridRight="7",scaleGridBottom="19");
+	thumbOverSkin: Embed(source="skin/ScrollThumb_overSkin.png",scaleGridTop="1",scaleGridLeft="1",scaleGridRight="7",scaleGridBottom="19");
+	thumbUpSkin: Embed(source="skin/ScrollThumb_upSkin.png",scaleGridTop="1",scaleGridLeft="1",scaleGridRight="7",scaleGridBottom="19");
+	trackSkin: Embed(source="skin/ScrollTrack_Skin.png");
+	upArrowDisabledSkin: Embed(source="skin/ScrollArrowUp_disabledSkin.png");
+	upArrowDownSkin: Embed(source="skin/ScrollArrowUp_downSkin.png");
+	upArrowOverSkin: Embed(source="skin/ScrollArrowUp_overSkin.png");
+	upArrowUpSkin: Embed(source="skin/ScrollArrowUp_upSkin.png");
+
+}
+
+
+TextArea
+{
+	fontFamily:"新宋体";
+	fontSize:12;
+	color:#C8D8A9;
+	borderStyle:"solid";
+	backgroundAlpha:0.3;
+	backgroundColor:#000000;
+	cornerRadius:5;
+	borderThickness:0;
+	paddingBottom:3;
+	paddingLeft:3;
+	paddingRight:3;
+	paddingTop:3;
+	focusAlpha:0;
+}	
+
+TextInput
+{
+	fontSize:12;
+	fontFamily:"新宋体";
+	backgroundColor: #65574e;
+	backgroundAlpha:0.2;
+	borderStyle:"solid";
+	borderThickness:1;
+	borderColor:#919876;
+	color:#FFFFFF;
+	focusAlpha:0;
+}
+
+/*
+//------------------------------
+//  ToolTip
+//------------------------------
+*/
+
+ToolTip
+{
+	fontFamily:"新宋体";
+	fontSize:12;
+	color: #FFFFFF;
+	backgroundAlpha: 1;
+	backgroundColor: #000000;
+	borderSkin: ClassReference("utils.components.GameToolTip");
+	
+}
+
+Tree
+{
+	defaultLeafIcon: Embed(source="skin/Tree_defaultLeafIcon.png");
+	disclosureClosedIcon: Embed(source="skin/Tree_disclosureClosedIcon.png");
+	disclosureOpenIcon: Embed(source="skin/Tree_disclosureOpenIcon.png");
+	folderClosedIcon: Embed(source="skin/Tree_folderClosedIcon.png");
+	folderOpenIcon: Embed(source="skin/Tree_folderOpenIcon.png");
+	selectionColor: #84A26F;
+	rollOverColor: #84A26F;
+}
+
+/*
+//------------------------------
+//  游戏窗口样式
+//------------------------------
+*/
+.winClose
+{
+	upSkin: Embed(source="assets/win/close_up.png");
+	overSkin: Embed(source="assets/win/close_over.png");
+	downSkin: Embed(source="assets/win/close_down.png");
+}
+
+.winHelp
+{
+	upSkin: Embed(source="assets/win/help_up.png");
+	overSkin: Embed(source="assets/win/help_over.png");
+	downSkin: Embed(source="assets/win/help_down.png");
+}
+
+/*
+//------------------------------
+//  修炼
+//------------------------------
+*/
+
+.xiuPrior
+{
+	upSkin: Embed(source="assets/xiulian/prior_up.png",scaleGridLeft="2",scaleGridTop="2",scaleGridRight="59",scaleGridBottom="6");
+	overSkin: Embed(source="assets/xiulian/prior_over.png",scaleGridLeft="2",scaleGridTop="2",scaleGridRight="59",scaleGridBottom="6");
+	downSkin: Embed(source="assets/xiulian/prior_down.png",scaleGridLeft="2",scaleGridTop="2",scaleGridRight="59",scaleGridBottom="6");
+	disabledSkin: Embed(source="assets/xiulian/prior_disable.png",scaleGridLeft="2",scaleGridTop="2",scaleGridRight="59",scaleGridBottom="6");
+	
+	selectedUpSkin: Embed(source='assets/xiulian/prior_up.png',scaleGridLeft="2",scaleGridTop="2",scaleGridRight="59",scaleGridBottom="6");
+	selectedOverSkin: Embed(source='assets/xiulian/prior_over.png',scaleGridLeft="2",scaleGridTop="2",scaleGridRight="59",scaleGridBottom="6");
+	selectedDownSkin: Embed(source='assets/xiulian/prior_down.png',scaleGridLeft="2",scaleGridTop="2",scaleGridRight="59",scaleGridBottom="6");
+	selectedDisabledSkin: Embed(source='assets/xiulian/prior_disable.png',scaleGridLeft="2",scaleGridTop="2",scaleGridRight="59",scaleGridBottom="6");
+}
+
+.xiuItem
+{
+	upSkin: Embed(source="assets/xiulian/item_up.png");
+	overSkin: Embed(source="assets/xiulian/item_over.png");
+	downSkin: Embed(source="assets/xiulian/item_over.png");
+	
+	selectedUpSkin: Embed(source='assets/xiulian/item_over.png');
+	selectedOverSkin: Embed(source='assets/xiulian/item_over.png');
+	selectedDownSkin: Embed(source='assets/xiulian/item_over.png');
+	
+	textSelectedColor: #E9F707;
+}
+
+.xiuNext
+{
+	upSkin: Embed(source="assets/xiulian/next_up.png",scaleGridLeft="2",scaleGridTop="2",scaleGridRight="58",scaleGridBottom="8");
+	overSkin: Embed(source="assets/xiulian/next_over.png",scaleGridLeft="2",scaleGridTop="2",scaleGridRight="58",scaleGridBottom="8");
+	downSkin: Embed(source="assets/xiulian/next_down.png",scaleGridLeft="2",scaleGridTop="2",scaleGridRight="58",scaleGridBottom="8");
+	disabledSkin: Embed(source="assets/xiulian/next_disable.png",scaleGridLeft="2",scaleGridTop="2",scaleGridRight="58",scaleGridBottom="8");
+	
+	selectedUpSkin: Embed(source='assets/xiulian/next_up.png',scaleGridLeft="2",scaleGridTop="2",scaleGridRight="58",scaleGridBottom="8");
+	selectedOverSkin: Embed(source='assets/xiulian/next_over.png',scaleGridLeft="2",scaleGridTop="2",scaleGridRight="58",scaleGridBottom="8");
+	selectedDownSkin: Embed(source='assets/xiulian/next_down.png',scaleGridLeft="2",scaleGridTop="2",scaleGridRight="58",scaleGridBottom="8");
+	selectedDisabledSkin: Embed(source='assets/xiulian/next_disable.png',scaleGridLeft="2",scaleGridTop="2",scaleGridRight="58",scaleGridBottom="8");
+}
+
+.xiuGeneral
+{
+	upSkin: Embed(source="assets/xiulian/xiulian_up.png",scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	overSkin: Embed(source="assets/xiulian/xiulian_over.png",scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	downSkin: Embed(source="assets/xiulian/xiulian_down.png",scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	disabledSkin: Embed(source="assets/xiulian/xiulian_disable.png",scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	
+	selectedUpSkin: Embed(source='assets/xiulian/xiulian_up.png',scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	selectedOverSkin: Embed(source='assets/xiulian/xiulian_over.png',scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	selectedDownSkin: Embed(source='assets/xiulian/xiulian_down.png',scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	selectedDisabledSkin: Embed(source='assets/xiulian/xiulian_disable.png',scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	
+}
+
+.canXiu
+{
+	upSkin: Embed(source="assets/xiulian/xiulian_down.png",scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	overSkin: Embed(source="assets/xiulian/xiulian_over.png",scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	downSkin: Embed(source="assets/xiulian/xiulian_down.png",scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	disabledSkin: Embed(source="assets/xiulian/xiulian_disable.png",scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	
+	selectedUpSkin: Embed(source='assets/xiulian/xiulian_down.png',scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	selectedOverSkin: Embed(source='assets/xiulian/xiulian_over.png',scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	selectedDownSkin: Embed(source='assets/xiulian/xiulian_down.png',scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	selectedDisabledSkin: Embed(source='assets/xiulian/xiulian_disable.png',scaleGridLeft="3",scaleGridTop="5",scaleGridRight="35",scaleGridBottom="16");
+	
+}
+
+/*
+//------------------------------
+//  按钮
+//------------------------------
+*/
+
+.cityMenu
+{
+	upSkin: Embed(source="assets/city/menu_up.png",scaleGridLeft="5",scaleGridTop="5",scaleGridRight="64",scaleGridBottom="18");
+	overSkin: Embed(source="assets/city/menu_over.png",scaleGridLeft="5",scaleGridTop="5",scaleGridRight="64",scaleGridBottom="18");
+	downSkin: Embed(source="assets/city/menu_down.png",scaleGridLeft="5",scaleGridTop="5",scaleGridRight="64",scaleGridBottom="18");
+	disabledSkin: Embed(source="assets/city/menu_disabled.png",scaleGridLeft="5",scaleGridTop="5",scaleGridRight="64",scaleGridBottom="18");
+}
+
+.teamTitle
+{
+	upSkin: Embed(source="assets/city/team_title.png");
+	overSkin: Embed(source="assets/city/team_title.png");
+	downSkin: Embed(source="assets/city/team_title.png");
+}
+
+.max
+{
+	upSkin: Embed(source="assets/wubao/win/max.png");
+	overSkin: Embed(source="assets/wubao/win/max.png");
+	downSkin: Embed(source="assets/wubao/win/max.png");
+}
+
+.mapMenu
+{
+	upSkin: Embed(source="assets/map/menu_up.png",scaleGridLeft="5",scaleGridTop="5",scaleGridRight="64",scaleGridBottom="18");
+	overSkin: Embed(source="assets/map/menu_over.png",scaleGridLeft="5",scaleGridTop="5",scaleGridRight="64",scaleGridBottom="18");
+	downSkin: Embed(source="assets/map/menu_down.png",scaleGridLeft="5",scaleGridTop="5",scaleGridRight="64",scaleGridBottom="18");
+	disabledSkin: Embed(source="assets/map/menu_disabled.png",scaleGridLeft="5",scaleGridTop="5",scaleGridRight="64",scaleGridBottom="18");
+}
+
+.off
+{
+	upSkin: Embed(source="assets/sphere/off_up.png",scaleGridLeft="6",scaleGridTop="6",scaleGridRight="52",scaleGridBottom="20");
+	overSkin: Embed(source="assets/sphere/off_over.png",scaleGridLeft="6",scaleGridTop="6",scaleGridRight="52",scaleGridBottom="20");
+	downSkin: Embed(source="assets/sphere/off_down.png",scaleGridLeft="6",scaleGridTop="6",scaleGridRight="52",scaleGridBottom="20");
+	disabledSkin: Embed(source="assets/sphere/off_disabled.png",scaleGridLeft="6",scaleGridTop="6",scaleGridRight="52",scaleGridBottom="20");
+}
+
+.acce
+{
+	upSkin: Embed(source="assets/main/acce_up.png");
+	overSkin: Embed(source="assets/main/acce_over.png");
+	downSkin: Embed(source="assets/main/acce_down.png");
+}
+
+.add
+{
+	upSkin: Embed(source="assets/main/add_up.png");
+	overSkin: Embed(source="assets/main/add_over.png");
+	downSkin: Embed(source="assets/main/add_down.png");
+}
+
+.fight
+{
+	upSkin: Embed(source="assets/fight/btn_up.png");
+	overSkin: Embed(source="assets/fight/btn_over.png");
+	downSkin: Embed(source="assets/fight/btn_up.png");
+}
+
+/*
+//------------------------------
+//  聊天
+//------------------------------
+*/
+
+.send
+{
+	upSkin: Embed(source="assets/chat/send_up.png");
+	overSkin: Embed(source="assets/chat/send_over.png");
+	downSkin: Embed(source="assets/chat/send_down.png");
+}
+
+.open
+{
+	upSkin: Embed(source="assets/chat/open_up.png");
+	overSkin: Embed(source="assets/chat/open_over.png");
+	downSkin: Embed(source="assets/chat/open_down.png");
+}
+
+.close
+{
+	upSkin: Embed(source="assets/chat/close_up.png");
+	overSkin: Embed(source="assets/chat/close_over.png");
+	downSkin: Embed(source="assets/chat/close_down.png");
+}
+
+.chatType
+{
+	upSkin: Embed(source="assets/chat/type_up.png");
+	overSkin: Embed(source="assets/chat/type_over.png");
+	downSkin: Embed(source="assets/chat/type_down.png");
+	
+	selectedUpSkin: Embed(source='assets/chat/type_over.png');
+	selectedOverSkin: Embed(source='assets/chat/type_over.png');
+	selectedDownSkin: Embed(source='assets/chat/type_down.png');
+	
+	textSelectedColor: #E9F707;
+}
+
+/*
+//------------------------------
+//  购买道具
+//------------------------------
+*/
+
+.treasureBuy
+{
+	upSkin: Embed(source="assets/treasure/buyUp.png");
+	overSkin: Embed(source="assets/treasure/buyOver.png");
+	downSkin: Embed(source="assets/treasure/buyDown.png");
+	disabledSkin: Embed(source="assets/treasure/buyDisable.png");
+	
+	selectedUpSkin: Embed(source='assets/treasure/buyUp.png');
+	selectedOverSkin: Embed(source='assets/treasure/buyOver.png');
+	selectedDownSkin: Embed(source='assets/treasure/buyDown.png');
+	selectedDisabledSkin: Embed(source='assets/treasure/buyDisable.png');
+}
+
+/*
+//------------------------------
+//  分页栏
+//------------------------------
+*/
+.first
+{
+	upSkin: Embed(source="assets/page/firstUp.png");
+	overSkin: Embed(source="assets/page/firstOver.png");
+	downSkin: Embed(source="assets/page/firstUp.png");
+	disabledSkin: Embed(source="assets/page/firstUp.png");
+	
+	selectedUpSkin: Embed(source='assets/page/firstOver.png');
+	selectedOverSkin: Embed(source='assets/page/firstOver.png');
+	selectedDownSkin: Embed(source='assets/page/firstOver.png');
+	selectedDisabledSkin: Embed(source='assets/page/firstOver.png');
+}
+
+.prior
+{
+	upSkin: Embed(source="assets/page/priorUp.png");
+	overSkin: Embed(source="assets/page/priorOver.png");
+	downSkin: Embed(source="assets/page/priorUp.png");
+	disabledSkin: Embed(source="assets/page/priorUp.png");
+	
+	selectedUpSkin: Embed(source='assets/page/priorOver.png');
+	selectedOverSkin: Embed(source='assets/page/priorOver.png');
+	selectedDownSkin: Embed(source='assets/page/priorOver.png');
+	selectedDisabledSkin: Embed(source='assets/page/priorOver.png');
+}
+
+.next
+{
+	upSkin: Embed(source="assets/page/nextUp.png");
+	overSkin: Embed(source="assets/page/nextOver.png");
+	downSkin: Embed(source="assets/page/nextUp.png");
+	disabledSkin: Embed(source="assets/page/nextUp.png");
+	
+	selectedUpSkin: Embed(source='assets/page/nextOver.png');
+	selectedOverSkin: Embed(source='assets/page/nextOver.png');
+	selectedDownSkin: Embed(source='assets/page/nextOver.png');
+	selectedDisabledSkin: Embed(source='assets/page/nextOver.png');
+}
+
+.last
+{
+	upSkin: Embed(source="assets/page/lastUp.png");
+	overSkin: Embed(source="assets/page/lastOver.png");
+	downSkin: Embed(source="assets/page/lastUp.png");
+	disabledSkin: Embed(source="assets/page/lastUp.png");
+	
+	selectedUpSkin: Embed(source='assets/page/lastOver.png');
+	selectedOverSkin: Embed(source='assets/page/lastOver.png');
+	selectedDownSkin: Embed(source='assets/page/lastOver.png');
+	selectedDisabledSkin: Embed(source='assets/page/lastOver.png');
+}
+
+/*
+//------------------------------
+//  游戏窗口--抬头字体
+//------------------------------
+*/
+.title
+{
+	fontFamily:"新宋体";
+	fontSize:14;
+	color:#C8D8A9;
+}
+
+/*
+//------------------------------
+//  游戏窗口--标签字体
+//------------------------------
+*/
+.label
+{
+	fontFamily:"新宋体";
+	fontSize:12;
+	color:#BD9E61;
+}
+
+/*
+//------------------------------
+//  游戏窗口--城池名称
+//------------------------------
+*/
+.cityName
+{
+	fontFamily:"新宋体";
+	fontSize:14;
+	color:#FFFFFF;
+}
+
+/*
+//------------------------------
+//  游戏窗口--内容字体
+//------------------------------
+*/
+.content
+{
+	fontFamily:"新宋体";
+	fontSize:12;
+	color:#C8D8A9;
+}
+
+/*
+//------------------------------
+//  游戏窗口-- 数字字体
+//------------------------------
+*/
+.number
+{
+	fontFamily:"Arial";
+	fontSize:12;
+	color:#E3D71F;
+}
+
+
+/*
+//------------------------------
+//  游戏地图--城池名称标签
+//------------------------------
+*/
+.mapCityLabel
+{
+	fontFamily:"新宋体";
+	fontSize:12;
+	color:#FFFFFF;
+	textAlign:"center";
+}
+
+/*
+//------------------------------
+//  界面中的框的样式
+//------------------------------
+*/
+.winCanvas
+{
+	borderStyle:"solid"; 
+	borderThickness:1; 
+	borderColor:#5C6717; 
+	cornerRadius:5; 
+	backgroundColor:#434A0C; 
+	backgroundAlpha:0.3;
+}
+
+.lowCanvas
+{
+	borderStyle:"inset"; 
+	borderThickness:1; 
+	borderColor:#5C6717; 
+	backgroundColor:#434A0C;
+	backgroundAlpha:0.3; 
+}
+

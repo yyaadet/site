@@ -1,0 +1,186 @@
+<%inherit file="index3.html" />
+
+
+
+<%def name="html_content_title()">
+申请推广员
+</%def>
+
+
+
+
+<%def name="html_content()">
+
+<!-- 申请推广员-->
+<input type="hidden" name="err" id="err" value="${c.err}" />
+     <form id="form1" name="form1" method="post" action="/home/expand_game">
+     <input type="hidden" name="act" value="applyfor">
+     <div class="tuiguan_big">
+         <div class="tuiguan_top"><strong>填写以下信息后，您就成为我们推广员家族中的一员了，预祝您获得丰厚收益。</strong><br />
+           友情提示：为了确保您能顺利获得推广收益，请保证您的基本信息真实有效。如因资料真实性造成推广积分兑换问题，我们将
+不负任何责任。</div>
+          <div class="zhiliao">
+         <ul>
+         <li>　&nbsp;&nbsp;<strong>基本信息：</strong></li>
+         <li>　&nbsp;&nbsp;&nbsp;通行证账号：
+           ${c.user_name}           </li>
+         <li>　&nbsp;&nbsp;　&nbsp;电子邮箱：<input type="text" id="email" name="email" style="width:150px; height:16px; " maxlength="30" />
+　　<font color="#C2001A">您将通过这个邮箱收到推广专区的第一手资讯</font></li>
+         <li>　&nbsp;&nbsp;　&nbsp;真实姓名：<input type="text" id="real_name" name="real_name" style="width:150px; height:16px; " maxlength="30" />
+　　<font color="#C2001A">真实姓名和身份证号码用于身份验证，一经填写将不能随意修改</font></li>
+         <li>　&nbsp;&nbsp;&nbsp;身份证号码：<input type="text" id="id_card" name="id_card" style="width:150px; height:16px; " maxlength="30" />
+　　</li>
+         <li>　&nbsp;&nbsp;<strong>支付信息：</strong></li>
+         <li>　&nbsp;&nbsp;&nbsp;支付宝账号：<input type="text" id="alipay" name="alipay" style="width:150px; height:16px; " maxlength="30" />
+　　<font color="#C2001A">与汇款相关，请填支付宝账号</font></li>
+         </ul>
+         </div>
+         <div class="botton">　　　　　　　　　　　　　<input id="reg" type="image" src="/images/tongxz_02.jpg"/></div>
+     </div>
+     </form>
+     <!--end 申请推广员-->
+
+</%def>
+
+<%def name="foot_js()">
+<script>
+$(document).ready(function() {
+
+if ($("#err").val() != ""){alert($("#err").val());}
+
+var alipay = false;
+var email = false;
+var real_name = false;
+var id_card = false;
+
+
+$("#email").blur(function(){
+    var email_val = $("#email").val()
+    if (!checkEmail(email_val)){
+        alert("邮箱格式有误");
+        email = false;
+    }else{
+        email = true;
+    }
+});
+
+
+$("#real_name").blur(function(){
+    if ($("#real_name").val() == ""){
+        alert("真实姓名不能为空");
+        real_name = false;
+    }else{
+        real_name = true;
+    }
+});
+
+$("#alipay").blur(function(){
+    if ($("#alipay").val() == ""){
+        alert("支付宝不能为空");
+        alipay = false;
+    }else{
+        alipay = true;
+    }
+});
+
+$("#id_card").blur(function(){
+    var id_num = $("#id_card").val();
+    if (id_num == ""){
+        alert("身份证不能为空");
+        id_card = false;
+    }else if(checkIdcard(id_num)!="true"){
+        alert("身份证号有误");
+        id_card = false;
+    }else{
+        id_card = true;
+    }
+});
+
+$("#reg").submit(function(){
+    var res = alipay && email && id_card && real_name;
+    if (res){
+        return true;
+    }else{
+        alert("提交的信息有误或者不完整！");
+        return false;
+    }
+    });
+
+
+function checkEmail(str_email){
+    var re =  /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+    var res = str_email.match(re);
+    return res;
+}
+
+function checkIdcard(idcard) {
+    var Errors = new Array(
+            "true",
+            "身份证号码位数不对!",
+            "身份证号码出生日期超出范围或含有非法字符!",
+            "身份证号码校验错误!",
+            "身份证地区非法!"
+            );
+    var area = {11:"北京",12:"天津",13:"河北",14:"山西",15:"内蒙古",21:"辽宁",22:"吉林",23:"黑龙江",31:"上海",32:"江苏",33:"浙江",34:"安徽",35:"福建",36:"江西",37:"山东",41:"河南",42:"湖北",43:"湖南",44:"广东",45:"广西",46:"海南",50:"重庆",51:"四川",52:"贵州",53:"云南",54:"西藏",61:"陕西",62:"甘肃",63:"青海",64:"宁夏",65:"新疆",71:"台湾",81:"香港",82:"澳门",91:"国外"}
+    var idcard,Y,JYM;
+    var S,M;
+    var idcard_array = new Array();
+    idcard_array = idcard.split("");
+    //地区检验
+    if (area[parseInt(idcard.substr(0, 2))] == null) return Errors[4];
+    //身份号码位数及格式检验
+    switch (idcard.length) {
+        case 15:
+            if ((parseInt(idcard.substr(6, 2)) + 1900) % 4 == 0 || ((parseInt(idcard.substr(6, 2)) + 1900) % 100 == 0 && (parseInt(idcard.substr(6, 2)) + 1900) % 4 == 0 )) {
+                ereg = /^[1-9][0-9]{5}[0-9]{2}((01|03|05|07|08|10|12)(0[1-9]|[1-2][0-9]|3[0-1])|(04|06|09|11)(0[1-9]|[1-2][0-9]|30)|02(0[1-9]|[1-2][0-9]))[0-9]{3}$/;
+                //测试出生日期的合法性
+            } else {
+                ereg = /^[1-9][0-9]{5}[0-9]{2}((01|03|05|07|08|10|12)(0[1-9]|[1-2][0-9]|3[0-1])|(04|06|09|11)(0[1-9]|[1-2][0-9]|30)|02(0[1-9]|1[0-9]|2[0-8]))[0-9]{3}$/;
+                //测试出生日期的合法性
+            }
+            if (ereg.test(idcard)) return Errors[0];
+            else return Errors[2];
+            break;
+        case 18:
+        //18位身份号码检测
+        //出生日期的合法性检查
+        //闰年月日:((01|03|05|07|08|10|12)(0[1-9]|[1-2][0-9]|3[0-1])|(04|06|09|11)(0[1-9]|[1-2][0-9]|30)|02(0[1-9]|[1-2][0-9]))
+        //平年月日:((01|03|05|07|08|10|12)(0[1-9]|[1-2][0-9]|3[0-1])|(04|06|09|11)(0[1-9]|[1-2][0-9]|30)|02(0[1-9]|1[0-9]|2[0-8]))
+            if (parseInt(idcard.substr(6, 4)) % 4 == 0 || (parseInt(idcard.substr(6, 4)) % 100 == 0 && parseInt(idcard.substr(6, 4)) % 4 == 0 )) {
+                ereg = /^[1-9][0-9]{5}(19|20)[0-9]{2}((01|03|05|07|08|10|12)(0[1-9]|[1-2][0-9]|3[0-1])|(04|06|09|11)(0[1-9]|[1-2][0-9]|30)|02(0[1-9]|[1-2][0-9]))[0-9]{3}[0-9Xx]$/;
+                //闰年出生日期的合法性正则表达式
+            } else {
+                ereg = /^[1-9][0-9]{5}(19|20)[0-9]{2}((01|03|05|07|08|10|12)(0[1-9]|[1-2][0-9]|3[0-1])|(04|06|09|11)(0[1-9]|[1-2][0-9]|30)|02(0[1-9]|1[0-9]|2[0-8]))[0-9]{3}[0-9Xx]$/;
+                //平年出生日期的合法性正则表达式
+            }
+            if (ereg.test(idcard)) {//测试出生日期的合法性
+                //计算校验位
+                S = (parseInt(idcard_array[0]) + parseInt(idcard_array[10])) * 7
+                        + (parseInt(idcard_array[1]) + parseInt(idcard_array[11])) * 9
+                        + (parseInt(idcard_array[2]) + parseInt(idcard_array[12])) * 10
+                        + (parseInt(idcard_array[3]) + parseInt(idcard_array[13])) * 5
+                        + (parseInt(idcard_array[4]) + parseInt(idcard_array[14])) * 8
+                        + (parseInt(idcard_array[5]) + parseInt(idcard_array[15])) * 4
+                        + (parseInt(idcard_array[6]) + parseInt(idcard_array[16])) * 2
+                        + parseInt(idcard_array[7]) * 1
+                        + parseInt(idcard_array[8]) * 6
+                        + parseInt(idcard_array[9]) * 3;
+                Y = S % 11;
+                M = "F";
+                JYM = "10X98765432";
+                M = JYM.substr(Y, 1);
+                //判断校验位
+                if (M == idcard_array[17].toUpperCase()) return Errors[0]; //检测ID的校验位
+                else return Errors[3];
+            }
+            else return Errors[2];
+            break;
+        default:
+            return Errors[1];
+            break;
+    }
+}
+
+});
+</script>
+</%def>

@@ -1,0 +1,240 @@
+## -*- coding: utf-8 -*-
+
+<!-- 推荐阅读 -->
+<%def name="get_webgame_news_recommand(news)">
+<%
+from digg.model.webgame_news import WebgameNews
+import pymongo
+
+objs = []
+if news.webgame_id:
+    objs = WebgameNews.query({'webgame_id': news.webgame_id}, limit = 6, sort=[('score', pymongo.DESCENDING)])
+    if not objs:
+    	objs = WebgameNews.query({'group_id': news.group_id}, limit = 6, sort=[('score', pymongo.DESCENDING)])
+else:
+	objs = WebgameNews.query({}, limit = 6, sort=[('score', pymongo.DESCENDING)])
+if news in objs:
+    objs.remove(news)
+%>
+<div class="table" style="border-bottom: solid 1px #CEE3F8;">
+    <div class="row">
+        <div class="col" style="font-size: 1.3em; background: #EFF7FF;">
+        推荐阅读
+        </div>
+    </div>
+</div>
+
+<div class="table">
+%for obj in objs:
+    <div class="row">
+        <div class="col" style="width: 600px; margin-left: 10px;">
+        	<%
+            url = h.static_webgame_news_detail_url(obj._id)
+            %>
+            <div class="col_line"><a href="${url}" title="${obj.title}" target="_blank">${h.short_text(obj.title, 50)}</a></div>
+        </div>
+    </div>
+%endfor
+</div>
+
+</%def>
+<!-- end -->
+
+<%def name="get_webgame_news_list(tag, objs, group_id, start_page, page, end_page, show_menu = True, show_page = True, show_url = False, limit = 25, is_short=True)">
+<script type="text/javascript">
+function vote(id, type)
+{
+	/* type: 0, bad; 1, good; */
+	$.getJSON("/webgame_news/vote", {"id": id, "type": type}, function(result) {
+		if (result.is_ok) {
+			$("#score_" + id).html(result.score);
+		}
+	});
+}
+
+function vote_50(id, type)
+{
+	/* type: 0, bad; 1, good; */
+	$.getJSON("/webgame_news/vote", {"id": id, "type": 1, "num": 50}, function(result) {
+		if (result.is_ok) {
+			$("#score_" + id).html(result.score);
+		}
+	});
+}
+
+function get_city(id, e)
+{
+	/* type: 0, bad; 1, good; */
+	$.getJSON("/webgame_news/get_city", {"id": id}, function(result) {
+		if (result.city) {
+            $("#city_" + id).html(result.city);
+		}
+	});
+}
+
+function show_big_img(e)
+{
+    if (e.width != 500) {
+        e.width = 500;
+        e.height = 280;
+    }
+    else {
+        e.width = 130;
+        e.height = 80;
+    }
+}
+
+function rem_news(container, id)
+{
+    var code = window.confirm("您确定要删除吗？");
+	if (code == true) {
+        $.getJSON("/webgame_news/rem", {"id": id}, function(result) {
+            if (result.is_ok) {
+                $("#" + container).remove();
+            }
+        });
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+</script>
+
+%if show_menu:
+<%
+from digg.model.webgame_group import WebgameGroup
+menus = [
+		{'name': u"最热", 'url': "/webgame_news/hotest"},
+                {'name': u"最新", 'url': "/webgame_news/newest"},
+]
+link_style = "text_button"
+%>
+<div class="table">
+    <div class="row">
+        %for menu in menus:
+        <%
+        if menu['name'] == c.menu_name:
+            link_style = "link_button"
+        else:
+            link_style = "text_button"
+        %>
+        <div class="col ${link_style}" style="text-align: center;"><a href="${menu['url']}">${menu['name']}</a></div>
+        %endfor
+    </div>
+</div>
+<div class="table">
+    <div class="row">
+        <div class="col" style="width: 80px;"><a href="${h.static_webgame_news_page_url(tag, 0, 1)}">全部类型</a></div>
+        %for info in WebgameGroup:
+            <div class="col" style="width: 80px;"><a href="${h.static_webgame_news_page_url(tag, info['id'], 1)}">${info['name']}</a></div>
+        %endfor
+    </div>
+    <div class="row" style="border-bottom: solid 1px #CEE3F8; height: 2px; min-height: 0;"></div>
+</div>
+%endif
+
+<%
+offset = page - 1
+if offset < 0:
+    offset = 0
+rank = 0 + offset * limit
+%>
+%for obj in objs:
+<% rank += 1 %>
+<div class="table" id="news_${rank}">
+    <div class="row">
+        <div class="col" style="width: 30px; min-width: 0;">
+            <div class="col_line rank">${rank}</div>
+        </div>
+        <div class="col" style="width: 40px; min-width: 0;">
+            <div class="col_line love" id="arrow_up_${obj._id}" onclick="vote('${obj._id}', 1);"></div>
+            <div class="col_line score" id="score_${obj._id}">${obj.good_num - obj.bad_num}</div>
+            <div id="arrow_down_${obj._id}" class="col_line nolove" onclick="vote('${obj._id}', 0);"></div>
+        </div>
+        <div class="col" style="width: 500px;">
+        	<%
+            import time
+            now = int(time.time())
+            url = h.static_webgame_news_detail_url(obj._id)
+            real_url = h.site_url("/webgame_news/go?id=" + obj._id)
+            %>
+            %if obj.imgs:
+            <div class="col_line tip_text">
+                %for img in obj.imgs:
+                <a href="${img}" target="_blank"><img width="120" height="80" src="${img}" /></a>
+                %endfor
+            </div>
+            %endif
+            <div class="col_line">
+                <a href="${real_url}" target="_blank" class="title">${obj.title}</a>
+                <a href="${url}" target="_blank">查看评论</a>
+            </div>
+            <div class="col_line tip_text">
+                在${h.diff_time(obj.timestamp, now)} 前发布到 【<a href='${h.static_webgame_detail_url(obj.webgame_id)}'>${obj.webgame_name}</a>】，
+                评论：${obj.comment_num}，
+                人气：${obj.view_num}，
+                围观：${obj.go_num} 
+            </div>
+            <div class="col_line" style="height: 140px;  overflow: hidden;">
+            	<p>
+            	%if is_short:
+            	${h.short_text(obj.cnt, 200)}
+            	%else:
+            	${obj.cnt|n}
+            	%endif
+            	</p>
+            </div>
+            %if h.url_is_img(obj.url):
+            <div class="col_line">
+            	<img src="${obj.url}" width="130px" height="80px" onclick="show_big_img(this);" alt="${obj.title}">
+            </div>
+            %endif
+            
+            <div class="col_line tip_text">
+                作者：${obj.uname} |
+                %if obj.city:
+                城市：${obj.city} |
+                %else:
+                城市：<a href="javascript:void(0)" onclick="get_city('${obj._id}')" id="city_${obj._id}">++获取来源城市++</a> |
+                %endif
+                得分：${round(obj.score, 2)}
+            </div>
+			
+            %if (obj.uid and c.uid == obj.uid) or c.is_admin == 1:
+            <div class="col_line">
+                <a onclick="return rem_news('news_${rank}', '${obj._id}')">删除</a>
+                 |
+                %if c.is_admin == 1:
+                <a  onclick="vote_50('${obj._id}');">增加50好评</a>
+                %endif
+            </div>
+            %endif
+
+        </div>
+    </div>
+</div>
+<div class="interval"></div>
+%endfor
+
+%if show_page:
+<!-- page -->
+<div class="table">
+    <div class="row">
+        %if start_page > 1:
+        <div class="col"><a href="${h.static_webgame_news_page_url(tag, group_id, start_page - 1)}">前10页</a></div>
+        %endif
+        %for i in range(start_page + 1, end_page):
+        <div class="col" style="min-width: 20px;">
+            %if i == page:
+            <strong><a href="${h.static_webgame_news_page_url(tag, group_id, i)}">[${i}]</a></strong>
+            %else:
+            <a href="${h.static_webgame_news_page_url(tag, group_id, i)}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col"><a href="${h.static_webgame_news_page_url(tag, group_id, end_page)}">后10页</a></div>
+    </div>
+</div>
+%endif
+</%def>

@@ -1,0 +1,86 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+<%namespace name="flash_game" file="/flash_game/func.mako.html" />
+
+<%def name="get_title()">上传小游戏</%def>
+
+<%def name="get_content()">
+<script type="text/javascript">
+
+function show_result(responseText, statusText, xhr, $form)
+{
+	if (parseInt(responseText) == 1) {
+		$("#error").html("成功");
+		$("#upload").resetForm();
+	}
+	else {
+		$("#error").html("发生错误：" + responseText);
+	}
+}
+
+function showRequest(formData, jqForm, options) { 
+	$("#error").html("正在上传中，请不要做其他操作...");
+}
+
+$(document).ready(function() { 
+	var options = {beforeSubmit: showRequest, success: show_result, resetForm: false};
+	$("#upload").submit(function() {
+		$(this).ajaxSubmit(options);
+		return false;
+	}); 
+});
+</script>
+<div id="content">
+         <div style="color:#FF0000;" id="error"></div>
+         <form id="upload" method="post" action="/admin/flash_game_add_do" enctype="multipart/form-data">
+        	<table id="mytable">
+               <tr>
+                	<td style="width: 100px;">* 游戏名称</td>
+                    <td><input type="text" name="name" value="${c.name}" /> <label style="color:#ccc">不超过20个汉字或40个字母数字</label></td>
+                </tr>
+                <tr>
+                	<td>* 尺寸大小</td>
+                    <td><input type="text" name="width" value="800" style="width: 40px;" /> * <input type="text" name="height" value="600" style="width: 40px;"/> <label style="color:#ccc">不能超过800*600</label></td>
+                </tr>
+                <tr>
+                	<td>* 选择文件</td>
+                    <td><input type="file" name="file"/> <label style="color:#ccc">仅支持swf文件，限20M</label></td>
+                </tr>
+                <tr>
+                	<td>* 游戏封面</td>
+                    <td><input type="file" name="pic"/> <label style="color:#ccc">jpg、bmp、gif格式，100K以内</label></td>
+                </tr>
+                <tr>
+                	<td>* 游戏分类</td>
+                    <td>
+                    	${flash_game.get_group(0)}
+                    </td>
+                </tr>
+                <tr>
+                	<td>* 游戏简介</td>
+                    <td><textarea class="text" name="info">${c.info}</textarea> <br />
+                    <label style="color:#ccc">不超过200个汉字或400个字母</label></td>
+                </tr>
+                <tr>
+                	<td>* 操作说明</td>
+                    <td><textarea class="text" name="operate_info">${c.operate_log}</textarea><br />
+                    <label style="color:#ccc">不超过200个汉字或400个字母</label>
+                    </td>
+                </tr>
+                <tr>
+                	<td>* 作者姓名</td>
+                    <td><input type="text" name="author" value="${c.author}" /></td>
+                </tr>
+                <tr>
+                	<td>联系电话</td>
+                    <td><input type="text" name="phone" value="${c.phone}" /></td>
+                </tr>
+                <tr>
+                	<td></td>
+                    <td><input type="submit" value="提 交"  class="button" /></td>
+                </tr>
+            </table>
+            </form> 
+</div>
+</%def>

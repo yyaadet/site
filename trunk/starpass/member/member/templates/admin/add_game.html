@@ -1,0 +1,48 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">添加游戏</span>
+</div>
+
+<div class="content_content">
+<form action="/admin/add_game" method="post">
+    <input type="hidden" name="act" value="add" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="game_name">游戏名称</label>
+    <input type="text" id="game_name" name="game_name" />
+    </p>
+    
+    <p>
+    <label for="developer">开&nbsp;发&nbsp;商</label>
+    <input type="text" id="developer" name="developer" />
+    </p>
+    
+    <p>
+    <label for="website">&nbsp;&nbsp;&nbsp;&nbsp;主页</label>
+    <input type="text" id="website" name="website" size="60"/>
+    </p>
+    
+    <p>
+    <label for="description">&nbsp;&nbsp;&nbsp;&nbsp;描述</label>
+        <textarea rows="5" cols="60"   id="description" name="description" ></textarea>
+    </p>
+    
+    <p>
+    <label for="pic_url">图片地址</label>
+    <input type="text" id="pic_url" name="pic_url" size="60" />
+    </p>
+    
+    <p>
+    <input type="submit" id="smit"  value="提交" />
+    </p>
+</form>
+</div>
+
+</%def>

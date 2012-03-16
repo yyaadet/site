@@ -1,0 +1,41 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+
+<div id="content" >
+        <form method="get" action="/admin/setting_edit">
+        	<table>
+                <tr>
+                	<td>是否静态化URL：</td>
+                    <td><input type="text" name="is_use_static_url" class="text" value="${c.setting.is_use_static_url}" /></td>
+                </tr>
+                <tr>
+                	<td>seo标题：</td>
+                    <td><input type="text" name="seo_title" value="${c.setting.seo_title}" class="text" /></td>
+                </tr>
+                <tr>
+                	<td>seo关键字：</td>
+                    <td><input type="text" name="seo_keywords" value="${c.setting.seo_keywords}" class="text" /></td>
+                </tr>
+                <tr>
+                	<td>seo描述：</td>
+                    <td><textarea name="seo_desc" class="text" >${c.setting.seo_desc}</textarea></td>
+                </tr>
+                <tr>
+                	<td></td>
+                    <td><input type="submit" value="保存" class="button" /></td>
+                </tr>
+            </table>
+        </form>
+        <div class="table">
+        	<div class="row">nginx rewrite rule:</div>
+        	<div class="row">
+            <p>
+            rewrite "^/news/detail/([0-9a-z]+)\.html$" /news/detail?id=$1 break;<br  />
+            </p>
+        	</div>
+       </div>
+</div>
+</%def>

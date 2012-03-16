@@ -1,0 +1,142 @@
+<style type="text/css">
+table{width:100%;border-collapse:collapse;margin:1em 0;}
+th, td{text-align:left;padding:.5em;border:1px solid #ddc08f;
+		font-family:"宋体";
+	line-height:20px;
+	font-size:12px;
+	
+	}
+th{background:#ac7e43 repeat-x;color:#fff;}
+td{background:#f9f0e1;}
+</style>
+<table>
+    <tr> 
+        <td>运维组名称</td>
+        <td>
+            <input type="text" name="name" id="name">
+        </td>
+    </tr>
+    <tr> 
+        <td>运维组描述</td>
+        <td><input type="text" name="description" id="description"></td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <td colspan="4"><font color=red>用户权限管理</font></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" name="show_user" id="show_user" />查看用户</td>
+        <td><input type="checkbox" name="lock_user" id="lock_user" />锁定用户</td>
+        <td><input type="checkbox" name="show_pay_log" id="show_pay_log" />查看购买记录</td>
+        <td><input type="checkbox" name="show_consume_log" id="show_consume_log" />查看消费记录</td>
+    </tr>
+    <tr>
+        <td colspan="4"><font color=red>道具管理</font></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" name="show_treasure" id="show_treasure" />查看道具</td>
+        <td><input type="checkbox" name="edit_treasure" id="edit_treasure" />编辑道具</td>
+        <td><input type="checkbox" name="del_treasure" id="del_treasure" />删除道具</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="4"><font color=red>副本管理</font></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" name="show_game" id="show_game" />查看副本</td>
+        <td><input type="checkbox" name="edit_game" id="edit_game" />编辑副本</td>
+        <td><input type="checkbox" name="del_game" id="del_game" />删除副本</td>
+        <td>&nbsp;</td>
+    </tr>
+
+    <tr>
+        <td colspan="4"><font color=red>运维管理</font></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" name="show_maintainer" id="show_maintainer" />查看运维</td>
+        <td><input type="checkbox" name="add_maintainer" id="add_maintainer" />增加运维</td>
+        <td><input type="checkbox" name="del_maintainer" id="del_maintainer" />删除运维</td>
+        <td>&nbsp;</td>
+    </tr>
+    
+    <tr>
+        <td colspan="4"><font color=red>游戏服务器管理</font></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" name="show_server" id="show_server" />查看服务器</td>
+        <td><input type="checkbox" name="add_server" id="add_server" />添加服务器</td>
+        <td><input type="checkbox" name="edit_server" id="edit_server" />编辑服务器</td>
+        <td><input type="checkbox" name="del_server" id="del_server" />删除服务器</td>
+    </tr>
+    
+    <tr>
+        <td colspan="4"><font color=red>缓存管理</font></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" name="show_cache" id="show_cache" />查看缓存</td>
+        <td><input type="checkbox" name="del_cache" id="del_cache" />删除缓存</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    
+    <tr>
+        <td colspan="4"><font color=red>系统设置</font></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" name="edit_resource" id="edit_resource" />资源服务器设置</td>
+        <td><input type="checkbox" name="edit_memcached" id="edit_memcached" />memcached服务器设置</td>
+        <td><input type="checkbox" name="edit_mail" id="edit_mail" />邮件设置</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" name="edit_logsetting" id="edit_logsetting" />系统登录设置</td>
+        <td><input type="checkbox" name="edit_invite" id="edit_invite" />邀请设置</td>
+        <td><input type="checkbox" name="edit_pay_key" id="edit_pay_key" />支付密钥设置</td>
+        <td>&nbsp;</td>
+    </tr>
+    
+    <tr>
+        <td colspan="4"><font color=red>运维组管理</font></td>
+    </tr>
+    <tr>
+        <td><input type="checkbox" name="show_group" id="show_group" />查看运维组</td>
+        <td><input type="checkbox" name="edit_group" id="edit_group" />编辑运维组</td>
+        <td><input type="checkbox" name="del_group" id="del_group" />删除运维组</td>
+        <td>&nbsp;</td>
+    </tr>
+    
+    <tr>
+        <td colspan="4" ><input  type="button" value="确  定" onclick="selectTab('/admin2/group?action=add&name='+$('#name').val()+'&description='+$('#description').val()
+            +'&show_user='+$('#show_user').attr('checked')
+            +'&lock_user='+$('#lock_user').attr('checked')
+            +'&show_pay_log='+$('#show_pay_log').attr('checked')
+            +'&show_consume_log='+$('#show_consume_log').attr('checked')
+            +'&show_treasure='+$('#show_treasure').attr('checked')
+            +'&edit_treasure='+$('#edit_treasure').attr('checked')
+            +'&del_treasure='+$('#del_treasure').attr('checked')
+            +'&show_game='+$('#show_game').attr('checked')
+            +'&edit_game='+$('#edit_game').attr('checked')
+            +'&del_game='+$('#del_game').attr('checked')
+            +'&show_maintainer='+$('#show_maintainer').attr('checked')
+            +'&add_maintainer='+$('#add_maintainer').attr('checked')
+            +'&del_maintainer='+$('#del_maintainer').attr('checked')
+            +'&show_server='+$('#show_server').attr('checked')
+            +'&add_server='+$('#add_server').attr('checked')
+            +'&edit_server='+$('#edit_server').attr('checked')
+            +'&del_server='+$('#del_server').attr('checked')
+            +'&show_cache='+$('#show_cache').attr('checked')
+            +'&del_cache='+$('#del_cache').attr('checked')
+            +'&edit_resource='+$('#edit_resource').attr('checked')
+            +'&edit_memcached='+$('#edit_memcached').attr('checked')
+            +'&edit_mail='+$('#edit_mail').attr('checked')
+            +'&edit_logsetting='+$('#edit_logsetting').attr('checked')
+            +'&edit_invite='+$('#edit_invite').attr('checked')
+            +'&edit_pay_key='+$('#edit_pay_key').attr('checked')
+            +'&show_group='+$('#show_group').attr('checked')
+            +'&edit_group='+$('#edit_group').attr('checked')
+            +'&del_group='+$('#del_group').attr('checked')
+            )"/></td>
+    </tr>
+</table>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="50" height="40" xmlns:ns1="utils.components.*">
+	
+	<mx:Script>
+		<![CDATA[
+		
+			import city.ui.events.AreaEvent;
+			
+			private function rob():void
+			{
+				var evt:AreaEvent = new AreaEvent(AreaEvent.ROB);
+				this.dispatchEvent(evt);
+			}
+			
+			private function mail():void
+			{
+				var evt:AreaEvent = new AreaEvent(AreaEvent.MAIL);
+				this.dispatchEvent(evt);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton x="0" y="0" height="20" width="50" label="掠　夺" btnType="menu" click="rob();"/>
+	<ns1:GameButton x="0" y="20" height="20" width="50" label="发　信" btnType="menu" click="mail();"/>
+	
+</mx:Canvas>

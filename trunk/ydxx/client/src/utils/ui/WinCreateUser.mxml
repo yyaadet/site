@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="utils.components.*" backgroundColor="0x000000" width="1000" height="580" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.utils.setTimeout;
+			import utils.WinManager;
+			import map.MapUtil;
+			import net.tcp.model.TcpCreateUser;
+			import map.list.CityPointList;
+			import map.model.CityPoint;
+			import net.tcp.TcpManager;
+			import mx.core.ScrollPolicy;
+			import utils.FormatText;
+		
+			import utils.PubUnit;
+			import city.model.City;
+			import utils.GameManager;
+			import city.list.CityList;
+			
+			private var cityID:int = 0;
+			private var cityList:CityList = null;
+			private var cityPointList:CityPointList = new CityPointList();
+			
+			[Bindable]
+			private var imgURL:String = "";
+			
+			private var faceSex:int = 1;
+			private var curFace:int = 1;
+			private var maxFace:int = 20;
+			
+			private function init():void
+			{
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+				cvMain.x = int((this.width - cvMain.width) / 2);
+				cvMain.y = int((this.height - cvMain.height) / 2);
+				
+				cvInput.setTitle("创建角色");
+				cvInput.isShowClose(false);
+				cvInput.isShowHelp(false);
+				
+				selCity();
+			}
+			
+			private function selCity():void
+			{
+				var gameCity:City = getCity();
+				if (gameCity != null)
+				{
+					var fullPer:Number = (gameCity.wubaoTotal - gameCity.wubaoNum) / gameCity.wubaoTotal * 100;
+					lblSel.text = gameCity.upName + " (拥挤度 " + PubUnit.formatNumber(fullPer, 2) + "%)";
+					cityID = gameCity.uniqID;
+				}
+				else
+					cityID = 0;
+			}
+			
+			private function getCity():City
+			{
+				cityList = GameManager.gameMgr.cityList;
+				var allotedCityList:CityList = cityList.getAllotedCityList();
+				if (allotedCityList.length <= 0)
+				{
+					WinManager.winMgr.showResult("已无城池可分配，请登录其他服务器", true, false, 1);
+					return null;
+				}
+				
+				var randomID:int = PubUnit.getRandom(1, allotedCityList.length);
+				var gameCity:City = allotedCityList.getObjByIndex(randomID - 1) as City;
+				if (gameCity != null)
+				{
+					cvSel.x = gameCity.mapX * 0.14 - 11 < 0 ? 0 : gameCity.mapX * 0.14 - 11;
+					cvSel.y = gameCity.mapY * 0.14 - 22 < 0 ? 0 : gameCity.mapY * 0.14 - 22;
+				}
+				
+				return gameCity;
+			}
+			
+			private function send():void
+			{
+				if (userName.text == "")
+				{
+					WinManager.winMgr.showResult("请输入您的君主名称");
+					return;
+				}
+				
+				WinManager.winMgr.showLoadingIntf("正在创建角色，请稍候...");
+				setTimeout(createUser, 500);
+			}
+			
+			private function createUser():void
+			{
+				var createUser:TcpCreateUser = new TcpCreateUser();
+				
+				createUser.cityID = cityID;
+				createUser.userName = userName.text;
+				
+				TcpManager.tcpMgr.sendCreateUser(createUser);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvMain" x="0" y="0" width="1000" height="600">
+		<mx:Canvas x="5" y="5" width="710" height="570" styleName="lowCanvas">
+			<mx:Canvas id="mapSel" width="700" height="560" backgroundImage="@Embed(source='../../images/assets/map/city_sel.jpg')" x="3" y="3"  verticalScrollPolicy="off" horizontalScrollPolicy="off">
+				<mx:Canvas id="cvSel" x="227" y="210" width="22" height="25" backgroundImage="@Embed(source='../../images/assets/map/qi.png')">
+				</mx:Canvas>
+			</mx:Canvas>
+		</mx:Canvas>
+		
+		<ns1:GameWindow id="cvInput" x="720" y="5" width="275" height="570">
+		
+			<mx:Label x="21.5" y="46" text="角色名称：" height="20" width="65"/>
+			<ns1:GameTextInput id="userName" isCH="true" width="64" height="22" x="86.5" y="44" textAlign="center" maxChars="4" styleName="content" creationComplete="userName.setFocus()">
+			</ns1:GameTextInput>
+			<mx:Label x="151.5" y="46" text="(最多输入4个中文)" height="20"/>
+			
+			<mx:Canvas x="20" y="74" width="232" height="157" styleName="winCanvas">
+				<mx:Label x="10" y="10" text="武将属性：" height="20" width="65"/>
+				<mx:Canvas x="10" y="35" width="100" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+					<mx:Label x="5" y="2" text="武力：" styleName="label" width="41" height="20" color="#FFFFFF"/>
+					<mx:Label id="lblKongfu" x="45" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left" text="80"/>
+				</mx:Canvas>
+				<mx:Canvas x="10" y="65" width="100" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+					<mx:Label x="5" y="2" text="智力：" styleName="label" width="41" height="20" color="#FFFFFF"/>
+					<mx:Label id="lblIntelli" x="45" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left" text="80"/>
+				</mx:Canvas>
+				<mx:Canvas x="10" y="95" width="100" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+					<mx:Label x="5" y="2" text="政治：" styleName="label" width="41" height="20" color="#FFFFFF"/>
+					<mx:Label id="lblPolity" x="45" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left" text="85"/>
+				</mx:Canvas>
+				<mx:Canvas x="10" y="125" width="100" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+					<mx:Label x="5" y="2" text="忠诚：" styleName="label" width="41" height="20" color="#FFFFFF"/>
+					<mx:Label id="lblFaith" x="45" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left" text="100"/>
+				</mx:Canvas>
+				<mx:Canvas x="120" y="35" width="100" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+					<mx:Label x="5" y="2" text="部曲：" styleName="label" width="41" height="20" color="#FFFFFF"/>
+					<mx:Label id="lblSolider" x="45" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left" text="剑兵 100"/>
+				</mx:Canvas>
+				<mx:Canvas x="120" y="65" width="100" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+					<mx:Label x="5" y="2" text="士气：" styleName="label" width="41" height="20" color="#FFFFFF"/>
+					<mx:Label id="lblSpirit" x="45" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left" text="50"/>
+				</mx:Canvas>
+				<mx:Canvas x="120" y="95" width="100" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+					<mx:Label x="5" y="2" text="技能：" styleName="label" width="41" height="20" color="#FFFFFF"/>
+					<mx:Label x="45" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left" text="奋斗"/>
+				</mx:Canvas>
+				<mx:Canvas x="120" y="125" width="100" height="22" backgroundColor="#808357" backgroundAlpha="0.2">
+					<mx:Label x="5" y="2" text="阵法：" styleName="label" width="41" height="20" color="#FFFFFF"/>
+					<mx:Label x="45" y="2" styleName="content" width="55" height="20" color="#E3D71F" textAlign="left" text="无"/>
+				</mx:Canvas>
+			</mx:Canvas>
+			
+			<mx:Label x="21.5" y="250" text="坞堡位置：" width="65" height="20"/>
+			<mx:Label id="lblSel" x="86.5" y="250" height="20"/>
+			<ns1:OKButton x="141.5" y="278" height="24" width="64" click="send();"/>
+			<ns1:GameButton x="69.5" y="278" label="重新选择" click="selCity();"/>
+			
+		</ns1:GameWindow>
+	</mx:Canvas>
+	
+</mx:Canvas>

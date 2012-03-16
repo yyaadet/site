@@ -1,0 +1,24 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+
+<%def name="get_title()">删除确认</%def>
+
+<%def name="get_content()">
+<div id="content">
+    <div id="content_left">
+    	
+    </div>
+    <div id="content_right">
+        <div class="table">
+            <div class="row">
+                <div class="col"> 真的要删除游戏：${c.fg_id}？</div>
+                <div class="col">
+                    <a href="/admin/flash_game_rem?id=${c.fg_id}">确认删除</a>
+                </div>
+            </div>
+        </div>
+    <!-- right -->
+</div>
+</div>
+</%def>

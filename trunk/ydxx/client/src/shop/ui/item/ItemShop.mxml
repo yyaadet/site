@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  width="255" height="110" xmlns:ns1="utils.components.*" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import utils.events.ConfirmEvent;
+			import net.tcp.TcpManager;
+			import net.tcp.model.TcpBuy;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import utils.GameManager;
+			import utils.FormatText;
+			import shop.model.Treasure;
+			import mx.controls.TextInput;
+			import mx.events.IndexChangedEvent;
+			import mx.controls.NumericStepper;
+			
+			private var treasure:Treasure = null;
+			
+			private var totalMoney:int = 0;
+			
+			private var isInit:Boolean = false;
+			
+			private var winAsk:WinAsk = null;
+			
+			private var _data:Object;  
+			
+			private function init():void
+			{			
+				isInit = true;
+			    var money:int = GameManager.gameMgr.user.money;
+				
+				var i:int = 0;
+				var ti:TextInput = null;
+				
+				for (i = 0; i < nsNum.numChildren;i++)
+				{
+					if (nsNum.getChildAt(i) is TextInput)
+					{
+						ti = nsNum.getChildAt(i) as TextInput;
+						ti.addEventListener(KeyboardEvent.KEY_UP, onNumSel);
+						break;
+					}
+				}
+				
+				refresh();
+			}
+			
+			private function refresh():void
+			{
+				treasure = data as Treasure;
+				if (treasure != null)
+				{
+					img1.imageURL = treasure.bigUrl;
+					lblName.text = treasure.name;
+					lblMoney.htmlText = FormatText.packegText(treasure.price.toString(), FormatText.YELLOW, "12", "Arial") + "金币";
+					taDes.text = treasure.description;
+					nsNum.value = 1;
+				}
+			}
+			
+			private function onNumSel(evt:KeyboardEvent):void
+			{
+				onChange();
+			}
+			
+			private function onChange():void
+			{
+				totalMoney = treasure.price * nsNum.value;
+				lblMoney.htmlText = FormatText.packegText(totalMoney.toString(), FormatText.YELLOW, "12", "Arial") + "金币";
+			}
+			
+			private function buyTreasure():void
+			{
+				var str:String = "";
+				
+				str = FormatText.packegText("确定要购买", FormatText.DEFAULT, "12", "宋体") + FormatText.packegText(nsNum.value.toString(), FormatText.RED, "12", "宋体") + 
+			      	  FormatText.packegText("个", FormatText.DEFAULT, "12", "宋体") + FormatText.packegText(treasure.name, FormatText.RED, "12", "宋体") +  
+			          FormatText.packegText("吗?", FormatText.DEFAULT, "12", "宋体");
+				 
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+			}
+			
+			private function confirmBuy(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+				GameManager.gameMgr.buyNum = nsNum.value;
+				
+				var buy:TcpBuy = new TcpBuy();
+				var i:int = 0;
+				
+				for (i = 0; i < nsNum.value; i++)
+				{
+					buy.wbID = GameManager.gameMgr.wubao.uniqID;
+					buy.treasureID = treasure.uniqID;
+					
+					TcpManager.tcpMgr.sendBuy(buy);
+				}
+			}
+			
+			override public function get data():Object
+			{   
+            	return _data;   
+		    }
+		      
+	        override public function set data(value:Object):void
+	        {   
+	            _data = value; 
+	            
+	            if (isInit)
+	            	refresh();  
+	        }   
+
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="5" y="5" width="250" height="102" styleName="winCanvas">
+		<ns1:GameImage id="img1" width="96" height="96" x="2" y="2">
+		</ns1:GameImage>
+		
+		<mx:Label id="lblName" x="105" y="5" width="65" height="20" textAlign="left" styleName="content"/>
+		<mx:Label id="lblMoney" x="170" y="5" height="20" width="70" textAlign="right"/>
+		<mx:TextArea id="taDes" x="105" y="30" width="137" height="40" editable="false" textAlign="left" />
+		
+		<mx:NumericStepper id="nsNum" minimum="1" maximum="100" x="158" y="73" width="50" height="22" 
+			change="onChange();" value="1" fontFamily="Arial" stepSize="1">
+		</mx:NumericStepper>
+		
+		<mx:Button id="btnBuy" y="76" x="211" height="16" width="30" click="buyTreasure();" styleName="treasureBuy">
+		</mx:Button>
+	</mx:Canvas>
+	
+</mx:Canvas>

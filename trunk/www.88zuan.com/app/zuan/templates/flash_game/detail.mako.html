@@ -1,0 +1,103 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+<%namespace name="flash_game" file="/flash_game/func.mako.html" />
+
+<%def name="ad_head()">
+<script type='text/javascript'>
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+(function() {
+var gads = document.createElement('script');
+gads.async = true;
+gads.type = 'text/javascript';
+var useSSL = 'https:' == document.location.protocol;
+gads.src = (useSSL ? 'https:' : 'http:') + 
+'//www.googletagservices.com/tag/js/gpt.js';
+var node = document.getElementsByTagName('script')[0];
+node.parentNode.insertBefore(gads, node);
+})();
+</script>
+
+<script type='text/javascript'>
+googletag.cmd.push(function() {
+googletag.defineSlot('/13427485/88zuan_游戏介绍页_顶部方块_336_280', [336, 280], 'div-gpt-ad-1325988314112-0').addService(googletag.pubads());
+googletag.pubads().enableSingleRequest();
+googletag.enableServices();
+});
+</script>
+</%def>
+
+<%def name="get_title()">${c.fg.name}</%def>
+
+<%def name="get_description()">${c.fg.info}</%def>
+
+<%def name="get_content()">
+<%
+from zuan.controllers.flash_game import get_group
+group = get_group(c.fg.group_id)
+%>
+<div id="content">
+    <div id="content_left">
+    	${flash_game.get_left_rank_list(c.fg.group_id)}
+    </div>
+    
+    <div id="content_right">
+    
+        <div class="table">
+            <div class="row">
+                <div id='div-gpt-ad-1325988314112-0' style='width:336px; height:280px; margin-left: 200px;'>
+                <script type='text/javascript'>
+                googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325988314112-0'); });
+                </script>
+                </div>
+            </div>
+        </div>
+       
+
+        <%
+        from zuan.controllers.flash_game import get_flash_game_pic_url
+        import time
+        now = int(time.time())
+        pic_url = get_flash_game_pic_url(c.fg, c.setting, False)
+        %>
+        
+  		<div class="table" style="height: auto;">
+           <div class="row">
+               <div class="col" style="width: 300px;">
+                   <div class="col_line">
+                      <a href="${h.static_flash_game_detail_url(c.fg._id)}">
+                          <img width="300" height="200" class="fg_big_logo" src="${pic_url}" align="middle" alt="${c.fg.name}" />
+                      </a>
+                   </div>
+                   <div class="col_line" style="text-align: center;">
+                       <a href="${h.static_flash_game_play_url(c.fg._id)}"><img src="/flash_game/start_game.png" /></a>
+                   </div>
+               </div>
+               <div class="col" style="width: 360px;">
+                   <div class="col_line"><h1>${c.fg.name}</h1></div>
+                   <div class="col_line"><b>玩伴：</b>游客在${h.diff_time(c.fg.last_play_timestamp, now)}前也玩了这个小游戏</div>
+                   <div class="col_line"><b>类别：</b>【${group[1]}】</div>
+                   <div class="col_line"><b>得分：</b>${round(c.fg.score, 2)}</div>
+                   <div class="col_line"><b>人气：</b>${c.fg.total_play}</div>
+                   <div class="col_line"><b>游戏时长：</b>${round(float(c.fg.total_play_time)/float(3600), 2)}</div>
+                   <div class="col_line"><b>简介：</b>${c.fg.info}</div>
+                   <div class="col_line"><b>操作：</b>${c.fg.operate_info}</div>
+                   %if c.admin_name:
+                   <div class="col_line">
+                       <a href="/admin/flash_game_edit?id=${c.fg._id}">编辑</a> |
+                       <a href="/flash_game/rem?id=${c.fg._id}">删除</a>
+                   </div>
+                   %endif
+               </div>
+           </div>
+         </div>
+         <!-- PingLun.La Begin -->
+		 <div id="pinglunla_here"></div><a href="http://pinglun.la/" id="logo-pinglunla">评论啦</a><script type="text/javascript" src="http://static.pinglun.la/md/pinglun.la.js" charset="utf-8"></script>
+		 <!-- PingLun.La End -->
+     </div>
+     
+    <!-- right -->
+   </div>
+</div>
+</%def>

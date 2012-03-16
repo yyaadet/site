@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="245" height="100" xmlns:ns1="utils.components.*" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import net.tcp.TcpManager;
+			import net.tcp.model.wubao.TcpAcce;
+			import utils.events.ConfirmEvent;
+			import utils.WinManager;
+			import wubao.model.User;
+			import wubao.model.Tech;
+			import wubao.list.TechList;
+			import utils.PubUnit;
+			import wubao.model.Build;
+			import wubao.list.BuildList;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var gameUser:User = null;
+			
+			private var winAsk:WinAsk = null;
+			
+			private var showColor:int = 0;
+			
+			private var warSec:int = 0;
+			private var trainSec:int = 0;
+			private var techSec:int = 0;
+			private var build1Sec:int = 0;
+			private var build2Sec:int = 0;
+			
+			private var timer1:Timer = new Timer(1000);
+			
+			private function init():void
+			{
+				showColor = PubUnit.WHITE;
+				timer1.addEventListener(TimerEvent.TIMER, onTimer);
+				timer1.stop();
+			}
+			
+			private function onTimer(evt:TimerEvent):void
+			{
+				if (warSec > 0)
+				{
+					warSec --;
+					lblOrder.text = "征战准备中：" + PubUnit.getActGameDate(warSec);
+				}
+				
+				if (trainSec > 0)
+				{
+					trainSec --;
+					lblTrain.text = "训练准备中：" + PubUnit.getActGameDate(trainSec);
+				}
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				var tech:Tech = gameWubao.techList.getUpdate();
+				if (techSec > 0)
+				{
+					techSec --;
+					lblTech.text = tech.name + "研究中：" + PubUnit.getActGameDate(techSec);
+				}
+				
+				var buildList:BuildList = gameWubao.buildList.getUpdateList();
+				var build:Build = null;
+				var i:int = 0;
+				for (i = 0; i < buildList.length; i++)
+				{
+					build = buildList.getObjByIndex(i) as Build;
+					this["build" + (i + 1).toString() + "Sec"] --;
+					this["lblBuild" + (i + 1).toString()].text = build.name + "升级中：" + PubUnit.getActGameDate(int(this["build" + (i + 1).toString() + "Sec"]));
+				}  
+			}
+			
+			public function refresh():void
+			{
+				lblOrder.text = "征战待命中";
+				lblTrain.text = "训练待命中";
+				lblTech.text = "研究待命中";
+				lblBuild1.text = "建筑升级待命中";
+				gameUser = GameManager.gameMgr.user;
+				if (gameUser != null && gameUser.isVip)
+					lblBuild2.text = "建筑升级待命中";
+				else
+					lblBuild2.text = "升级VIP开通第二个建筑队列";
+					
+				lblOrder.setStyle("color", showColor);	
+				lblTrain.setStyle("color", showColor);
+				lblTech.setStyle("color", showColor);
+				lblBuild1.setStyle("color", showColor);
+				lblBuild2.setStyle("color", showColor);
+				
+				btnOrder.visible = false;
+				btnOrder.includeInLayout = false;
+				btnTrain.visible = false;
+				btnTrain.includeInLayout = false;
+				btnTech.visible = false;
+				btnTech.includeInLayout = false;
+				btnBuild1.visible = false;
+				btnBuild1.includeInLayout = false;
+				btnBuild2.visible = false;
+				btnBuild2.includeInLayout = false;
+				
+				warSec = 0;
+				trainSec = 0;
+				techSec = 0;
+				build1Sec = 0;
+				build2Sec = 0;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				
+				if (gameUser != null && gameUser.orderCD > GameManager.gameMgr.gameTime)
+				{
+					warSec = (gameUser.orderCD - GameManager.gameMgr.gameTime) * 20;
+					lblOrder.text = "征战准备中：" + PubUnit.getActGameDate(warSec);
+					lblOrder.setStyle("color", showColor);
+					btnOrder.visible = true;
+					btnOrder.includeInLayout = true;
+					if (!timer1.running)
+						timer1.start();
+				}
+				
+				if (gameUser != null && gameUser.trainCD > GameManager.gameMgr.gameTime)
+				{
+					trainSec = (gameUser.trainCD - GameManager.gameMgr.gameTime) * 20;
+					lblTrain.text = "训练准备中：" + PubUnit.getActGameDate(trainSec);
+					lblTrain.setStyle("color", showColor);
+					btnTrain.visible = true;
+					btnTrain.includeInLayout = true;
+					if (!timer1.running)
+						timer1.start();
+				}
+				
+				var i:int = 0;
+				var tech:Tech = gameWubao.techList.getUpdate();
+				
+				if (tech != null)
+				{
+					techSec = (tech.endTime - GameManager.gameMgr.gameTime) * 20;
+					lblTech.text = tech.name + "研究中：" + PubUnit.getActGameDate(techSec);   
+					lblTech.setStyle("color", showColor);
+					btnTech.visible = true;
+					btnTech.includeInLayout = true;
+					btnTech.data = tech;
+					if (!timer1.running)
+						timer1.start();
+				}
+				
+				var buildList:BuildList = gameWubao.buildList.getUpdateList();
+				var build:Build = null;
+				for (i = 0; i < buildList.length; i++)
+				{
+					build = buildList.getObjByIndex(i) as Build;
+					this["build" + (i + 1).toString() + "Sec"] = (build.endTime - GameManager.gameMgr.gameTime) * 20;
+					this["lblBuild" + (i + 1).toString()].text = build.name + "升级中：" + PubUnit.getActGameDate(int(this["build" + (i + 1).toString() + "Sec"]));  
+					this["lblBuild" + (i + 1).toString()].setStyle("color", showColor);
+					this["btnBuild" + (i + 1).toString()].visible = true; 
+					this["btnBuild" + (i + 1).toString()].includeInLayout = true;
+					this["btnBuild" + (i + 1).toString()].data = build;
+					if (!timer1.running)
+						timer1.start();
+				}
+				
+			}
+			
+			private var upBuild:Build = null;
+			private var upTech:Tech = null;
+			
+			private function levelUp(evt:MouseEvent):void
+			{
+				var gameButton:GameButton = evt.target as GameButton;
+				if (gameButton == null) return;
+				
+				var coins:int = 0;
+				var str:String = "";
+				if (gameButton.data is Build)
+				{
+					upBuild = gameButton.data as Build;
+					if (upBuild != null)
+					{
+						coins = PubUnit.getAcceCoin(upBuild.endTime - GameManager.gameMgr.gameTime);
+						str = "你确定要花费 " + coins.toString() + " 金币加速升级吗？";
+					}
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmUpBuild);
+				}
+				else if (gameButton.data is Tech)
+				{
+					upTech = gameButton.data as Tech;
+					if (upTech != null)
+					{
+						coins = PubUnit.getAcceCoin(upTech.endTime - GameManager.gameMgr.gameTime);
+						str = "你确定要花费 " + coins.toString() + " 金币加速研究吗？";
+					}
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmUpTech);
+				}
+			}
+			
+			private function confirmUpBuild(evt:ConfirmEvent):void
+			{
+				var acce:TcpAcce = new TcpAcce();
+				acce.wbID = gameWubao.uniqID;
+				acce.type = 1;
+				acce.typeID = upBuild.type;
+				
+				TcpManager.tcpMgr.sendAcce(acce);
+			}
+			
+			private function confirmUpTech(evt:ConfirmEvent):void
+			{
+				var acce:TcpAcce = new TcpAcce();
+				acce.wbID = gameWubao.uniqID;
+				acce.type = 2;
+				acce.typeID = upTech.type;
+				
+				TcpManager.tcpMgr.sendAcce(acce);
+			}
+			
+			private function acceOrder(evt:MouseEvent):void
+			{
+				var coins:int = PubUnit.getAcceCDCoin(gameUser.orderCD - GameManager.gameMgr.gameTime);
+				var str:String = "你确定要花费 " + coins.toString() + " 金币将征战等待时间置为0吗？";
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmAcceOrder);
+			}
+			
+			private function confirmAcceOrder(evt:ConfirmEvent):void
+			{
+				TcpManager.tcpMgr.sendAcceOrder(null);
+			}
+			
+			private function acceTrain(evt:MouseEvent):void
+			{
+				var coins:int = PubUnit.getAcceCoin(gameUser.trainCD - GameManager.gameMgr.gameTime);
+				var str:String = "你确定要花费 " + coins.toString() + " 金币将训练等待时间置为0吗？";
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmAcceTrain);
+			}
+			
+			private function confirmAcceTrain(evt:ConfirmEvent):void
+			{
+				TcpManager.tcpMgr.sendAcceTrain(null);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:HBox x="0" y="0" width="245" height="20" horizontalGap="0">
+		<mx:Label id="lblOrder" height="20" text="" fontSize="12" fontFamily="新宋体" maxWidth="223"/>
+		<ns1:GameButton id="btnOrder" height="15" width="22" click="acceOrder(event);" btnType="acce"/>
+	</mx:HBox>
+	
+	<mx:HBox x="0" y="20" width="245" height="20" horizontalGap="0">
+		<mx:Label id="lblTrain" height="20" text="" fontSize="12" fontFamily="新宋体" maxWidth="223"/>
+		<ns1:GameButton id="btnTrain" height="15" width="22" click="acceTrain(event);" btnType="acce"/>
+	</mx:HBox>
+	
+	<mx:HBox x="0" y="40" width="245" height="20" horizontalGap="0">
+		<mx:Label id="lblTech" height="20" text="" fontSize="12" fontFamily="新宋体" maxWidth="223"/>
+		<ns1:GameButton id="btnTech" height="15" width="22" click="levelUp(event);" btnType="acce"/>
+	</mx:HBox>
+	
+	<mx:HBox x="0" y="60" width="245" height="20" horizontalGap="0">
+		<mx:Label id="lblBuild1" height="20" text="" fontSize="12" fontFamily="新宋体" maxWidth="223"/>
+		<ns1:GameButton id="btnBuild1" height="15" width="22" click="levelUp(event);" btnType="acce"/>
+	</mx:HBox>
+	
+	<mx:HBox x="0" y="80" width="245" height="20" horizontalGap="0">
+		<mx:Label id="lblBuild2" height="20" text="" fontSize="12" fontFamily="新宋体" maxWidth="223"/>
+		<ns1:GameButton id="btnBuild2" height="15" width="22" click="levelUp(event);" btnType="acce"/>
+	</mx:HBox>
+	
+</mx:Canvas>

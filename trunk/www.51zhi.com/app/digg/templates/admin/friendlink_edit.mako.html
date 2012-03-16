@@ -1,0 +1,57 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+<div id="content" >
+   <%namespace name='friendlink' file='/admin/friendlink.mako.html' />
+   ${friendlink.get_menu()}
+   
+   <form action="/admin/friendlink_edit_do" method="post">
+   <div class="table">
+   		<div class="row">
+        	<div class="col">名称：</div>
+            <div class="col"><input type="text" class="text" name="name" value="${c.obj.name}" /></div>
+        </div>
+        <div class="row">
+        	<div class="col">url：</div>
+            <div class="col"><input type="text" class="url" name="url" value="${c.obj.url}" /></div>
+        </div>
+        <div class="row">
+        	<div class="col">重点：</div>
+            <div class="col">
+            	%if c.obj.is_hot == 0:
+            	<input type="radio" name="is_hot" value="0" checked="checked" /><label>否</label>
+                <input type="radio" name="is_hot" value="1" /><label>是</label>
+                %else:
+                <input type="radio" name="is_hot" value="0" /><label>否</label>
+                <input type="radio" name="is_hot" value="1" checked="checked" /><label>是</label>
+                %endif
+            </div>
+        </div>
+        <div class="row">
+        	<div class="col">在主页：</div>
+            <div class="col">
+            	%if c.obj.is_in_home == 0:
+            	<input type="radio" name="is_in_home" value="0" checked="checked" /><label>否</label>
+                <input type="radio" name="is_in_home" value="1" /><label>是</label>
+                %else:
+                <input type="radio" name="is_in_home" value="0" /><label>否</label>
+                <input type="radio" name="is_in_home" value="1" checked="checked" /><label>是</label>
+                %endif
+            </div>
+        </div>
+        <div class="row">
+        	<div class="col">显示顺序：</div>
+            <div class="col">
+            	<input type="text" name="order" value="${c.obj.order}" class="text" /><label>数值越大越靠前</label>
+            </div>
+        </div>
+        <div class="row">
+        	<div class="col"><input type="hidden" name="id" value="${c.obj._id}" /></div>
+            <div class="col"><input type="submit" value="保存" class="button" /></div>
+        </div>
+   </div>
+   </form>
+</div>
+</%def>

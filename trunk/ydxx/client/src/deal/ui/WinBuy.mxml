@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="280" height="192" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.WinManager;
+			import utils.GameManager;
+			import wubao.model.User;
+			import net.tcp.TcpManager;
+			import net.tcp.model.deal.TcpBuyWeapon;
+			import net.http.HttpManager;
+			import utils.FormatText;
+			import deal.model.Sell;
+			
+			private var _gameSell:Sell;
+			
+			private var gameUser:User = null;
+			
+			private function init():void
+			{
+				setTitle("购买装备");
+			}
+			
+			override public function refresh():void
+			{
+				if (gameSell != null)
+				{
+					var str:String = "花费 " + FormatText.packegText(gameSell.price.toString()) + " 金币购买【" + gameSell.userName + "】出售的数量为 " +
+					                 FormatText.packegText(gameSell.num.toString()) + " 的 " + FormatText.packegText(gameSell.level.toString()) + 
+					                 " 级【" + FormatText.packegText(gameSell.typeName) + "】";
+					
+					taInfo.htmlText = str;
+				}
+				
+				tiPw.text = "";
+				gameUser = GameManager.gameMgr.user;
+			}
+			
+			private function send():void
+			{
+				if (gameUser.isLock &&(tiPw.text == "" || tiPw.text.length != 6))
+				{
+					WinManager.winMgr.showResult("密码格式不正确");
+					return;
+				}
+				
+				HttpManager.httpMgr.checkLock(tiPw.text);
+			}
+			
+			public function buy():void
+			{
+				var buyWeapon:TcpBuyWeapon = new TcpBuyWeapon();
+				buyWeapon.uniqID = gameSell.uniqID;
+				TcpManager.tcpMgr.sendDealBuy(buyWeapon);
+			}
+			
+			public function get gameSell():Sell
+			{
+				return _gameSell;
+			}
+			
+			public function set gameSell(param:Sell):void
+			{
+				_gameSell = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="260" height="116" styleName="winCanvas">
+		<mx:TextArea id="taInfo" x="10" y="10" width="240" height="50" editable="false"/>
+		<mx:Label x="11" y="64" text="请输入密码"/>
+		<GameTextInput id="tiPw" x="10" y="84" isNUM="true" displayAsPassword="true" maxChars="6" width="169"/>
+	</mx:Canvas>
+	
+	<OKButton x="72" y="156" click="send();"/>
+	<GameButton x="144" y="156" label="关　闭" click="super.closeWin(event);"/>
+</GameWindow>

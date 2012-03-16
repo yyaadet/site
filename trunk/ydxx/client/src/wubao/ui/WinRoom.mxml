@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="490" height="250" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.TipInfo;
+			import mx.events.FlexEvent;
+			import utils.PubUnit;
+			import wubao.model.Build;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var build:Build = null;
+			
+			private var isInit:Boolean = false;
+			
+			private function init():void
+			{
+				helpID = 25;
+				taInfo.htmlText = TipInfo.getRoomInfo();
+				isInit = true;
+				refresh();
+			}
+			
+			private function onComp(evt:FlexEvent):void
+			{
+				lblLevel.removeEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+				
+				lblLevel.x = cvImage.width - lblLevel.width - 5;
+				lblLevel.y = 5;
+				
+				PubUnit.drawBackground(lblLevel);
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				var type:int = Build.ROOM;
+				
+				lu1.type = type;
+				lu1.refresh();
+				
+				if (gameWubao != null)
+				{
+					build = gameWubao.buildList.getObjByID(type) as Build;
+					if (build != null)
+					{
+						lblLevel.addEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+						lblLevel.text = build.level.toString();
+						lblRoom.text = gameWubao.family.toString() + " / " + PubUnit.getFamilyMax(build.level).toString() + " 户";
+						
+						if (isInit)
+							setTitle(build.title);
+					}	
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	
+	<mx:Canvas id="cvImage" x="10" y="34" width="128" height="128">
+		<mx:backgroundImage>@Embed(source='../../images/assets/wubao/win/room.swf')</mx:backgroundImage>
+		<mx:Label id="lblLevel" fontSize="16" fontWeight="bold" fontFamily="Arial" textAlign="center"/>
+	</mx:Canvas>
+	
+	<mx:Canvas x="146" y="33" width="334" height="60">
+		<mx:Label x="5" y="5" text="户口：" height="20" width="41"/>
+		<mx:Label id="lblRoom" x="45" y="4" height="20" width="150" styleName="number"/>
+	</mx:Canvas>
+		
+	<mx:TextArea id="taInfo" x="146" y="97" width="334" height="65" editable="false"/>
+	
+	<LevelUp id="lu1" x="10" y="170">
+	</LevelUp>
+	
+</GameWindow>

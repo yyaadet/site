@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="280" height="255" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+		
+			import net.http.HttpManager;
+			import mx.utils.StringUtil;
+			import utils.WinManager;
+			
+			[Bindable]
+			private var mibaoList:Array = PubUnit.mibaoList;
+			
+			private function init():void
+			{
+				setTitle("设置密码");
+			}
+			
+			override public function refresh():void
+			{
+				tiPW.text = "";
+				tiPW1.text = "";
+				cbQues.selectedIndex = 0;
+				tiAns.text = "";
+			}
+			
+			private function sendMibao():void
+			{
+				if (tiPW.text == "" || tiPW1.text == "" || tiPW.text != tiPW1.text || tiPW.text.length != 6 || tiPW1.text.length != 6)
+				{
+					WinManager.winMgr.showResult("密码格式不正确");
+					return;
+				}
+				
+				if (cbQues.selectedIndex == 0)
+				{
+					WinManager.winMgr.showResult("请选择密保问题");
+					return;
+				}
+				
+				if (StringUtil.trim(tiAns.text) == "")
+				{
+					WinManager.winMgr.showResult("请输入密保答案");
+					return;
+				}
+				
+				var quesType:int = 0;
+				var ans:String = "";
+				var pw:String = "";
+				
+				quesType = cbQues.selectedItem.id;
+				ans = tiAns.text;
+				pw = tiPW.text;
+				
+				HttpManager.httpMgr.setLock(quesType, ans, pw);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="260" height="67" styleName="winCanvas">
+		<mx:Label x="10" y="12" text="输入六位数字作为密码" height="20"/>
+		<GameTextInput id="tiPW" x="135" y="10" width="60" displayAsPassword="true" isNUM="true" maxChars="6" height="20"/>
+		
+		<mx:Label x="10" y="37" text="请再次输入密码" height="20"/>
+		<GameTextInput id="tiPW1" x="135" y="35" width="60" displayAsPassword="true" isNUM="true" maxChars="6" height="20"/>
+	</mx:Canvas>
+	
+	<OKButton x="72" y="220" click="sendMibao();"/>
+	<GameButton x="144" y="220" label="关　闭" click="super.closeWin(event);"/>
+	<mx:Canvas x="10" y="108" width="260" height="105" styleName="lowCanvas">
+		<mx:TextArea x="8" y="8" width="240" backgroundAlpha="0" editable="false" text="　　请您设置金币锁密保问题，并牢记您的答案，方便以后在忘记密码时进行重置。" color="#FFFFFF" height="36"/>
+		<mx:ComboBox id="cbQues" x="48" y="50" width="200" dataProvider="{mibaoList}" labelField="ques" height="20"></mx:ComboBox>
+		<mx:TextInput id="tiAns" x="48" y="75" width="200" height="20"/>
+		<mx:Label x="8" y="50" text="问题"/>
+		<mx:Label x="8" y="75" text="答案"/>
+	</mx:Canvas>
+	
+</GameWindow>

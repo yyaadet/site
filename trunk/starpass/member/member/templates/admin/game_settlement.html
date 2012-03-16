@@ -1,0 +1,49 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">游戏结算详单</span>
+</div>
+
+<div class="search">
+    <input type="hidden" id="game_id" name="game_id" value="${c.game_id}">
+    <p>
+    <label for="date">按月份查询</label>
+    <input type="text" id="date" name="date">
+    <span>格式：年-月 如：2010-10</span>
+    <input type="button" value="查询" onclick="javascript:;window.location.href=('/admin/game_settlement?act=search&date='+$('#date').val()+'&game_id='+$('#game_id').val())">
+    </p>
+</div>
+
+<div class="cnt">
+<p>
+<span>总的兑换笔数：${c.cnts}</span>
+</p>
+</div>
+
+<div class="div_table">
+<table>
+    <tr>
+        <th><span>游戏服务器名</span></th>
+        <th><span>游戏服务器收入</span></th>
+        <th><span>月份</span></th>
+        <th><span>兑换笔数</span></th>
+        <th><span>基本操作</span></th>
+    </tr>
+    
+    %for item in c.data:
+    <tr>
+        <td>${item["name"]}</td>
+        <td>${item["all"]}</td>
+        <td>${c.date}</td>
+        <td>${item["count"]}</td>
+        <td><a href="/admin/upload_exchange_log?server_id=${item['id']}&date=${c.date}">详单下载</a></td>
+    </tr>
+    %endfor
+    
+</table>
+</div>
+
+
+</%def>

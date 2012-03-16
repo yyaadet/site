@@ -1,0 +1,49 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">支付宝设置</span>
+</div>
+
+<div class="content_content">
+<form action="/admin/alipay_setting" method="post">
+    <input type="hidden" name="act" value="edit" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="aliapy_security_code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;安全码</label>
+    <input size="60" type="text" id="aliapy_security_code" name="aliapy_security_code" value="${c.aliapy_security_code}"/>
+    </p>
+    
+    <p>
+    <label for="aliapy_seller_email">支付宝用户ID</label>
+    <input size="60" type="text" id="aliapy_seller_email" name="aliapy_seller_email" value="${c.aliapy_seller_email}"/>
+    </p>
+    
+    <p>
+    <label for="aliapy_partner_id">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;商户ID</label>
+    <input type="text" id="aliapy_partner_id" name="aliapy_partner_id" value="${c.aliapy_partner_id}"/>
+    </p>
+    
+    <p>
+    <label for="alipay_used">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;是否使用</label>
+    %if c.alipay_used == "0":
+    <input type="radio" id="alipay_used" name="alipay_used" value="1" /> 是
+    <input type="radio" id="alipay_used" name="alipay_used" value="0" checked="checked"/> 否
+    %else:
+    <input type="radio" id="alipay_used" name="alipay_used" value="1" checked="checked"/> 是
+    <input type="radio" id="alipay_used" name="alipay_used" value="0" /> 否
+    %endif
+    </p>
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+</div>
+
+</%def>

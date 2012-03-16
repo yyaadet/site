@@ -1,0 +1,3 @@
+include webhanfeng/config/deployment.ini_tmpl
+recursive-include webhanfeng/public *
+recursive-include webhanfeng/templates *

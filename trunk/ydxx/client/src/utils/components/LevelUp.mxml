@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="470" height="70" fontSize="12" styleName="lowCanvas" xmlns:ns1="utils.components.*">
+
+	<mx:Script>
+		<![CDATA[
+			import guid.GuidManager;
+			import net.tcp.model.wubao.TcpLevelUp;
+			import net.tcp.model.wubao.TcpAcce;
+			import utils.FormatText;
+			import net.tcp.TcpManager;
+			import utils.PubUnit;
+			import wubao.model.Build;
+			import wubao.list.BuildList;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var _type:int = 0;
+			
+			private var gameWubao:WuBao = null;
+			private var build:Build = null;
+			private var buildList:BuildList = null;
+			
+			public function refresh():void
+			{
+				//获取建筑类
+				gameWubao = GameManager.gameMgr.wubao;
+				if (gameWubao == null) return;
+				
+				buildList = gameWubao.buildList;
+				if (buildList == null || buildList.length < 1) return;
+				
+				build = buildList.getObjByID(type) as Build;
+				if (build == null) return;
+				
+				//判断建筑的等级是否达到最高等级
+				var maxLevel:int = PubUnit.getBuildMax(build.type)
+				if (maxLevel == build.level)
+				{
+					lblReq.htmlText = FormatText.packegText("已升至最高等级", FormatText.WHITE);
+					lblPre.htmlText = FormatText.packegText("已升至最高等级", FormatText.WHITE);
+					lblLeftTime.visible = false;
+					lblLeftTime.includeInLayout = false;
+					btnUpdate.enabled = false;
+					btnAcce.enabled = false;
+					
+					return;
+				}
+				
+				//显示升级所需的资源和前提
+				var buildAry:Array = [];
+				buildAry = PubUnit.getBuildNeed(build.type, build.level);
+				
+				var needTime:int = 0;
+				
+				if (type == 11)
+				{
+					if (gameWubao.prestige < buildAry[0])
+						lblPre.htmlText = "声望 " + FormatText.packegText(buildAry[0].toString(), FormatText.RED);
+					else
+						lblPre.htmlText = "声望 " + FormatText.packegText(buildAry[0].toString(), FormatText.GREEN);
+					
+					if (gameWubao.money < buildAry[1])	
+						lblReq.htmlText = "钱币 " + FormatText.packegText(buildAry[1].toString(), FormatText.RED) + 
+						                  " 时间 " + FormatText.packegText(PubUnit.getGameDate(buildAry[2]).toString(), FormatText.GREEN);
+					else
+						lblReq.htmlText = "钱币 " + FormatText.packegText(buildAry[1].toString(), FormatText.GREEN) + 
+						                  " 时间 " + FormatText.packegText(PubUnit.getGameDate(buildAry[2]).toString(), FormatText.GREEN);
+					
+					if (gameWubao.prestige < buildAry[0] || gameWubao.money < buildAry[1])
+						btnUpdate.enabled = false;
+					else
+						btnUpdate.enabled = true;
+					
+					needTime = buildAry[2];
+				}
+				else
+				{
+					var preBuild:Build = null;
+					preBuild = buildList.getObjByID(buildAry[0]) as Build;
+					
+					if (preBuild.level < buildAry[1])
+						lblPre.htmlText = preBuild.name + " " + FormatText.packegText(buildAry[1], FormatText.RED) + " 级";
+					else
+						lblPre.htmlText = preBuild.name + " " + FormatText.packegText(buildAry[1], FormatText.GREEN) + " 级";
+					
+					if (gameWubao.money < buildAry[2])
+						lblReq.htmlText = "钱币 " + FormatText.packegText(buildAry[2].toString(), FormatText.RED) + 
+						                  " 时间 " + FormatText.packegText(PubUnit.getGameDate(buildAry[3]).toString(), FormatText.GREEN);
+					else
+						lblReq.htmlText = "钱币 " + FormatText.packegText(buildAry[2].toString(), FormatText.GREEN) + 
+						                  " 时间 " + FormatText.packegText(PubUnit.getGameDate(buildAry[3]).toString(), FormatText.GREEN);
+					
+					if (preBuild.level < buildAry[1] || gameWubao.money < buildAry[2])
+						btnUpdate.enabled = false;
+					else
+						btnUpdate.enabled = true;
+						
+					needTime = buildAry[3];
+				}
+				
+				if (build.endTime < 1)
+				{
+					lblLeftTime.visible = false;
+					lblLeftTime.includeInLayout = false;
+					btnAcce.enabled = false;
+				}
+				else
+				{
+					lblLeftTime.visible = true;
+					lblLeftTime.includeInLayout = true;
+					var costTime:int = 0;
+					costTime = build.endTime - GameManager.gameMgr.gameTime;
+					lblLeftTime.text = PubUnit.getGameDate(costTime) + "后完成，加速花费金币 " + PubUnit.getAcceCoin(costTime); 
+					btnUpdate.enabled = false;
+					btnAcce.enabled = true;
+				}
+				
+			}
+			
+			private function levelUp():void
+			{
+				var lu:TcpLevelUp = new TcpLevelUp();
+				lu.wbID = gameWubao.uniqID;
+				lu.type = 1;
+				lu.typeID = type;
+				
+				TcpManager.tcpMgr.sendLevelUP(lu);
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+			private function acce():void
+			{
+				var acce:TcpAcce = new TcpAcce();
+				acce.wbID = gameWubao.uniqID;
+				acce.type = 1;
+				acce.typeID = type;
+				
+				TcpManager.tcpMgr.sendAcce(acce);
+			}
+			
+			public function get type():int
+			{
+				return _type;
+			}
+			
+			public function set type(param:int):void
+			{
+				_type = param;
+			}
+			
+			public function get level():int
+			{
+				return build.level;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label id="lblLeftTime" x="5" y="43" height="20" width="345"/>
+	
+	<mx:Label x="5" y="23" text="升级前提：" height="20" width="65"/>
+	<mx:Label id="lblPre" x="70" y="23" height="20" width="280"/>
+	
+	<mx:Label x="5" y="3" text="升级所需：" height="20" width="65"/>
+	<mx:Label id="lblReq" x="70" y="3" width="280" height="20"/>
+	
+	<ns1:GameButton x="396" y="6" id="btnUpdate" label="升　级" width="64" height="24" click="levelUp();"/>
+	<ns1:GameButton x="396" y="36" id="btnAcce" label="加　速" width="64" height="24" click="acce();"/>
+	
+</mx:Canvas>

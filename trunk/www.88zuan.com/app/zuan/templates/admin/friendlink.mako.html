@@ -1,0 +1,52 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+        <div>
+            <a href="/admin/friendlink_add">添加友情链接</a>
+        </div>
+        
+        ${self.get_friendlink_list(c.objs, c.start_page, c.end_page)}	
+</%def>
+
+<%def name="get_friendlink_list(objs, start_page=1, page=1, end_page=1, show_footer=True)">
+<table id="mytable">
+<tr>
+    <th>URL</th>
+    <th>名称</th>
+    <th>首页显示</th>
+    <th>编辑</th>
+    <th>删除</th>
+</tr>
+%for obj in objs:
+<tr>
+    <td>${obj.url}</td>
+    <td>${obj.name}</td>
+    <td>${obj.is_in_home}</td>
+    <td><a href="/admin/friendlink_edit?id=${obj._id}">编辑</a></td>
+    <td><a href="/admin/friendlink_rem?id=${obj._id}">删除</a></td>
+</tr>
+%endfor
+</table>
+
+    %if show_footer:
+    <div class="table">
+        <div class="row">
+            %if c.start_page != 1:
+            <div class="col" style="width: 50px;"><a href="/admin/friendlink?page=${start_page - 1}">上一页</a></div>
+            %endif
+            %for i in range(start_page, end_page + 1):
+            <div class="col" style="min-width: 0;width: 20px;">
+                %if i == page:
+                <strong><a href="/admin/friendlink?page=${i}">[${i}]</a></strong>
+                %else:
+                <a href="/admin/friendlink?page=${i}">${i}</a>
+                %endif
+            </div>
+            %endfor
+            <div class="col" style="width: 50px;"><a href="/admin/friendlink?page=${end_page + 1}">下一页</a></div>
+        </div>
+    </div>
+    %endif
+</%def>

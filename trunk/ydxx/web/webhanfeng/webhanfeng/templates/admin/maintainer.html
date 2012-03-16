@@ -1,0 +1,39 @@
+<!--运维成员管理　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+<tr>
+  <td height="45" colspan="5" align="left" bgcolor="#f9f0e1">　　
+    <a href="#" onclick="selectTab('/admin/add_maintainer')">
+    <img src="/images/pic_29.gif" width="69" height="23" border="0" /></a></td>
+</tr>
+<tr>
+  <td height="30" align="center" bgcolor="#ac7e43" class="white_bc">ID</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">用户名</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">用户组</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">操作</td>
+</tr>
+%for item,group in c.data:
+<tr>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.id}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.username}</td>
+  %if group == None:
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">无</td>
+  %else:
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${group.name}</td>
+  %endif
+  %if item.username == "admin":
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">系统用户</td>
+  %elif item.username == c.username:
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">自己</td>
+  %else:
+  <td align="center" bgcolor="#f9f0e1" class="gray">
+    <a href="#" class="menu" onclick="selectTab('/admin/maintainer?action=del&id=${item.id}')">删除</a>／
+    <a href="#" class="menu" onclick="selectTab('/admin/edit_maintainer?id=${item.id}')">编辑</a></td>
+  %endif
+</tr>
+%endfor
+<%namespace file="/admin/mypager.html" import="*" />
+${footer_page("/admin/maintainer?page=")}
+  
+</table>
+<!--运维成员管理 end-->
+

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="118" height="21" xmlns:ns1="utils.components.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import net.tcp.TcpManager;
+			import mail.model.Mail;
+			import sphere.model.Sphere;
+			import net.tcp.model.sphere.TcpConfAlli;
+			
+			private function agree():void
+			{
+				send(1);
+			}
+			
+			private function refuse():void
+			{
+				send(0);
+			}
+			
+			private function send(type:int):void
+			{
+				var gameMail:Mail = data as Mail;
+				var gameSphere:Sphere = gameMail.gameSphere;
+				if (gameSphere == null) return;
+				
+				var confAlli:TcpConfAlli = new TcpConfAlli();
+				confAlli.mailID = gameMail.uniqID;
+				confAlli.sphereID = gameSphere.uniqID;
+				confAlli.years = int(gameMail.title);
+				confAlli.isConf = type;
+				TcpManager.tcpMgr.sendConfAlli(confAlli);
+			}
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton y="0" btnType="menu" label="同意" click="agree();" height="21" width="56" x="2"/>
+	<ns1:GameButton btnType="menu" label="拒绝" click="refuse();" width="56" height="21" x="60" y="0"/>
+	
+</mx:Canvas>

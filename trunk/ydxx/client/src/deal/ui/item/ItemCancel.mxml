@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="45" height="21" xmlns:ns1="utils.components.*" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import deal.model.Sell;
+			import utils.events.ConfirmEvent;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import net.tcp.TcpManager;
+			import net.tcp.model.deal.TcpCancel;
+			import deal.model.Bill;
+			
+			private var _data:Object;
+			
+			private var winAsk:WinAsk = null;
+			
+			private function init():void
+			{
+				
+			}	
+			
+			private function cancel():void
+			{
+				if (data is Bill)
+				{
+					var gameBill:Bill = data as Bill;
+					if (gameBill == null)
+						return;
+				}
+				else if (data is Sell)
+				{
+					var gameSell:Sell = data as Sell;
+					if (gameSell == null)
+						return;
+				}
+				
+				var str:String = "确定要撤销吗？";
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmCancel);
+			}	
+			
+			private function confirmCancel(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmCancel);
+				var tcpCancel:TcpCancel = null;
+				
+				if (data is Bill)
+				{
+					var gameBill:Bill = data as Bill;
+					if (gameBill != null)
+					{
+						tcpCancel = new TcpCancel();
+						tcpCancel.type = 1;
+						tcpCancel.uniqID = gameBill.uniqID;
+						TcpManager.tcpMgr.sendDealCancel(tcpCancel);
+					}
+				} 
+				else if (data is Sell)
+				{
+					var gameSell:Sell = data as Sell;
+					if (gameSell != null)
+					{
+						tcpCancel = new TcpCancel();
+						tcpCancel.type = 2;
+						tcpCancel.uniqID = gameSell.uniqID;
+						TcpManager.tcpMgr.sendDealCancel(tcpCancel);
+					}
+				}
+			}
+			
+			override public function get data():Object
+			{
+				return _data;
+			} 
+			
+			override public function set data(value:Object):void
+			{
+				_data = value;
+				
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameButton x="0" y="0" label="撤消" btnType="menu" click="cancel();" width="45" height="21"/>
+</mx:Canvas>

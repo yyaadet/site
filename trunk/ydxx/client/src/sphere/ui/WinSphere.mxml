@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="480" height="392" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import sphere.model.Diplomacy;
+			import city.model.City;
+			import utils.SceneManager;
+			import mx.utils.StringUtil;
+			import utils.events.ConfirmEvent;
+			import net.tcp.model.sphere.TcpDissolve;
+			import net.tcp.model.sphere.TcpExitSphere;
+			import sphere.events.FireUserEvent;
+			import sphere.list.DipList;
+			import wubao.list.OfficialList;
+			import city.list.CityList;
+			import net.tcp.model.sphere.TcpFireUser;
+			import wubao.model.User;
+			import wubao.list.UserList;
+			import utils.FormatText;
+			import net.tcp.TcpManager;
+			import net.tcp.model.sphere.TcpDissolve;
+			import utils.ui.WinAsk;
+			import utils.WinManager;
+			import sphere.list.SphereList;
+			import sphere.model.Sphere;
+		
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			[Bindable]
+			public  var isLeader:Boolean = false;
+			
+			private var gameWubao:WuBao = null;
+			private var sphereList:SphereList = null;
+			private var gameSphere:Sphere = null;
+			
+			private var winAsk:WinAsk = null;
+			
+			private function init():void
+			{
+				setTitle("势　力");
+				helpID = 10;
+				addEventListener(FireUserEvent.FIRE_USER, fireUser);
+			}
+			
+			override public function refresh():void
+			{
+				listBar.selectedIndex = 0;
+				gameWubao = GameManager.gameMgr.wubao;
+				sphereList = GameManager.gameMgr.sphereList;
+				
+				isLeader = sphereList.isLeader(gameWubao.userID);
+				var sphereID:int = gameWubao.sphereID;
+				gameSphere = sphereList.getObjByID(sphereID) as Sphere;
+				
+				showInfoByIndex(0);
+			}
+			
+			public function showByIndex():void
+			{
+				var index:int = listBar.selectedIndex;
+				showInfoByIndex(index);
+			}
+			
+			private function showInfoByIndex(index:int):void
+			{
+				if (index == 0)
+					showSphereInfo();
+				else if (index == 1)
+					showUserList();
+				else if (index == 2)
+					showOffList();
+				else if (index == 3)
+					showSphereList();
+			}
+			
+			//===================================================================================
+			// 基本信息
+			//===================================================================================
+			
+			private function showSphereInfo():void
+			{
+				if (gameSphere != null)
+				{
+					lblName.text = gameSphere.sphereName;
+					lblUserNum.text = gameSphere.userNum.toString() + "/" + gameSphere.maxUser.toString();
+					lblOff.text = gameSphere.levelName;
+					lblCity.text = gameSphere.cityNum.toString();
+					lblPre.text = gameSphere.prestige.toString();
+					lblLeader.text = gameSphere.userName;
+					taContent.text = gameSphere.description;
+				}
+				
+				btnApplyLeader.toolTip = "如果君主三天不上线，则势力内声望大于君主的玩家，可申请成为新的君主";
+				
+				if (isLeader)
+				{
+					btnExit.enabled = false;
+					btnDemise.enabled = true;
+					btnDestroy.enabled = true;
+					btnJoinList.enabled = true;
+					btnModify.enabled = true;
+					btnApplyLeader.enabled = false;
+				}
+				else
+				{
+					btnExit.enabled = true;
+					btnDemise.enabled = false;
+					btnDestroy.enabled = false;
+					btnJoinList.enabled = false;
+					btnModify.enabled = false;
+					btnApplyLeader.enabled = true;
+				}
+			}
+			
+			private function exitSphere():void
+			{
+				var str:String = FormatText.packegText("你确定要退出势力吗？");
+				winAsk = WinManager.winMgr.showAsk(str);
+				
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmExit);
+			}
+			
+			private function confirmExit(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmExit);
+				
+				var exit:TcpExitSphere = new TcpExitSphere();
+				exit.wbID = gameWubao.uniqID;
+				exit.sphereID = gameSphere.uniqID;
+				TcpManager.tcpMgr.sendExitSphere(exit);
+			}
+			
+			private function modifyDes():void
+			{
+				WinManager.winMgr.showModify(gameSphere.uniqID);
+			}
+			
+			private function demise():void
+			{
+				WinManager.winMgr.showDemise(gameSphere.uniqID);
+			}
+			
+			private function dissolve():void
+			{
+				var str:String = FormatText.packegText("你确定要解散势力吗？");
+				winAsk = WinManager.winMgr.showAsk(str);
+				
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmDissolve);
+			}
+			
+			private function confirmDissolve(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmDissolve);
+				
+				var tcpDis:TcpDissolve = new TcpDissolve();
+				tcpDis.sphereID = gameSphere.uniqID;
+				TcpManager.tcpMgr.sendDissolve(tcpDis);
+			}
+			
+			private function showJoinList():void
+			{
+				WinManager.winMgr.showJoinList();
+			}
+			
+			private function showAlliList():void
+			{
+				WinManager.winMgr.showAlliList();
+			}
+			
+			private function showSphereDis():void
+			{
+				WinManager.winMgr.showSphereDis();
+			}
+			
+			private function getSalary():void
+			{
+				TcpManager.tcpMgr.sendSalary(null);
+			}
+			
+			private function applyLeader():void
+			{
+				TcpManager.tcpMgr.sendApplyLeader(null);
+			}
+			
+			//===================================================================================
+			// 成员列表
+			//===================================================================================
+			
+			private var userList:UserList = null;
+			
+			private var selUser:User = null;
+			
+			public function showUserList():void
+			{
+				if (gameSphere == null) return;
+				
+				userList = gameSphere.userList.getListByPrestige();
+				lblTotal1.text = "成员数 " + userList.length.toString();
+				
+				pagination1.dataSource = userList;
+				pagination1.pageNum = 10;
+				pagination1.dataUI = dgUser;
+				pagination1.dataUIProvider = "dataProvider";
+				
+				pagination1.refresh();
+			}
+			
+			public function fireUser(evt:FireUserEvent):void
+			{
+				var gameUser:User = evt.user as User;
+				if (gameUser != null)
+				{
+					selUser = gameUser;
+					var str:String = FormatText.packegText("确定要开除玩家 ") + 
+					                 FormatText.packegText(gameUser.userName, FormatText.GREEN) + 
+					                 FormatText.packegText(" 吗？");
+					
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmFire);
+				}
+			}
+			
+			private function confirmFire(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmFire);
+				
+				var fireUser:TcpFireUser = new TcpFireUser();
+				fireUser.sphereID = gameSphere.uniqID;
+				fireUser.userID = selUser.uniqID;
+				TcpManager.tcpMgr.sendFireUser(fireUser);
+			}
+
+			//===================================================================================
+			// 官位列表
+			//===================================================================================
+			
+			private var offList:OfficialList = null;
+			
+			public function showOffList():void
+			{
+				offList = GameManager.gameMgr.offList.getOffList();
+				
+				pagination3.dataSource = offList;
+				pagination3.pageNum = 48;
+				pagination3.dataUI = tilelist;
+				pagination3.dataUIProvider = "dataProvider";
+				
+				pagination3.refresh();
+			}
+			
+			//===================================================================================
+			// 外交关系
+			//===================================================================================
+			
+			private var dipList1:DipList = null;
+			
+			private var dipList2:DipList = null;
+			
+			private function showDipList():void
+			{
+				dipList1 = GameManager.gameMgr.dipList.getListByType(1);
+				
+				dipList2 = GameManager.gameMgr.dipList.getListByType(2);
+			}
+			
+			private function showAlliInfo():void
+			{
+			}
+			
+			private function showEneInfo():void
+			{
+			}
+			
+			//===================================================================================
+			// 势力一览
+			//===================================================================================
+			
+			private function showSphereList():void
+			{
+				sphereList = GameManager.gameMgr.sphereList.getRank();
+				refreshSphereList(sphereList);
+				tiName.text = "";
+			}
+			
+			private function showInfo():void
+			{
+				var showData:Array = [];
+				showData = pagination.showData as Array;
+				
+				var sphereID:int = (showData[dgSphere.selectedIndex] as Sphere).uniqID;
+				
+				if (sphereID != gameWubao.sphereID)
+					WinManager.winMgr.showSphereInfo(sphereID);
+			}
+			
+			private function search():void
+			{
+				if (StringUtil.trim(tiName.text).length == 0)
+				{
+					showSphereList();
+					return;
+				}
+				
+				sphereList = GameManager.gameMgr.sphereList.getSearch(StringUtil.trim(tiName.text));
+				refreshSphereList(sphereList);
+			}
+			
+			private function refreshSphereList(sphereList:SphereList):void
+			{
+				lblTotal.text = "总条数 " + sphereList.length.toString();
+				
+				pagination.dataSource = sphereList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgSphere;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<GameToggleButtonBar id="listBar" x="10" y="34" dataProvider="vs1" height="22" width="460">
+	</GameToggleButtonBar>
+	
+	<mx:ViewStack x="10" id="vs1" width="460" height="327" creationPolicy="all" change="showByIndex();" y="55">
+		<mx:Canvas label="信　息" width="100%" height="100%" styleName="lowCanvas">
+			<mx:Label x="10" y="10" text="势力：" height="20" width="41"/>
+			<mx:Label id="lblName" x="50" y="10" height="20" width="80" color="#E3D71F"/>
+				
+			<mx:Label x="160" y="10" text="君主：" height="20" width="41"/>
+			<mx:Label id="lblLeader" x="200" y="10" height="20" width="80" color="#E3D71F"/>
+				
+			<mx:Label x="310" y="10" text="职位：" height="20" width="41"/>
+			<mx:Label id="lblOff" x="350" y="10" height="20" width="80" color="#E3D71F"/>
+				
+			<mx:Label x="10" y="35" text="成员：" height="20" width="41"/>
+			<mx:Label id="lblUserNum" x="50" y="35" height="20" width="80" color="#E3D71F"/>
+				
+			<mx:Label x="160" y="35" text="城池：" height="20" width="41"/>
+			<mx:Label id="lblCity" x="200" y="35" height="20" width="80" color="#E3D71F"/>
+				
+			<mx:Label x="310" y="35" text="威望：" height="20" width="41"/>
+			<mx:Label id="lblPre" x="350" y="35" height="20" width="80" color="#E3D71F"/>
+				
+			<mx:TextArea id="taContent" x="8" y="65" width="440" height="166" editable="false"/>
+				
+			<mx:Canvas x="8" width="440" height="76" styleName="lowCanvas" y="239">
+				<GameButton id="btnModify" x="222" label="修改简介" click="modifyDes();" y="8"/>
+				<GameButton id="btnJoinList" x="150" label="加入申请" click="showJoinList();" y="8"/>
+				<GameButton id="btnSalary" x="8" label="领取俸禄" click="getSalary();" y="8"/>
+				
+				<GameButton id="btnExit" x="222" label="退出势力" click="exitSphere();" y="38"/>
+				<GameButton id="btnDemise" x="293" label="势力禅让" click="demise();" y="8"/>
+				<GameButton id="btnDestroy" x="150" label="解散势力" click="dissolve();" y="38"/>
+				<GameButton id="btnDis" x="79" label="势力分布" click="showSphereDis();" y="8"/>
+				
+				<GameButton id="btnApplyLeader" label="申请君主" click="applyLeader();" y="8" x="364"/>
+			</mx:Canvas>
+				
+		</mx:Canvas>
+		
+		<mx:Canvas label="成　员" width="100%" height="100%" styleName="lowCanvas">
+			<mx:DataGrid id="dgUser" x="8" y="8" width="440" height="277" headerHeight="25" rowHeight="25" textAlign="center">
+				<mx:columns>
+					<mx:DataGridColumn headerText="排名" dataField="rank" width="50" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="成员" dataField="userName" width="80" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="声望" dataField="prestige" width="80" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="最后上线时间" dataField="lastLoginStr" width="100" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="状态" dataField="isOnlineStr" width="50" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					
+					<mx:DataGridColumn headerText="" width="80" itemRenderer="sphere.ui.item.ItemFireUser" sortable="false" draggable="false" resizable="false">
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+			
+			<Pagination id="pagination1" y="293" x="330">
+			</Pagination>
+			
+			<mx:Label id="lblTotal1" width="100" height="20" textAlign="center" y="293" x="178"/>
+			
+		</mx:Canvas>
+		
+		<mx:Canvas label="官　位" width="100%" height="100%">
+			<mx:Canvas x="0" y="0" width="100%" height="100%" styleName="lowCanvas">
+				<mx:TileList id="tilelist" columnCount="8" rowCount="6" itemRenderer="sphere.ui.item.ItemOff" 
+					x="8" useRollOver="false" selectable="false" backgroundAlpha="0" variableRowHeight="true" width="440" borderStyle="none" height="305" y="8">
+				</mx:TileList>
+				
+				<Pagination id="pagination3" x="422" y="350" visible="false" includeInLayout="false">
+				</Pagination>
+			</mx:Canvas>
+		</mx:Canvas>
+		
+		<mx:Canvas label="一　览" width="100%" height="100%">
+			<mx:Canvas x="0" y="0" width="100%" height="100%" styleName="lowCanvas">
+				<mx:DataGrid id="dgSphere" y="8" width="440" height="277" headerHeight="25" rowHeight="25" textAlign="center" itemClick="showInfo();" x="8">
+					<mx:columns>
+						<mx:DataGridColumn headerText="排名" dataField="rank" width="50" sortable="false" draggable="false" resizable="false">
+							<mx:headerRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:headerRenderer>
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="势力" dataField="sphereName" width="80" sortable="false" draggable="false" resizable="false">
+							<mx:headerRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:headerRenderer>
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="君主" dataField="userName" width="80" sortable="false" draggable="false" resizable="false">
+							<mx:headerRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:headerRenderer>
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="职位" dataField="levelName" width="80" sortable="false" draggable="false" resizable="false">
+							<mx:headerRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:headerRenderer>
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="威望" dataField="prestige" width="50" sortable="false" draggable="false" resizable="false">
+							<mx:headerRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:headerRenderer>
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="城池" dataField="cityNum" width="50" sortable="false" draggable="false" resizable="false">
+							<mx:headerRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:headerRenderer>
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn headerText="成员" dataField="userNum" width="50" sortable="false" draggable="false" resizable="false">
+							<mx:headerRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:headerRenderer>
+							<mx:itemRenderer>
+								<mx:Component>
+									<mx:Label paddingTop="2">
+									</mx:Label>
+								</mx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+					</mx:columns>
+				</mx:DataGrid>
+				
+				<GameTextInput id="tiName" x="8" y="293" width="80" isCH="true" height="22"/>
+				<GameButton x="93" label="搜　索" btnType="off" click="search();" height="22" y="293"/>
+				
+				<mx:Label id="lblTotal" y="293" width="100" height="20" x="178" textAlign="center"/>
+				
+				<Pagination id="pagination" x="330" y="293">
+				</Pagination>
+			</mx:Canvas>
+		</mx:Canvas>
+		
+	</mx:ViewStack>
+	
+</GameWindow>

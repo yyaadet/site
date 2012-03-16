@@ -1,0 +1,33 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">操作记录</span>
+</div>
+
+<div class="div_table">
+<table>
+    <tr>
+        <th><span>管理员ID</span></th>
+        <th><span>管理员名称</span></th>
+        <th><span>操作时间</span></th>
+        <th><span>描述</span></th>
+        <th><span>基本操作</span></th>
+    </tr>
+    
+    %for item in c.data:
+    <tr>
+        <td>${item.admin_id}</td>
+        <td>${item.admin_name}</td>
+        <td>${readable_time(item.time)}</td>
+        <td>${item.description}</td>
+        <td>操作</td>
+    %endfor
+</table>
+</div>
+
+<%namespace file="/admin/pager.html" import="*" />
+${pager("/admin/admin_list?page=")}
+
+</%def>

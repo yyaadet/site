@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="443" height="232" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.core.ScrollPolicy;
+			import utils.TipInfo;
+			import wubao.model.User;
+			import utils.FormatText;
+			import wubao.ui.events.ComposeEvent;
+			import wubao.ui.events.SellEvent;
+			import utils.events.ConfirmEvent;
+			import utils.WinManager;
+			import utils.PubUnit;
+			import utils.ui.WinAsk;
+			import wubao.model.Build;
+			import net.tcp.TcpManager;
+			import net.tcp.model.wubao.TcpDestroy;
+			import wubao.model.Weapon;
+			import utils.components.item.BagItem;
+			import utils.components.events.BagEvent;
+			import wubao.ui.events.DestroyEvent;
+			import wubao.ui.menu.MenuWeapon;
+			import wubao.list.WeaponList;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var menu1:MenuWeapon = null;
+			
+			private var winAsk:WinAsk = null;
+			
+			private var isInit:Boolean = false;
+			
+			private function init():void
+			{
+				setTitle("库　房");
+				helpID = 29;
+				if (menu1 == null)
+				{
+					menu1 = new MenuWeapon();
+					this.addChild(menu1);
+					menu1.addEventListener(ComposeEvent.COMPOSE, onComposeClick);
+					menu1.addEventListener(SellEvent.SELL, onSellClick);
+					menu1.addEventListener(DestroyEvent.DESTROY, onDestroyClick);
+					menu1.x = 0;
+					menu1.y = 0;
+					menu1.visible = false;
+					menu1.includeInLayout = false;
+				} 
+				
+				gs1.addEventListener(BagEvent.ItemClick, bagClick);
+				this.addEventListener(MouseEvent.CLICK, onClick);
+				
+				isInit = true;
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+				refresh();
+			}
+			
+			private function onClick(evt:MouseEvent):void
+			{
+				if (evt.target is BagItem)
+				{
+					var bagItem:BagItem = evt.target as BagItem;
+					if (bagItem != null && bagItem.num > 0)
+						return;
+				}
+				
+				hideMenu();
+			}
+			
+			private function hideMenu():void
+			{
+				if (menu1 != null)
+				{
+					menu1.visible = false;
+					menu1.includeInLayout = false;
+				}
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				if (gameWubao != null)
+				{
+					var wpList:WeaponList = gameWubao.store.weaponList;
+					gs1.dataProvider = wpList.getWpnList().list;
+					gs1.itemID = "uniqID";
+					gs1.numField = "num";
+					gs1.urlField = "imgBmp";
+					gs1.tipField = "tip";
+					gs1.max = 24;
+					gs1.free = gameWubao.store.left;
+					gs1.showData();
+				}
+				
+				if (gameWubao.store.total == 24)
+					btnBuy.enabled = false;
+				else
+					btnBuy.enabled = true;
+					
+			}
+			
+			//点击
+			private var selBagItem:BagItem = null;
+			
+			private function bagClick(evt:BagEvent):void
+			{
+				var bagItem:BagItem = evt.bagItem;
+				if (bagItem == null || bagItem.obj == null) return;
+				
+				selBagItem = bagItem;
+				
+				if (menu1 != null)
+				{
+					menu1.x = cvBag.x + gs1.x + bagItem.x + evt.mouseEvent.localX;
+					menu1.y = cvBag.y + gs1.y + bagItem.y + evt.mouseEvent.localY;
+					menu1.visible = true;
+					menu1.includeInLayout = true;
+				}
+			}
+			
+			private function onComposeClick(evt:ComposeEvent):void
+			{
+				if (gameWubao.store.left < 1)
+				{
+					WinManager.winMgr.showResult("库房空间不够，无法强化");
+					return;
+				}
+				
+				if (selBagItem == null || selBagItem.obj == null) return;
+				
+				var weapon:Weapon = null;
+				weapon = selBagItem.obj as Weapon;
+				if (weapon == null)
+					return;
+				
+				WinManager.winMgr.showCompose(weapon.uniqID);
+			}
+			
+			private function onSellClick(evt:SellEvent):void
+			{
+				if (selBagItem == null || selBagItem.obj == null) return;
+				
+				var weapon:Weapon = null;
+				weapon = selBagItem.obj as Weapon;
+				if (weapon == null)
+					return;
+				
+				WinManager.winMgr.showSell(weapon.uniqID);
+			}
+			
+			private function onDestroyClick(evt:DestroyEvent):void
+			{
+				if (selBagItem == null || selBagItem.obj == null) return;
+				
+				var weapon:Weapon = null;
+				weapon = selBagItem.obj as Weapon;
+				if (weapon == null)
+					return;
+				
+				var str:String = "";
+				str = "回收 " + FormatText.packegText(weapon.num.toString()) + "【" + FormatText.packegText(weapon.name) + "】，可获得钱币 " + 
+				      FormatText.packegText((PubUnit.weaponToMoney(weapon.type, weapon.level) * weapon.num).toString()) +
+				      "，确定要回收吗？";    
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmDestroy);
+			}
+			
+			private function confirmDestroy(evt:ConfirmEvent):void
+			{
+				var weapon:Weapon = null;
+				var type:int = 0;
+				var level:int = 0;
+				
+				weapon = selBagItem.obj as Weapon;
+				if (weapon != null)
+				{
+					type = weapon.type;
+					level = weapon.level;
+				}
+				else
+					return;
+					
+				var tcpDestroy:TcpDestroy = new TcpDestroy();
+				tcpDestroy.wbID = gameWubao.uniqID;
+				tcpDestroy.type = type;
+				tcpDestroy.level = level;
+				
+				TcpManager.tcpMgr.sendDestroy(tcpDestroy);
+				hideMenu();
+			}
+						
+			public function dealDestroy(type:int, level:int):void
+			{
+				var bagItem:BagItem = null;
+				var weapon:Weapon = GameManager.gameMgr.wubao.store.weaponList.getWeapon(type, level);
+				if (weapon != null)
+				{
+					GameManager.gameMgr.wubao.store.weaponList.removeObjByID(weapon.uniqID);
+					bagItem = gs1.getItemByID(weapon.uniqID);
+					if (bagItem != null)
+						gs1.subItem(bagItem, 1);
+				}
+			}
+			
+			private function buyStore():void
+			{
+				var str:String = "";
+				str = "确定要花费 " + PubUnit.getStoreCoin().toString() + " 金币购买一个库房空间吗？";    
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmBuy);
+			}
+			
+			private function confirmBuy(evt:ConfirmEvent):void
+			{
+				TcpManager.tcpMgr.sendBuyStore(null);
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Canvas id="cvBag" x="10" y="34" width="423" height="156" styleName="lowCanvas">
+		<GameStore id="gs1" x="0" y="0" width="419" height="152">
+		</GameStore>
+	</mx:Canvas>
+	<GameButton id="btnBuy" x="369" y="198" label="购买空间" click="buyStore();"/>
+	
+</GameWindow>

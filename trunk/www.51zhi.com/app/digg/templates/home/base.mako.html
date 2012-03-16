@@ -1,0 +1,193 @@
+#-*- encoding: utf-8 -*-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>${self.get_title()}-${c.setting.seo_title}</title>
+    <meta name="keywords" content="${self.get_title()} ${c.setting.seo_keywords}" />
+    <meta name="description" content="${self.get_description()} ${c.setting.seo_desc}" />
+    <meta property="wb:webmaster" content="a550f0a9aa3d62c0" />
+    ${self.get_header()}
+    ${self.ad_header()} 
+  </head>
+  <body>
+  	${self.get_top()}
+
+        ${self.get_content()}
+		
+        ${self.get_tail()}
+        
+  </body>
+</html>
+
+<%def name="ad_header()"></%def>
+
+<%def name="get_description()"></%def>
+
+<%def name="get_title()"></%def>
+
+<%def name="get_header()" >
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" media="screen" href="/user/user.css" />
+    <link href="/favicon.ico" type="image/x-icon" rel="shortcut icon" />
+    <script type="text/javascript" src="/jquery-1.3.2.min.js" ></script>
+    <script type="text/javascript" src="/tools.js"  charset="UTF-8"></script>
+    <script type="text/javascript">
+    function clear_query_input(e)
+    {
+    	e.value = "";
+    }
+    </script>
+</%def>
+        
+<%def name="get_top()">
+<%
+menus = [
+        {'name': u"首页", 'url': "/"},
+        {'name': u"新闻", 'url': "/webgame_news/hotest"},
+        {'name': u"游戏", 'url': "/webgame/hot"},
+        {'name': u"发卡", 'url': "/card/hotest"},
+        {'name': u"团购", 'url': '/home/tuan'},
+        {'name': u'购物', 'url': '/home/shop'},
+]
+%>
+
+<div id="top">
+    <div class="table" style="margin-top: 0; ">
+        <div class="row" style="height: 25px; line-height: 20px;  overflow: hidden;">
+               <div class="col" style="width: 350px;">
+                    <a version="1.0" class="qzOpenerDiv" href="http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_likeurl" target="_blank">赞</a><script  src="http://qzonestyle.gtimg.cn/qzone/app/qzlike/qzopensl.js#jsdate=20110603&style=3&showcount=1&width=130&height=30" charset="utf-8" defer="defer" ></script>
+                </div>
+               <div class="col" style="width: 600px; text-align: right;">
+                %if not c.user:
+                    欢迎您来到巨游！[<a href="/user/login">登陆</a>] [<a href="/user/reg">注册后发布游戏</a>]
+                %else:
+                    欢迎${c.user.name}回来， 人气：<label style="color: #EAAC49;">${c.user.visited_num}</label>，积分：${c.user.score} |
+                    [<a href="/webgame/add">添加游戏</a>]
+                    [<a href="/user/index">我的主页</a>]
+                    [<a href="/user/reset_passwd">修改密码</a>]
+                    [<a href="/user/logout">登出</a>]
+                %endif
+                </div>
+        </div>
+        
+        <div class="row" style="text-align: center;">
+            <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-9489507855194952";
+                /* 全站首页横幅 */
+                google_ad_slot = "4407019790";
+                google_ad_width = 728;
+                google_ad_height = 90;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+            </script>
+        </div>
+        
+        <div class="row" style="height: 50px; background: #EFF7FF; border-bottom: solid 1px #CEE3F8;">
+            
+            <div class="col" style="width: 130px; line-height: 40px;">
+                <a href="${h.site_url()}"><img src="/user/logo.jpg" alt="巨游网" /></a>
+                <!--<a href="${h.site_url()}" class="title_word">巨游网</a>-->
+            </div>
+            
+            %for menu in menus:
+            <%
+            style = "color: red;"
+            if menu['name'] != c.menu_name:
+            	style = ""
+            style += "font-size: 20px;"
+            %>
+            <div class="col" style="line-height: 60px; width:60px;"><a style="${style}" href="${menu['url']}">${menu['name']}</a></div>
+            %endfor
+            
+            <div class="col" style="width: 435px; background: #fff;">
+                <script type="text/javascript">
+                alimama_pid="mm_12972016_2669395_9666412";
+                alimama_type="g";
+                alimama_tks={};
+                alimama_tks.style_i=1;
+                alimama_tks.lg_i=0;
+                alimama_tks.w_i="420";
+                alimama_tks.h_i=45;
+                alimama_tks.btn_i=1;
+                alimama_tks.txt_s="找网游装备、帐号代练";
+                alimama_tks.hot_i=0;
+                alimama_tks.hc_c="0065FF";
+                alimama_tks.cid_i="50017708";
+                alimama_tks.c_i=0;
+                </script>
+                <script type="text/javascript" src="http://a.alimama.cn/inf.js"></script>
+            </div>
+
+        </div>
+        
+        
+    </div>
+</div>
+</%def>
+
+<%def name="get_content()">
+<div id="content" >
+</div>
+</%def>
+
+<%def name="get_tail(is_in_home = 1)">
+<div id="tail" >
+    <div class="table">
+    	<div class="row" style="height: 25px;">
+        	<div class="col"><a target="_blank" href="/home/friend_link">更多友情链接>></a></div>
+        	<div class="col" style="width: auto;">申请友情链接，请联系QQ：1134362918， 或是邮件联系: 1134362918@qq.com</div>
+        </div>
+        <div class="row">
+        <%
+        from digg.model.friendlink import Friendlink
+        import pymongo
+        c.fls = Friendlink.query({'is_in_home':is_in_home}, sort=[('order', pymongo.DESCENDING)])
+        %>
+        %for link in c.fls:
+        <%
+        style=""
+        if link.is_hot:
+        	style="color: red;"
+        %>
+        <a target="_blank" style="${style}" href="${link.url}">${link.name}</a> | 
+        %endfor
+        </div>
+    </div>
+    <div class="table">
+    	<div class="row">
+            <a href="${h.site_url()}">巨游</a>  
+            <a href="/home/bussiness">商务合作</a>  
+            <a href="/home/help">帮助中心</a>  
+            <a href="http://www.miibeian.gov.cn/">京ICP备11011403号</a>
+        </div>
+        <div class="row" style="height: 26px; text-align: center;">
+        请记住本站网址www.51zhi.com,点击<a style="color: red;" onclick="addBookmark();return false;" href="#">收藏巨游</a>,方便下次再玩
+        </div>
+    </div>
+</div>
+
+<div style="display: none;">
+<!-- 51.la -->
+<script language="javascript" type="text/javascript" src="http://js.users.51.la/3607088.js"></script>
+<noscript><a href="http://www.51.la/?3607088" target="_blank"><img alt="&#x6211;&#x8981;&#x5566;&#x514D;&#x8D39;&#x7EDF;&#x8BA1;" src="http://img.users.51.la/3607088.asp" style="border:none" /></a></noscript>
+<!-- end -->
+
+<!-- tongji.baidu.com -->
+<script type="text/javascript">
+		var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+		document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F4c600578dff11825a202c464850601da' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- end -->
+<script type="text/javascript">/*51zhi_悬浮弹窗_120*270*/ var cpro_id = 'u744842';</script><script src="http://cpro.baidu.com/cpro/ui/f.js" type="text/javascript"></script>
+</div>
+</%def>
+
+
+<%def name="get_top_ads()">
+<div class="table" style="height: 90px; overflow:hidden;">
+    <iframe width="100%" height="100%" src="/ad/bu_top.html" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+</div>
+</%def>
+

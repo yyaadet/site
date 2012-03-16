@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="328" height="390" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import guid.GuidManager;
+			import utils.FormatText;
+			import wubao.model.User;
+			import utils.events.ConfirmEvent;
+			import utils.ui.WinAsk;
+			import images.AssetsManager;
+			import utils.WinManager;
+			import net.tcp.TcpManager;
+			import net.tcp.model.fight.TcpFight;
+			import utils.PubUnit;
+			import wubao.model.WuBao;
+			import general.model.General;
+			import battle.model.GateGeneral;
+			import battle.list.GateGeneralList;
+			import utils.GameManager;
+			import battle.model.Gateway;
+			
+			private var _gateID:int = 0;
+			
+			private var gw1:Gateway = null;
+			
+			private var imgDefault:Bitmap = null;
+			
+			private function init():void
+			{
+				gw1 = GameManager.gameMgr.gateList.getObjByID(gateID) as Gateway;
+				setTitle("关卡信息");
+				
+				var i:int = 0;
+				for (i = 0; i < 6; i++)
+				{
+					GameImage(this["imgGeneral" + (i + 1).toString()]).addEventListener(MouseEvent.CLICK, generalClick);
+					GameImage(this["imgSel" + (i + 1).toString()]).addEventListener(MouseEvent.CLICK, selClick);
+				}
+				
+			}
+			
+			override public function refresh():void
+			{
+				var ggList:GateGeneralList = GameManager.gameMgr.gateGeneralList.getByGateID(gateID);
+				gw1 = GameManager.gameMgr.gateList.getObjByID(gateID) as Gateway;
+				var i:int = 0;
+				var gateGeneral:GateGeneral = null;
+				var gateImage:GameImage = null;
+				var bgClass:Class = AssetsManager.assetsMgr.FIGHT_BG;
+				var bgBmp:Bitmap = new bgClass();
+				
+				for (i = 0; i < 6; i++)
+				{
+					gateImage = this["gateGeneral" + (i + 1).toString()] as GameImage;
+					if (gateImage != null)
+					{
+						gateImage.clear();
+						gateImage.removeAllChildren();
+						gateImage.imageURL = bgBmp;
+						gateImage.toolTip = "";
+					}
+				}
+				
+				if (gw1 != null)
+				{
+					var countStr:String = "";
+					var left:int = 1;
+					
+					if (GameManager.gameMgr.user.gateID + 1 == gw1.uniqID && gw1.countMax == gw1.count)
+						left = 1;
+					else
+						left = gw1.countMax - gw1.count;
+											
+					if (gw1.countMax == -1)
+						countStr = ""
+					else
+						countStr = "  剩余次数："+ left.toString();
+
+					lblGate.htmlText = "【" + FormatText.packegText(gw1.name) + "】 功勋：" + gw1.prestige.toString() + countStr;
+					
+					if (gw1.type != 0)
+						lblInfo.htmlText = "有几率获得：" + gw1.level.toString() + " 级" + PubUnit.weaponList[gw1.type] + 
+						                   FormatText.packegText(" × ", FormatText.WHITE, "9") + gw1.num.toString();
+					else
+						lblInfo.text = "";
+					
+					for (i = 0; i < ggList.length; i++)
+					{
+						gateGeneral = ggList.getObjByIndex(i) as GateGeneral;
+						if (gateGeneral != null)
+						{
+							gateImage = this["gateGeneral" + (i + 1).toString()] as GameImage;
+							if (gateImage != null)
+							{
+								gateImage.addEventListener(GameImage.INIT_FINISH, loadImageFinish);
+								gateImage.imageURL = gateGeneral.general.faceURL;
+								gateImage.data = gateGeneral;
+								
+								gateImage.toolTip = "武将：" + gateGeneral.general.generalName + "\n" + 
+								                    "等级：" + gateGeneral.general.soliderTrain.toString() + "\n" +
+								                    "部曲：" + gateGeneral.general.soliderName + "\n" +
+								                    "士卒：" + gateGeneral.general.soliderTotal.toString() + "\n" + 
+								                    "技能：" + gateGeneral.general.getSoliderSkill() + "\n" +
+								                    "阵型：" + gateGeneral.general.useZhenName + "\n" +
+								                    "士气：" + gateGeneral.general.soliderSpirit.toString(); 
+							}
+						}
+					}
+					
+				}
+				
+				var deClass:Class = AssetsManager.assetsMgr.WPN_DEFAULT;
+				imgDefault = new deClass();
+				showGeneral();
+			}
+			
+			private function loadImageFinish(evt:Event):void
+			{
+				var gameImage:GameImage = evt.target as GameImage;
+				if (gameImage == null) return;
+				
+				gameImage.removeEventListener(GameImage.INIT_FINISH, loadImageFinish);
+				var gateGeneral:GateGeneral = gameImage.data as GateGeneral;
+				var label1:Label = new Label();
+				label1.text = gateGeneral.general.generalName;
+				label1.width = 80;
+				label1.height = 20;
+				label1.x = gameImage.width - label1.width;
+				label1.y = 0;
+				label1.setStyle("color", 0xFFFFFF);
+				label1.setStyle("fongSize", 12);
+				label1.setStyle("fongFamily", "新宋体");
+				label1.setStyle("textAlign", "right");
+				gameImage.addChild(label1);
+			}
+			
+			private var winAsk:WinAsk = null;
+			
+			private function attackGate():void
+			{
+				if (generalList.length < 1)
+				{
+					WinManager.winMgr.showResult("请选择出战武将");
+					return;
+				}
+				
+				var gameUser:User = GameManager.gameMgr.user;
+				if (gameUser.orderCD > 0 && gameUser.orderCD > GameManager.gameMgr.gameTime)
+				{
+					WinManager.winMgr.showResult("征战等待中");
+					return;
+				}
+				
+				if (gameWubao.store.left < 1)
+				{
+					var str:String = "库房空间已满，不会掉落任何装备，确定要攻打吗？";
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmAttack);
+					return;
+				}
+				
+				sendAttack();
+			}
+			
+			private function confirmAttack(evt:ConfirmEvent):void
+			{
+				sendAttack();
+			}
+			
+			private function sendAttack():void
+			{
+				var tcpFight:TcpFight = new TcpFight();
+				tcpFight.gateID = gateID;
+				tcpFight.generalNum = generalList.length;
+				tcpFight.generalList = generalList;	
+				TcpManager.tcpMgr.sendFight(tcpFight);
+				
+				if (GameManager.gameMgr.isShowGuid)
+				{
+					GuidManager.guidMgr.saveIndex(GuidManager.guidMgr.funcIndex);
+					GuidManager.guidMgr.hideGuid();
+				}
+			
+			}
+			
+			private var generalList:Array = [];
+			private var selList:Array = [];
+			private var gameWubao:WuBao = null;
+			
+			private function showGeneral():void
+			{
+				var generalID1:int = 0;
+				var generalID2:int = 0;
+				var generalID3:int = 0;
+				var generalID4:int = 0;
+				var generalID5:int = 0;
+				var generalID6:int = 0;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				generalList.length = 0;
+				
+				var so1:SharedObject = SharedObject.getLocal(gameWubao.uniqID.toString());
+				if (so1 != null && so1.size > 0)
+				{
+					generalID1 = so1.data.generalID1;
+					generalID2 = so1.data.generalID2;
+					generalID3 = so1.data.generalID3;
+					generalID4 = so1.data.generalID4;
+					generalID5 = so1.data.generalID5;
+					generalID6 = so1.data.generalID6;
+					
+					if (generalID1 > 0)
+						generalList.push(generalID1);
+					if (generalID2 > 0)
+						generalList.push(generalID2);
+					if (generalID3 > 0)
+						generalList.push(generalID3);
+					if (generalID4 > 0)
+						generalList.push(generalID4);
+					if (generalID5 > 0)
+						generalList.push(generalID5);
+					if (generalID6 > 0)
+						generalList.push(generalID6);
+				}
+				
+				//如果本地没有保存武将数据并且只有一个武将，自动帮玩家选择出战武将
+				if (generalList.length == 0 && gameWubao.generalList.length == 1)
+				{
+					var gameGeneral:General = gameWubao.generalList.getObjByIndex(0) as General;
+					if (gameGeneral != null && gameGeneral.uniqID > 0 && gameGeneral.soliderNum > 0)
+					{
+						generalList.push(gameGeneral.uniqID);
+						imgGeneral1.canSel = true;
+						imgGeneral1.imageURL = gameGeneral.faceURL;
+						imgGeneral1.data = gameGeneral;
+						imgGeneral1.toolTip = "武将：" + gameGeneral.generalName + "\n" +
+                                              "等级：" + gameGeneral.soliderTrain.toString() + "\n" +  
+                                              "部曲：" + gameGeneral.soliderName + "\n" + 
+            								  "士卒：" + gameGeneral.soliderNum.toString() + "/" + gameGeneral.soliderTotal.toString() + "\n" +
+            								  "技能：" + gameGeneral.getSoliderSkill() + "\n" + 
+           									  "阵型：" + gameGeneral.useZhenName + "\n" +
+           									  "士气：" + gameGeneral.soliderSpirit.toString();
+					}
+					else
+					{
+						imgGeneral1.canSel = false;
+						imgGeneral1.imageURL = imgDefault;
+						imgGeneral1.data = null;
+						imgGeneral1.toolTip = "";
+						imgGeneral1.removeSel();
+					}
+				}
+				
+				showBattleGeneral();
+				showSelGeneral();
+			}
+			
+			private function showBattleGeneral():void
+			{
+				var i:int = 0;
+				var generalID:int = 0;
+				var len:int = 0;
+				var gameGeneral:General = null;
+				
+				for (i = 0; i < 6; i++)
+				{
+					GameImage(this["imgGeneral" + (i + 1).toString()]).canSel = false;
+					GameImage(this["imgGeneral" + (i + 1).toString()]).imageURL = imgDefault;
+					GameImage(this["imgGeneral" + (i + 1).toString()]).data = null;
+					GameImage(this["imgGeneral" + (i + 1).toString()]).toolTip = "";
+					GameImage(this["imgGeneral" + (i + 1).toString()]).removeSel();
+				}
+				
+				len = generalList.length;
+				
+				//将本地存储的武将ID列表中已经不存在的武将清除掉
+				//解雇武将会造成这个问题
+				//解雇武将后，由于本地文件还保存着之前的武将ID，所以为存在武将为null的bug
+				//将不在坞堡或城池内的武将清除掉
+				var index:int = 0;
+				for (i = 0; i < len; i++)
+				{
+					generalID = generalList[index];
+					gameGeneral = gameWubao.generalList.getObjByID(generalID) as General;
+					if (gameGeneral == null || gameGeneral.soliderNum <= 0 || (gameGeneral.place != 1 && gameGeneral.place != 2))
+					{
+						generalList.splice(generalList.indexOf(generalID), 1);
+						continue;
+					}
+					
+					index ++;
+				}
+				
+				len = generalList.length;
+				index = 0;
+				for (i = 0; i < len; i++)
+				{
+					generalID = generalList[i];
+					gameGeneral = gameWubao.generalList.getObjByID(generalID) as General;
+					if (gameGeneral != null && generalID > 0 && gameGeneral.soliderNum > 0 && (gameGeneral.place == 1 || gameGeneral.place == 2))
+					{
+						GameImage(this["imgGeneral" + (index + 1).toString()]).canSel = true;
+						GameImage(this["imgGeneral" + (index + 1).toString()]).imageURL = gameGeneral.faceURL;
+						GameImage(this["imgGeneral" + (index + 1).toString()]).data = gameGeneral;
+						GameImage(this["imgGeneral" + (index + 1).toString()]).toolTip = "武将：" + gameGeneral.generalName + "\n" +
+						                                                             	 "等级：" + gameGeneral.soliderTrain.toString() + "\n" +  
+						                                                                 "部曲：" + gameGeneral.soliderName + "\n" + 
+								                    								     "士卒：" + gameGeneral.soliderNum.toString() + "/" + gameGeneral.soliderTotal.toString() + "\n" +
+								                    								     "技能：" + gameGeneral.getSoliderSkill() + "\n" + 
+								                   									     "阵型：" + gameGeneral.useZhenName + "\n" +
+								                   									     "士气：" + gameGeneral.soliderSpirit.toString();
+						
+						index ++;
+					}
+				}
+				
+				
+			}
+			
+			private function showSelGeneral():void
+			{
+				var i:int = 0;
+				var gameGeneral:General = null;
+				
+				for (i = 0; i < 6; i++)
+				{
+					GameImage(this["imgSel" + (i + 1).toString()]).canSel = false;
+					GameImage(this["imgSel" + (i + 1).toString()]).imageURL = imgDefault;
+					GameImage(this["imgSel" + (i + 1).toString()]).data = null;
+					GameImage(this["imgSel" + (i + 1).toString()]).toolTip = "";
+					GameImage(this["imgSel" + (i + 1).toString()]).removeSel();
+				}
+				
+				for (i = 0; i < gameWubao.generalList.length; i++)
+				{
+					gameGeneral = gameWubao.generalList.getObjByIndex(i) as General;
+					if (gameGeneral != null && gameGeneral.soliderNum > 0 && !PubUnit.isObjInArray(gameGeneral.uniqID, generalList) && (gameGeneral.place == 1 || gameGeneral.place == 2))
+					{
+						GameImage(this["imgSel" + (i + 1).toString()]).canSel = true;
+						GameImage(this["imgSel" + (i + 1).toString()]).imageURL = gameGeneral.faceURL;
+						GameImage(this["imgSel" + (i + 1).toString()]).data = gameGeneral;
+						GameImage(this["imgSel" + (i + 1).toString()]).toolTip = "武将：" + gameGeneral.generalName + "\n" + 
+						                                                         "等级：" + gameGeneral.soliderTrain.toString() + "\n" +
+						                                                         "部曲：" + gameGeneral.soliderName + "\n" +
+								                    							 "士卒：" + gameGeneral.soliderNum.toString() + "/" + gameGeneral.soliderTotal.toString() + "\n" +
+								                    							 "技能：" + gameGeneral.getSoliderSkill() + "\n" +  
+								                   								 "阵型：" + gameGeneral.useZhenName + "\n" +
+								                   								 "士气：" + gameGeneral.soliderSpirit.toString();
+					}
+					else
+					{
+						GameImage(this["imgSel" + (i + 1).toString()]).canSel = false;
+						GameImage(this["imgSel" + (i + 1).toString()]).imageURL = imgDefault;
+						GameImage(this["imgSel" + (i + 1).toString()]).data = null;
+						GameImage(this["imgSel" + (i + 1).toString()]).toolTip = "";
+						GameImage(this["imgSel" + (i + 1).toString()]).removeSel();
+					}
+				}
+			}
+			
+			private function generalClick(evt:MouseEvent):void
+			{
+				var gameImage1:GameImage = evt.currentTarget as GameImage;
+				var gameGeneral:General = null;
+				
+				if (gameImage1 != null)
+				{
+					gameGeneral = gameImage1.data as General;
+					if (gameGeneral != null)
+					{
+						var index:int = generalList.indexOf(gameGeneral.uniqID);
+						generalList.splice(index, 1);
+						showBattleGeneral();
+						showSelGeneral();
+						writeLocal();
+					}
+				}
+			}
+			
+			private function selClick(evt:MouseEvent):void
+			{
+				var gameImage1:GameImage = evt.currentTarget as GameImage;
+				var gameGeneral:General = null;
+				
+				if (gameImage1 != null)
+				{
+					gameGeneral = gameImage1.data as General;
+					if (gameGeneral != null && !PubUnit.isObjInArray(gameGeneral.uniqID, generalList))
+					{
+						generalList.push(gameGeneral.uniqID);
+						showBattleGeneral();
+						showSelGeneral();
+						writeLocal();
+					}
+				}
+			}
+			
+			private function writeLocal():void
+			{
+				var so1:SharedObject = SharedObject.getLocal(gameWubao.uniqID.toString());
+				if (so1 != null)
+				{
+					var i:int = 0;
+					
+					so1.data.generalID1 = 0;
+					so1.data.generalID2 = 0;
+					so1.data.generalID3 = 0;
+					so1.data.generalID4 = 0;
+					so1.data.generalID5 = 0;
+					so1.data.generalID6 = 0;
+					
+					for (i = 0; i < generalList.length; i++)
+					{
+						if (i == 0)
+							so1.data.generalID1 = generalList[i];
+						else if (i == 1)
+							so1.data.generalID2 = generalList[i];
+						else if (i == 2)
+							so1.data.generalID3 = generalList[i];
+						else if (i == 3)
+							so1.data.generalID4 = generalList[i];
+						else if (i == 4)
+							so1.data.generalID5 = generalList[i];
+						else if (i == 5)
+							so1.data.generalID6 = generalList[i];
+					}
+					
+				}
+			}
+			
+			public function get gateID():int
+			{
+				return _gateID;
+			}
+			
+			public function set gateID(param:int):void
+			{
+				_gateID = param;
+			}
+			
+		]]>
+	</mx:Script>
+
+	<mx:Canvas x="10" y="34" width="308" height="174">
+		<mx:Label id="lblGate" x="0" y="10" width="240" height="20" color="#FFFFFF"/>
+		
+		<mx:Canvas x="0" y="52" width="308" styleName="lowCanvas" height="122" horizontalScrollPolicy="on">
+			<GameImage id="gateGeneral1" width="96" height="96" x="3" y="3">
+			</GameImage>
+			<GameImage id="gateGeneral2" width="96" height="96" x="104" y="3">
+			</GameImage>
+			<GameImage id="gateGeneral3" width="96" height="96" x="205" y="3">
+			</GameImage>
+			<GameImage id="gateGeneral4" width="96" height="96" x="306" y="3">
+			</GameImage>
+			<GameImage id="gateGeneral5" width="96" height="96" x="407" y="3">
+			</GameImage>
+			<GameImage id="gateGeneral6" width="96" height="96" x="508" y="3">
+			</GameImage>
+		</mx:Canvas>
+		<GameButton x="244" y="10" label="攻　击" click="attackGate();"/>
+		<mx:Label id="lblInfo" x="5" y="30" width="240" height="20"/>
+	</mx:Canvas>
+	
+	<mx:Canvas x="10" y="217" width="308" height="163" styleName="lowCanvas">
+		<mx:Label x="8" y="8" text="出战武将顺序：" height="20"/>
+		<mx:HBox x="8" y="28" width="288" height="48" horizontalGap="0">
+			<GameImage id="imgGeneral1" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgGeneral2" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgGeneral3" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgGeneral4" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgGeneral5" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgGeneral6" width="48" height="48">
+			</GameImage>
+		</mx:HBox>
+		
+		<mx:Label x="8" y="83" text="点击头像设定出战武将的顺序" height="20"/>
+		<mx:HBox x="8" y="103" width="288" height="48" horizontalGap="0">
+			<GameImage id="imgSel1" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgSel2" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgSel3" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgSel4" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgSel5" width="48" height="48">
+			</GameImage>
+			<GameImage id="imgSel6" width="48" height="48">
+			</GameImage>
+		</mx:HBox>
+	</mx:Canvas>
+	
+</GameWindow>

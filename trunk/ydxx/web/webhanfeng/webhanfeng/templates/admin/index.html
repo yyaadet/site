@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>汉风后台管理</title>
+<style type="text/css" media="all">@import "/css/admin.css";</style>
+<script type="text/javascript" src="/scripts/jquery-1.3.2.js"></script>
+<script type="text/javascript" src="/scripts/selectTab.js"></script>
+<script type="text/javascript">
+function MM_preloadImages() { //v3.0
+  var d=document; if(d.images){ if(!d.MM_p) d.MM_p=new Array();
+    var i,j=d.MM_p.length,a=MM_preloadImages.arguments; for(i=0; i<a.length; i++)
+    if (a[i].indexOf("#")!=0){ d.MM_p[j]=new Image; d.MM_p[j++].src=a[i];}}
+}
+function MM_swapImgRestore() { //v3.0
+  var i,x,a=document.MM_sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+}
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+
+function MM_swapImage() { //v3.0
+  var i,j=0,x,a=MM_swapImage.arguments; document.MM_sr=new Array; for(i=0;i<(a.length-2);i+=3)
+   if ((x=MM_findObj(a[i]))!=null){document.MM_sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
+}
+</script>
+</head>
+<body>
+<!-- 头部-->
+<div id="top">
+   <div id="top_img_right"><img src="/images/pic_07.gif" width="507" height="107" /></div>
+</div>
+<!--end 头部-->
+<!--导航-->
+<div id="nav">
+      <div id="m_a">欢迎你，${c.username} 
+        <a href="/admin/logout" class="menu1">退出</a> 
+      </div>
+      <div id="m_b">
+        <a href="#" onclick="selectMenu('a');setTitle('玩家管理');MM_swapImgRestore();MM_swapImage('Image17','','/images/pic_20.gif',1)">
+            <img src="/images/pic_11.gif" name="Image17" width="97" height="24" border="0" id="Image17"/>
+        </a>
+        <a href="#" onclick="selectMenu('b');setTitle('运维管理');MM_swapImgRestore();MM_swapImage('Image18','','/images/pic_31.gif',1)"><img src="/images/pic_30.gif" name="Image18" width="97" height="24" border="0" id="Image18" /></a>
+        
+        <a href="#" onclick="selectMenu('c');setTitle('系统设置管理');MM_swapImgRestore();MM_swapImage('Image20','','/images/pic_22.gif',1)"><img src="/images/pic_13.gif" name="Image20" width="127" height="24" border="0" id="Image20" /></a>
+      </div>
+</div>
+<!--end 导航-->
+<div id="container">
+ <div id="sidebar">
+ <div class="white_b" id="title">子菜单</div>
+    
+    <!--运维管理——二级菜单　start-->
+    <div id="subMenu">
+      
+      <ul id="a">
+        <li><a href="#" class="menu" onclick="selectTab('/admin/user_list')">玩家列表</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/user_list?action=locked&flag=locked')">显示锁定用户</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/gm_list')">GM列表</a></li>
+        %if c.username == "admin":
+        <li><a href="#" class="menu" onclick="selectTab('/admin/recharge_records')">玩家充值记录</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/report')">玩家举报查看</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/apply_for')">内测资格申请</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/search_registed_users')">注册用户搜索</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/user_statistics')">注册/登录统计</a></li>
+        %endif
+      </ul>
+      
+      <ul id="b">
+        %if c.username == "admin":
+        <li><a href="#" class="menu" onclick="selectTab('/admin/maintainer')">运维成员管理</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/group')">运维组管理</a></li>
+        %endif
+        %if c.username == "mouren":
+        <li><a href="#" class="menu" onclick="selectTab('/admin/chongzhi')">充值接口</a></li>
+        %endif
+        <li><a href="#" class="menu" onclick="selectTab('/admin/give_treasure')">赠送道具</a></li>
+      </ul>
+      
+      <ul id="c">
+        %if c.username == "admin":
+        <li><a href="#" class="menu" onclick="selectTab('/admin/server_url')">服务器URL设置</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/game_server')">服务器地址设置</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/game_gift')">游戏礼包</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/pay_key')">密钥设置</a></li>
+        %endif
+        %if c.username == "mouren":
+        <li><a href="#" class="menu" onclick="selectTab('/admin/rmb_to_gold')">充值比率设置</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/invite_code')">邀请码管理</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/invite')">邀请设置</a></li>
+        %endif
+        <li><a href="#" class="menu" onclick="selectTab('/admin/cztj')">充值统计</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/maintenance')">系统维护</a></li>
+        <li><a href="#" class="menu" onclick="selectTab('/admin/change_password')">修改密码</a></li>
+      </ul>
+      
+    </div>
+    <!--运维管理——二级菜单　end-->
+ </div>
+ <div id="s"></div>
+ <div id="content">
+    <br><br>
+    欢迎使用《汉风》后台管理系统。
+ </div>
+</div>
+</body>
+<script type="text/javascript">
+function selectMenu(id){
+    show = document.getElementById(id)
+    menuA = document.getElementById("a")
+    menuB = document.getElementById("b")
+    menuC = document.getElementById("c")
+    menuA.style.display = "none"
+    menuB.style.display = "none"
+    menuC.style.display = "none"
+    if (show!=null){
+        show.style.display = "block"
+    }
+}
+function setTitle(myTitle){
+    mytitle = document.getElementById("title");
+    mytitle.innerHTML = myTitle;
+    }
+selectMenu();
+</script>
+</html>

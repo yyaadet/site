@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="138" creationComplete="init()">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+			import mx.managers.PopUpManager;
+			
+			//提示信息
+			private var _tipInfo:String = "";
+			
+			private var _isOK:Boolean = true;
+			private var _hasClose:Boolean = true;
+			private var _closeType:int = 0;
+			
+			private function init():void
+			{
+				setTitle("提　示");
+				
+				isShowHelp(false);
+				isShowClose(hasClose);
+				btnOK.enabled = isOK;
+			}			
+			
+			private function okClick(evt:MouseEvent):void
+			{
+				if (closeType == 0)
+					super.closeWin(evt);
+				else if (closeType == 1)
+					PubUnit.gotoIndex();
+			}
+			
+			//================================================================
+			// 属性
+			//================================================================
+			
+			public function get tipInfo():String
+			{
+				return _tipInfo;
+			}
+			
+			public function set tipInfo(param:String):void
+			{
+				_tipInfo = param;
+				
+				if (tip != null)
+					tip.htmlText = _tipInfo;
+			}
+			
+			public function get isOK():Boolean
+			{
+				return _isOK;
+			}
+			
+			public function set isOK(param:Boolean):void
+			{
+				_isOK = param;
+			}
+			
+			public function get hasClose():Boolean
+			{
+				return _hasClose;
+			}
+			
+			public function set hasClose(param:Boolean):void
+			{
+				_hasClose = param;
+				isShowClose(_hasClose);
+			}
+			
+			public function get closeType():int
+			{
+				return _closeType;
+			}
+			
+			public function set closeType(param:int):void
+			{
+				_closeType = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea id="tip" x="10" y="34" width="280" height="60" editable="false"/>
+	<OKButton id="btnOK" x="118" y="104" click="okClick(event);"/>
+	
+</GameWindow>

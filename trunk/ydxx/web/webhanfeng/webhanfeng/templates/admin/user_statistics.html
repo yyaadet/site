@@ -1,0 +1,65 @@
+    <!--玩家例表　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <tr>
+      <td height="30" colspan="13" bgcolor="#FFFFFF">
+        <table width="100%" height="45" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td  align="left" bgcolor="#f9f0e1"><ul class="img">
+            <li>起始时间：<input name="start_time" class="gray" id="start_time" value="${c.start_time}" style="WIDTH: 150px " />   
+            
+            <li>终止时间：<input name="end_time" class="gray" id="end_time" value="${c.end_time}" style="WIDTH: 150px " />   （年-月-日）
+            <li>
+                %if c.date == "month":
+                <input type="radio" name="date" value="day"  />按日
+                <input type="radio" name="date" value="month" checked="checked"/>按月
+                %else:
+                <input type="radio" name="date" value="day" checked="checked" />按日
+                <input type="radio" name="date" value="month" />按月
+                %endif
+            </li>
+             <li><a href="#" onclick="javascript:;if (checkTime()) selectTab('/admin/user_statistics?start_time='+$('#start_time').val()
+                +'&end_time='+$('#end_time').val()
+                +'&date='+$('input[name=\'date\']:checked').val()
+                )"><img src="/images/pic_15.gif" width="76" height="25" border="0" /></a></li></ul></td>
+          </tr>
+      </table></td>
+    </tr>
+    <tr>
+      <td height="30" align="center" bgcolor="#ac7e43" class="white_bc">日期</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">注册统计</td>
+      <td align="center" bgcolor="#ac7e43" class="white_bc">登录统计</td>
+    </tr>
+    %for i in c.data:
+    <tr>
+      <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${i[0]}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${i[1]}</td>
+      <td align="center" bgcolor="#f9f0e1" class="gray">${i[2]}</td>
+    </tr>
+    %endfor
+    
+</table>
+<script>
+function strDateTime(str)
+{
+var r = str.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/);
+if(r==null)return false;
+var d= new Date(r[1], r[3]-1, r[4]);
+return (d.getFullYear()==r[1]&&(d.getMonth()+1)==r[3]&&d.getDate()==r[4]);
+}
+function checkTime()
+{
+    start_time = $('#start_time').val()
+    end_time = $('#end_time').val()
+    if(!strDateTime(start_time)){
+        alert("起始时间错误");
+        return false;
+        }
+    if(!strDateTime(end_time)){
+        alert("终止时间错误");
+        return false;
+        }
+    return true;
+}
+</script>
+<!--玩家例表 end-->
+

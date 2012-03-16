@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="48" height="48" color="0xFFFFFF" xmlns:ns1="utils.components.*" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import images.AssetsManager;
+			import mx.events.FlexEvent;
+			
+			//数量
+			private var _num:int = 0;
+			
+			//图片地址
+			private var _imageURL:Object;
+			
+			//提示信息
+			private var _tip:String = "";
+			
+			//判断两个项目是否相等的函数
+			private var _equalFun:String = "";
+			
+			//内容对象
+			private var _obj:Object;
+			
+			//是否显示数字
+			private var _showNum:Boolean = true;
+			
+			private var _isLock:Boolean = false;
+			
+			private function init():void
+			{
+				lblNum.y = this.height - lblNum.height;
+				lblNum.visible = showNum;
+				lblNum.includeInLayout = showNum;
+				lblNum.graphics.clear();
+				lblNum.graphics.beginFill(0x333333, 0.5);
+				lblNum.graphics.drawRect(0, 0, 45, 13);
+				lblNum.graphics.endFill();
+				
+				this.mouseChildren = false;
+			}
+			
+			public function add(source:BagItem, num:int):void
+			{
+				if (num <= 0) return;
+				
+				this.obj = source.obj;
+				this.imageURL = source.imageURL;
+				this.tip = source.tip;
+				this.num += num;
+			}
+			
+			public function copy(source:BagItem):void
+			{
+				this.obj = source.obj;
+				this.num = source.num;
+				this.imageURL = source.imageURL;
+				this.tip = source.tip;
+			}
+			
+			public function combin(source:BagItem):void
+			{
+				this.num += source.num;
+			}
+			
+			public function equal(source:BagItem):Boolean
+			{
+				if (source == null) return false;
+				
+				return obj[equalFun](source);
+			}
+			
+			public function isFill():Boolean
+			{
+				if (num > 0)
+					return true;
+				else
+					return false;
+				
+				return false;
+			}
+			
+			public function removeAll():void
+			{
+				img.removeAllChildren();
+				this.removeAllChildren();
+			}
+			
+			public function clear():void
+			{
+				num = 0;
+				tip = "";
+				obj = null;
+				
+				var deClass:Class = AssetsManager.assetsMgr.WPN_DEFAULT;
+				if (isLock)
+					deClass = AssetsManager.assetsMgr.WPN_DEFAULT_L;
+					
+				var bmp:Bitmap = new deClass();
+				img.imageURL = bmp;
+			}
+			
+			public function get num():int
+			{
+				return _num;
+			}
+			
+			public function set num(param:int):void
+			{
+				_num = param;
+				lblNum.text = _num.toString();
+			}
+			
+			public function get imageURL():Object
+			{
+				return _imageURL;
+			}
+			
+			public function set imageURL(param:Object):void
+			{
+				_imageURL = param;
+				
+				img.imageURL = _imageURL;
+			}
+			
+			public function get tip():String
+			{
+				return _tip;
+			}
+			
+			public function set tip(param:String):void
+			{
+				_tip = param;
+				
+				this.toolTip = _tip;
+			}
+			
+			public function get equalFun():String
+			{
+				return _equalFun;
+			}
+			
+			public function set equalFun(param:String):void
+			{
+				_equalFun = param;
+			}
+			
+			public function get obj():Object
+			{
+				return _obj;
+			}
+			
+			public function set obj(param:Object):void
+			{
+				_obj = param;
+			}
+			
+			public function get showNum():Boolean
+			{
+				return _showNum;
+			}
+			
+			public function set showNum(param:Boolean):void
+			{
+				_showNum = param;
+				
+				if (lblNum != null)
+				{
+					lblNum.visible = _showNum;
+					lblNum.includeInLayout = _showNum;
+				}
+			}
+			
+			public function get isLock():Boolean
+			{
+				return _isLock;
+			}
+			
+			public function set isLock(param:Boolean):void
+			{
+				_isLock = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameImage id="img" x="0" y="0" width="48" height="48">
+	</ns1:GameImage>
+	
+	<mx:Label id="lblNum" height="14" width="46" y="33" x="1" textAlign="right" fontFamily="Arial" fontSize="9">
+	</mx:Label>
+	
+</mx:Canvas>

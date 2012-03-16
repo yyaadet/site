@@ -1,0 +1,36 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_content()">
+<div id="content">
+    <div id="left">
+        <%namespace file="/user/func.mako.html" name="user" />
+        ${user.user_left_menu()}
+    </div>
+    <div id="mid">
+       <form action="/user/do_reset_passwd" method="post">
+        <div class="table">
+        	<div class="row">
+            	<div class="col">旧密码：</div>
+                <div class="col"><input class="text" name="old_passwd" type="text" value=""/></div>
+            </div>
+            <div class="row">
+            	<div class="col">新密码：</div>
+                <div class="col"><input class="text" name="passwd" type="password" value="" /></div>
+            </div>
+            <div class="row">
+            	<div class="col">重复密码：</div>
+                <div class="col"><input class="text" name="passwd1" type="password" value="" /></div>
+            </div>
+            <div class="row">
+            	<div class="col"></div>
+                <div class="col"><input class="button"  type="submit" value="提交" /></div>
+            </div>
+        </div>
+        </form>    
+    </div>
+    <div id="right">
+    </div>
+</div>
+</%def>

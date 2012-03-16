@@ -1,0 +1,91 @@
+<!--游戏礼包　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+<tr>
+  <td height="45" colspan="7" align="left" bgcolor="#f9f0e1">　　　
+    <a href="#" onclick="selectTab('/admin/add_game_gift')"><img src="/images/pic_36.gif" width="81" height="23" border="0" /></a>　　
+    <a href="#" onclick="window.open('/admin/game_gift?action=export')"><img src="/images/pic_35.gif" width="94" height="23" border="0" /></a>
+    <input type="button" value="导出新手卡" onclick="window.open('/admin/game_gift?action=geren')" />
+    <input type="button" value="导出工会卡" onclick="window.open('/admin/game_gift?action=gonghui')" />
+    <input type="button" value="导出黄金新手卡" onclick="window.open('/admin/game_gift?action=huangjin')" />
+    </td>
+</tr>
+<tr>
+  <td width="7%" height="30" align="center" bgcolor="#ac7e43" class="white_bc">&nbsp;</td>
+  <td width="9%" align="center" bgcolor="#ac7e43" class="white_bc">ID</td>
+  <td align="left" bgcolor="#ac7e43" class="white_bc">　　验证码</td>
+  <td width="11%" align="center" bgcolor="#ac7e43" class="white_bc">面值</td>
+  <td width="11%" align="center" bgcolor="#ac7e43" class="white_bc">类型</td>
+  <td width="12%" align="center" bgcolor="#ac7e43" class="white_bc">有效日期</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">状态</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">操作</td>
+</tr>
+%for item in c.data:
+<tr>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">
+    <input type="checkbox" id="id${item.id}" name="id${item.id}" /></td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.id}</td>
+  <td height="30" align="left" bgcolor="#f9f0e1" class="gray">${item.code}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.money}</td>
+  %if item.is_oneoff == 1:
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">新手卡</td>
+  %elif item.is_oneoff == 2:
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">工会卡</td>
+  %elif item.is_oneoff == 3:
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">黄金新手卡</td>
+  %else:
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">无限使用</td>
+  %endif
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${readable_time(item.date)}</td>
+  %if item.is_used != 0:
+  <td align="center" bgcolor="#f9f0e1" class="gray">已用</td>
+  %else:
+  <td align="center" bgcolor="#f9f0e1" class="gray">未用</td>
+  %endif
+  <td align="center" bgcolor="#f9f0e1" class="gray">
+    <a href="#" onclick="selectTab('/admin/game_gift?action=del&id=${item.id}')">删除</a>
+  </td>
+</tr>
+%endfor
+<tr>
+  <td height="30" align="center" bgcolor="#ac7e43" class="menu1"><a href="#" class="menu2" onclick="checkAll();">全选</a></td>
+  <td height="30" align="center" bgcolor="#ac7e43" class="gray"><a href="#" class="menu2" onclick="uncheckAll();">不选</a></td>
+  <td height="30" align="left" bgcolor="#ac7e43" class="gray">
+    <span class="menu">　　<a href="#" class="menu2" onclick="selectTab('/admin/game_gift?action=del_more'
+            %for item in c.data:
+            +'&id${item.id}='+$('#id${item.id}').attr('checked')
+            %endfor
+            )">删除所选</a></span></td>
+  <td height="30" bgcolor="#ac7e43" class="gray"><a href="#" class="menu2" onclick="javascript:if(confirm('确定要清空所有数据吗？')){selectTab('/admin/game_gift?action=del_all')}">清空</a></td>
+  <td height="30" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+</tr>
+
+<%namespace file="/admin/mypager.html" import="*" />
+${footer_page("/admin/game_gift?page=")}
+</table>
+<script>
+    function checkAll()
+{
+var code_Values = document.getElementsByTagName("input");
+for(i = 0;i < code_Values.length;i++){
+if(code_Values[i].type == "checkbox")
+{
+code_Values[i].checked = true;
+}
+}
+}
+
+function uncheckAll()
+{
+var code_Values = document.getElementsByTagName("input");
+for(i = 0;i < code_Values.length;i++){
+if(code_Values[i].type == "checkbox")
+{
+code_Values[i].checked = false;
+}
+}
+} 
+</script>
+<!--游戏礼包 end-->
+

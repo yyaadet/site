@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="220" height="268" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import net.http.HttpManager;
+			import utils.WinManager;
+			
+			private function init():void
+			{
+				setTitle("修改密码");
+			}
+			
+			override public function refresh():void
+			{
+				tiPw.text = "";
+				tiPw1.text = "";
+				tiPw2.text = "";
+			}
+			
+			private function modi():void
+			{
+				if (tiPw.text == "" || tiPw1.text == "" || tiPw2.text == "" || tiPw.text.length != 6 || 
+				    tiPw1.text.length != 6 || tiPw2.text.length != 6 || tiPw1.text != tiPw2.text)
+				{
+					WinManager.winMgr.showResult("密码格式不正确");
+					return;
+				}  
+				
+				HttpManager.httpMgr.modiLock(tiPw.text, tiPw1.text);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="200" height="188" styleName="winCanvas">
+		<mx:Label x="10" y="7" text="请输入原密码"/>
+		<GameTextInput id="tiPw" x="10" y="29" width="178" isNUM="true" displayAsPassword="true" maxChars="6"/>
+		
+		<mx:Label x="10" y="68" text="请输入六位数字作为新密码"/>
+		<GameTextInput id="tiPw1" x="10" y="90" width="178" isNUM="true" displayAsPassword="true" maxChars="6"/>
+		<mx:Label x="10" y="120" text="请再次输入新密码"/>
+		<GameTextInput id="tiPw2" x="10" y="142" width="178" isNUM="true" displayAsPassword="true" maxChars="6"/>
+	</mx:Canvas>
+	
+	<OKButton x="42" y="230" click="modi();"/>
+	<GameButton x="114" y="230" click="super.closeWin(event);" label="关　闭"/>
+	
+</GameWindow>

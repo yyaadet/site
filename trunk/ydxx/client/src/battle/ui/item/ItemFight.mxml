@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="126" height="104" xmlns:ns1="utils.components.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.ToolTipEvent;
+			import sphere.ui.item.ItemAlliOper;
+			import images.AssetsManager;
+			import utils.PubUnit;
+			import general.model.General;
+			import utils.components.GameSwfLoader;
+			
+			import mx.core.UIComponent;
+		
+			private var _soliderSwf:GameSwfLoader = null;
+			
+			private var _gameGeneral:General = null;
+			
+			//显示类型
+			//1--己方  2--敌方
+			private var _showType:int = 1;
+			
+			private var _isDie:Boolean = false;
+			
+			private var soliderNum:int = 0;
+			
+			private var soliderTotal:int = 0;
+			
+			private var soliderSpirit:int = 0;
+			
+			private var soliderTrain:int = 0;
+			
+			private var soliderW:int = 40;
+			private var soliderH:int = 40;
+			private var row:int = 4;
+			private var col:int = 4;
+			private var offSetW:int = 0;
+			private var offSetH:int = 0;
+			
+			private var rowIndex:int = 0;
+			private var colIndex:int = 0;
+			
+			private var mcList:Array = [];
+			private var uiList:Array = [];
+			
+			//已经删除的士兵个数
+			private var hasDelMC:int = 0;
+			
+			//己方士兵所站立的方位  3 * 3
+			private var mcPosList9:Array = [
+			                              	[6, 3, 8],
+			                              	[5, 1, 2],
+			                              	[7, 4, 9]
+			                              ]
+			
+			//敌方士兵所站立的方位  3 * 3
+			private var mcEnePosList9:Array = [
+			                              	[8, 3, 6],
+			                              	[2, 1, 5],
+			                              	[9, 4, 7]
+			                              ]
+			
+			public function show():void
+			{
+				cvFlag.visible = true;
+				cvFlag.includeInLayout = true;
+				
+				if (showType == 1)
+				{
+					cvFlag.x = this.width - cvFlag.width - 20;
+					cvFlag.setStyle("backgroundImage", AssetsManager.assetsMgr.FIGHT_FLAG1);
+					lblName.x = 14;
+					lblName.y = 8;
+				}
+				else
+				{
+					cvFlag.x = 20;
+					cvFlag.setStyle("backgroundImage", AssetsManager.assetsMgr.FIGHT_FLAG2);
+					lblName.x = 7;
+					lblName.y = 8;
+				}
+				
+				lblName.text = gameGeneral.generalName.substr(0, 1);
+					
+				row = 3;
+				col = 3;
+				
+				offSetW = (96 - soliderW) / (col - 1);
+				offSetH = (90 - soliderH) / (row - 1);
+				
+				_isDie = false;
+				mcList.length = 0;
+				uiList.length = 0;
+				hasDelMC = 0;
+				rowIndex = 0;
+				colIndex = 0;
+				cvSolider.removeAllChildren();
+				
+				var i:int = 0;
+				var j:int = 0;
+				
+				for (i = 0; i < row; i++)
+				{
+					mcList[i] = [];
+					for (j = 0; j < col; j++)
+					{
+						mcList[i][j] = null;
+						var loader1:Loader = new Loader();
+						loader1.contentLoaderInfo.addEventListener(Event.COMPLETE, loadComp);
+						loader1.loadBytes(soliderSwf.swfLoader.contentLoaderInfo.bytes);
+					}
+				}
+			}
+			
+			private function loadComp(evt:Event):void
+			{
+				var loader1:MovieClip = evt.target.content as MovieClip;
+				if (showType != 1)
+					PubUnit.flipHorizontal(loader1);
+				var ui:ItemSolider = new ItemSolider();
+				ui.width = soliderW;
+				ui.height = soliderH;
+				
+				if (showType == 1)
+				{
+					ui.x = colIndex * offSetW + (row - rowIndex - 1) * 15;
+					ui.y = rowIndex * offSetH;
+				}
+				else
+				{
+					ui.x = colIndex * offSetW + rowIndex * 15;
+					ui.y = rowIndex * offSetH;
+				}
+				
+				mcList[rowIndex][colIndex] = loader1;
+				ui.rowIndex = rowIndex;
+				ui.colIndex = colIndex;
+				if (showType == 1)
+					ui.position = mcPosList9[rowIndex][colIndex];
+				else	
+					ui.position = mcEnePosList9[rowIndex][colIndex];
+				colIndex ++;
+				if (colIndex == col)
+				{
+					rowIndex ++;
+					colIndex = 0;
+					if (rowIndex == row)
+					{
+						rowIndex = 0;
+						colIndex = 0;
+					}
+				}
+				
+				ui.addChild(loader1);
+				cvSolider.addChild(ui);
+				uiList.push(ui);
+				loader1.stop();
+			}
+			
+			public function setDieNum(die:int):void
+			{
+				soliderNum = soliderNum - die;
+				
+				if (soliderNum == 0)
+				{
+					_isDie = true;
+					lblName.text = "";
+					cvSolider.removeAllChildren();
+					this.visible = false;
+					this.includeInLayout = false;
+					return;
+				}
+				
+				uiList = uiList.sortOn("position", Array.DESCENDING | Array.NUMERIC);
+				
+				var mcTotal:int = row * col;
+				var rate:Number = soliderNum / soliderTotal;
+				var delItemCount:int = mcTotal - Math.ceil(Number(rate * mcTotal)) - hasDelMC;
+				
+				if (delItemCount > 0)
+				{
+					var ui1:ItemSolider = null;
+					var count:int = 0;
+					for (var i:int = 0; i < uiList.length; i++)
+					{
+						ui1 = uiList[i];
+						if (!ui1.isDel && count < delItemCount)
+						{
+							var mc:MovieClip = mcList[ui1.rowIndex][ui1.colIndex];
+							if (mc != null)
+								ui1.removeChild(mc);
+							cvSolider.removeChild(ui1);
+							ui1.isDel = true;
+							ui1 = null;
+							count ++;
+						}
+					}
+					
+					hasDelMC = hasDelMC + delItemCount;
+				}
+			}
+			
+			public function setGeneralInfo(spirit:int, train:int):void
+			{
+				soliderSpirit += spirit;
+				soliderTrain += train;
+			}
+			
+			public function playMove():void
+			{
+				var i:int = 0;
+				var j:int = 0;
+				var mc:MovieClip = null;
+				
+				for (i = 0; i < row; i++)
+				{
+					for (j = 0; j < col; j++)
+					{
+						mc = mcList[i][j];
+						if (mc != null)
+						{
+							mc.gotoAndPlay(1);
+						}
+					}
+				}
+			}
+			
+			public function play():void
+			{
+				var i:int = 0;
+				var j:int = 0;
+				var mc:MovieClip = null;
+				
+				for (i = 0; i < row; i++)
+				{
+					for (j = 0; j < col; j++)
+					{
+						mc = mcList[i][j];
+						if (mc != null)
+						{
+							mc.gotoAndPlay(25);
+						}
+					}
+				}
+			}
+			
+			public function stop():void
+			{
+				var i:int = 0;
+				var j:int = 0;
+				var mc:MovieClip = null;
+				
+				for (i = 0; i < row; i++)
+				{
+					for (j = 0; j < col; j++)
+					{
+						mc = mcList[i][j];
+						if (mc != null)
+						{
+							mc.gotoAndStop(1);
+						}
+					}
+				}
+			}
+			
+			private function createToolTip(evt:ToolTipEvent):void
+			{
+				var tip:FightTip = new FightTip();
+				tip.soliderNum = soliderNum;
+				tip.soliderTotal = soliderTotal;
+				tip.soliderSpirit = soliderSpirit;
+				tip.gameGeneral = gameGeneral;
+				evt.toolTip = tip;
+				var ary:Array = [];
+				ary.push(tip);
+				this.callLater(setTip, ary);
+			}
+			
+			private function setTip(tip:FightTip):void
+			{
+				tip.show();
+			}
+			
+			public function get soliderSwf():GameSwfLoader
+			{
+				return _soliderSwf;
+			}
+			
+			public function set soliderSwf(param:GameSwfLoader):void
+			{
+				_soliderSwf = param;
+			}
+			
+			public function get gameGeneral():General
+			{
+				return _gameGeneral;
+			}
+			
+			public function set gameGeneral(param:General):void
+			{
+				_gameGeneral = param;
+				
+				soliderNum = param.soliderNum;
+				soliderTotal = param.soliderNum;
+				soliderSpirit = param.soliderSpirit;
+				soliderTrain = param.soliderTrain;
+			}
+			
+			public function get showType():int
+			{
+				return _showType;
+			}
+			
+			public function set showType(param:int):void
+			{
+				_showType = param;
+			}
+			
+			public function get isDie():Boolean
+			{
+				return _isDie
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameImage id="cvSolider" x="0" y="14" width="126" height="90" canSel="true" toolTip="test" toolTipCreate="createToolTip(event)">
+	</ns1:GameImage>
+	
+	<mx:Canvas id="cvFlag" width="37" height="34" y="0" x="45" visible="false" includeInLayout="false">
+		<mx:backgroundImage>@Embed(source='../../../images/assets/fight/flag2.png')</mx:backgroundImage>
+		<mx:Label id="lblName" width="20" height="20" fontSize="12" fontFamily="新宋体" y="8" x="7" color="#FFFFFF">
+		</mx:Label>
+	</mx:Canvas>
+</mx:Canvas>

@@ -1,0 +1,126 @@
+<%inherit file="index2.html" />
+
+
+
+<%def name="html_content_title()">
+我要充值
+</%def>
+
+
+
+
+<%def name="html_content()">
+<form action="/home/recharge">
+<input type="hidden" name="act" value="ok">
+<input type="hidden" name="way" value="${c.way}">
+<input type="hidden" name="username" value="${c.username}">
+<input type="hidden" name="rmb" value="${c.rmb}">
+<table width="672" border="0" cellpadding="0" cellspacing="1" bgcolor="#DEDEDE">
+         <tr>
+           <td height="35" colspan="2" align="left" bgcolor="#FFFFFF">
+           %if c.way == 1:
+                <span class="table_t">　网银支付</span>
+           %elif c.way == 2:
+                <span class="table_t">　中国移动通信账户支付</span>
+           %elif c.way == 3:
+                <span class="table_t">　联通卡支付</span>
+           %elif c.way == 4:
+                <span class="table_t">　支付宝支付</span>
+           %elif c.way == 5:
+                <span class="table_t">　骏网一卡通支付</span>
+           %elif c.way == 6:
+                <span class="table_t">　征途卡支付</span>
+           %elif c.way == 7:
+                <span class="table_t">　盛大卡支付</span>
+           %elif c.way == 8:
+                <span class="table_t">　Q币卡支付</span>
+           %elif c.way == 9:
+                <span class="table_t">　久游一卡通支付</span>
+           %elif c.way == 10:
+                <span class="table_t">　网易一卡通支付</span>
+           %elif c.way == 11:
+                <span class="table_t">　完美一卡通支付</span>
+           %elif c.way == 12:
+                <span class="table_t">　搜狐一卡通支付</span>
+           %elif c.way == 13:
+                <span class="table_t">　易宝一卡通支付</span>
+           %elif c.way == 14:
+                <span class="table_t">　电信支付</span>
+           %elif c.way == 15:
+                <span class="table_t">　天下一卡通支付</span>
+           %elif c.way == 16:
+                <span class="table_t">　纵游一卡通支付</span>
+           %elif c.way == 17:
+                <span class="table_t">　天宏一卡通支付</span>
+           %elif c.way == 18:
+                <span class="table_t">　WAP银行卡支付</span>
+           %endif
+           </td>
+          </tr>
+          
+          
+          %if c.err != "":
+          <tr>
+           <td width="129" height="35" align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>错误信息：
+           </dl></td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <font color="#C2001A">${c.err}</font>
+           </dl>
+           </td>
+          </tr>
+          %endif
+         <tr>
+           <td width="129" height="35" align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>您的充值的帐号：
+           </dl></td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <font color="#C2001A">${c.username}</font>
+           </dl>
+           </td>
+         </tr>
+         
+         <tr>
+           <td height="35" align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>您的充值金额为：
+           </dl></td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <font color="#C2001A">
+             ${c.rmb}
+             </font>
+           </dl>
+           </td>
+         </tr>
+         
+         <tr>
+           <td height="35" align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>所得平台币为：
+           </dl></td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             %if c.way == 1 or c.way == 4:
+                <font color="#C2001A">${int(c.rmb*10*c.rate)}</font>
+             %elif c.way == 2 or c.way == 3 or c.way == 14:
+                <font color="#C2001A">${int(c.rmb*9*c.rate)}</font>
+             %else:
+                <font color="#C2001A">${int(c.rmb*8*c.rate)}</font>
+             %endif
+           </dl>
+           </td>
+         </tr>
+         
+         <tr>
+           <td height="35" align="left" bgcolor="#FFFFFF">&nbsp;</td>
+           <td align="left" bgcolor="#FFFFFF"><dl>
+             <span class="table_t">　</span>
+             <input type="image" src="/images/botton_02.jpg" border="0"/></a>
+           </dl>
+           </td>
+         </tr>
+       </table>
+       </form>
+
+</%def>

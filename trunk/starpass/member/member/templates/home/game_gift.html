@@ -1,0 +1,53 @@
+<%inherit file="index2.html" />
+
+
+
+<%def name="html_content_title()">
+领取新手卡
+</%def>
+
+
+
+
+<%def name="html_content()">
+%if c.err != "":
+    <span style="color:red">${c.err}</span>
+%endif
+<table width="672" border="1" cellpadding="0" cellspacing="0" bordercolor="#FFFFFF">
+         <tr>
+           <td width="190" height="35" bgcolor="#DCDCDE"><div align="center" class="x" >游戏名称</div></td>
+           <td width="255" bgcolor="#DCDCDE"><div align="center"><div align="center" class="x" >选择服务器</div></td>
+           <td width="231" bgcolor="#DCDCDE"><div align="center"><span class="x">领取新手卡</span></div></td>
+         </tr>
+         
+         %for game in c.games:
+            <%
+                servers = get_servers_by_game_id(game.id)
+            %>
+         <tr>
+           <td height="35" bgcolor="#ECECEC"><div align="center">
+               <dl>
+                 ${game.name}
+               </dl>
+           </div></td>
+           <td bgcolor="#ECECEC"><div align="center">
+               <dl>
+                 <select id="server_id" name="server_id" onchange="get_servers();">
+                    <option selected="selected" value="0">请选择服务器</option>
+                    %for s in servers:
+                        <option value=${s.id}>${s.name}</option>
+                    %endfor
+                </select>
+               </dl>
+           </div></td>
+           <td bgcolor="#ECECEC"><div align="center">
+             <dl>
+               <a href="#" onclick="window.location.href=('/home/game_gift?act=get&game_id=${game.id}&server_id='+$('#server_id').val())">领取新手卡</a>
+             </dl>
+           </div></td>
+         </tr>
+         %endfor
+       </table>
+
+
+</%def>

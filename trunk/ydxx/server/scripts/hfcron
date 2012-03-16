@@ -1,0 +1,2 @@
+*/10      *    *       *       *       /usr/local/sbin/hfd -b /usr/local/etc/hfd.ini >/dev/null 2>&1
+*/1      *    *       *       *       /usr/local/hfd/moniweb.sh  >/dev/null 2>&1

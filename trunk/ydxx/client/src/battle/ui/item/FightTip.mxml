@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="122" height="122" implements="mx.core.IToolTip" backgroundColor="#000000" borderStyle="solid" borderThickness="1" cornerRadius="5" borderColor="#000000">
+
+	<mx:Script>
+		<![CDATA[
+			import images.AssetsManager;
+			import utils.FormatText;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			import wubao.model.Weapon;
+		
+			import general.model.General;
+		
+			private var _text:String;
+			
+			private var _gameGeneral:General = null;
+			
+			private var _soliderNum:int = 0;
+			
+			private var _soliderTotal:int = 0;
+			
+			private var _soliderSpirit:int = 0;
+			
+			public function show():void
+			{
+				taInfo.htmlText = FormatText.packegText("武将：") + FormatText.packegText(gameGeneral.generalName, FormatText.GREEN) + "\n" + 
+				                  FormatText.packegText("等级：") + FormatText.packegText(gameGeneral.soliderTrain.toString(), FormatText.GREEN) + "\n" +
+				                  FormatText.packegText("部曲：") + FormatText.packegText(gameGeneral.soliderName, FormatText.GREEN) + "\n" +
+							      FormatText.packegText("士卒：") + FormatText.packegText(soliderNum.toString() + "/" + soliderTotal.toString(), FormatText.GREEN) + "\n" + 
+								  FormatText.packegText("阵型：") + FormatText.packegText(gameGeneral.useZhenName, FormatText.GREEN) + "\n" +
+								  FormatText.packegText("士气：") + FormatText.packegText(soliderSpirit.toString(), FormatText.GREEN);
+				
+				var gameWubao:WuBao = GameManager.gameMgr.wubao;
+				
+				var weapon:Canvas = null;
+				var wType:int = 0;
+				var wLevel:int = 0;
+				var lblNum:Label = null;
+				
+				for (var i:int = 1; i <= 4; i++)
+				{
+					wType = gameGeneral["w" + i.toString() + "Type"];
+					wLevel = gameGeneral["w" + i.toString() + "Level"];
+					weapon = this["w" + i.toString()] as Canvas;
+					weapon.setStyle("backgroundImage", AssetsManager.assetsMgr.WPN_DEFAULT_S);
+					lblNum = this["lbl" + i.toString()] as Label;
+					lblNum.graphics.clear();
+					
+					if (wType > 0)
+					{
+						weapon.setStyle("backgroundImage", Weapon.getSmallImg(wType));
+						weapon.data = wType;
+						lblNum.text = wLevel.toString();
+						lblNum.graphics.beginFill(0x333333, 0.5);
+						lblNum.graphics.drawRect(0, 4, lblNum.width, 10);
+						lblNum.graphics.endFill();
+					}
+				}
+
+			}
+			
+			private function getWeapon():Canvas
+			{
+				var i:int = 1;
+				var weapon:Canvas = null;
+				
+				for (i = 1; i <= 4; i++)
+				{
+					weapon = this["w" + i.toString()] as Canvas;
+					if (weapon != null && weapon.data <= 0)
+						return weapon;
+				}
+				
+				return null;
+			}
+					
+			public function get text():String
+			{
+				return _text;
+			}
+			
+			public function set text(value:String):void
+			{
+				_text = value;
+			}
+			
+			public function get gameGeneral():General
+			{
+				return _gameGeneral;
+			}
+			
+			public function set gameGeneral(param:General):void
+			{
+				_gameGeneral = param;
+			}
+			
+			public function get soliderNum():int
+			{
+				return _soliderNum;
+			}
+			
+			public function set soliderNum(param:int):void
+			{
+				_soliderNum = param;
+			}
+			
+			public function get soliderTotal():int
+			{
+				return _soliderTotal;
+			}
+			
+			public function set soliderTotal(param:int):void
+			{
+				_soliderTotal = param;
+			}
+			
+			public function get soliderSpirit():int
+			{
+				return _soliderSpirit;
+			}
+			
+			public function set soliderSpirit(param:int):void
+			{
+				_soliderSpirit = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea id="taInfo" x="0" y="0" backgroundAlpha="0" editable="false" width="120" height="92"/>
+	
+	<mx:Canvas id="w1" x="2" y="94" width="24" height="24">
+		<mx:Label id="lbl1" x="0" y="10" width="24" height="14" fontSize="10" color="0xFFFFFF" textAlign="right"/>
+	</mx:Canvas>
+	<mx:Canvas id="w2" x="26" y="94" width="24" height="24">
+		<mx:Label id="lbl2" x="0" y="10" width="24" height="14" fontSize="10" color="0xFFFFFF" textAlign="right"/>
+	</mx:Canvas>
+	<mx:Canvas id="w3" x="50" y="94" width="24" height="24">
+		<mx:Label id="lbl3" x="0" y="10" width="24" height="14" fontSize="10" color="0xFFFFFF" textAlign="right"/>
+	</mx:Canvas>
+	<mx:Canvas id="w4" x="74" y="94" width="24" height="24">
+		<mx:Label id="lbl4" x="0" y="10" width="24" height="14" fontSize="10" color="0xFFFFFF" textAlign="right"/>
+	</mx:Canvas>
+	
+</mx:Canvas>

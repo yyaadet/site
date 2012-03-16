@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="95" height="114" fontSize="12" color="0xFFFFFF" fontFamily="新宋体" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import deal.model.Bill;
+		
+			import deal.list.BillList;
+			
+			private var _billList:BillList = null;
+			
+			private function init():void
+			{
+				
+			}
+			
+			private function showBill():void
+			{
+				var i:int = 0;
+				var len:int = billList.length;
+				var gameBill:Bill = null;
+				
+				for (i = 0; i < 5; i++)
+				{
+					gameBill = billList.getObjByIndex(i) as Bill;
+					if (gameBill != null)
+					{
+						this["lblPrice" + (i + 1).toString()].text = gameBill.price.toString();
+						this["lblNum" + (i + 1).toString()].text = gameBill.leftNum.toString();
+					}
+				}
+			}
+			
+			public function get billList():BillList
+			{
+				return _billList;
+			}
+			
+			public function set billList(param:BillList):void
+			{
+				_billList = param;
+				
+				if (_billList == null) return;
+				showBill();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="0" y="0" width="95" height="114" styleName="lowCanvas">
+		<mx:Canvas x="3" y="3" width="85" height="20" styleName="winCanvas">
+			<mx:Label id="lblPrice1" x="0" y="0" height="18" width="40" textAlign="right" color="#E3D71F"/>
+			<mx:Label x="34" y="0" text="|" textAlign="center" width="15" height="20"/>
+			<mx:Label id="lblNum1" x="43" y="0" height="18" width="40" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas x="3" y="24" width="85" height="20" styleName="winCanvas">
+			<mx:Label id="lblPrice2" x="0" y="0" height="18" width="40" textAlign="right" color="#E3D71F"/>
+			<mx:Label x="34" y="0" text="|" textAlign="center" width="15" height="20"/>
+			<mx:Label id="lblNum2" x="43" y="0" height="18" width="40" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas x="3" y="45" width="85" height="20" styleName="winCanvas">
+			<mx:Label id="lblPrice3" x="0" y="0" height="18" width="40" textAlign="right" color="#E3D71F"/>
+			<mx:Label x="34" y="0" text="|" textAlign="center" width="15" height="20"/>
+			<mx:Label id="lblNum3" x="43" y="0" height="18" width="40" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas x="3" y="66" width="85" height="20" styleName="winCanvas">
+			<mx:Label id="lblPrice4" x="0" y="0" height="18" width="40" textAlign="right" color="#E3D71F"/>
+			<mx:Label x="34" y="0" text="|" textAlign="center" width="15" height="20"/>
+			<mx:Label id="lblNum4" x="43" y="0" height="18" width="40" textAlign="left"/>
+		</mx:Canvas>
+		<mx:Canvas x="3" y="87" width="85" height="20" styleName="winCanvas">
+			<mx:Label id="lblPrice5" x="0" y="0" height="18" width="40" textAlign="right" color="#E3D71F"/>
+			<mx:Label x="34" y="0" text="|" textAlign="center" width="15" height="20"/>
+			<mx:Label id="lblNum5" x="43" y="0" height="18" width="40" textAlign="left"/>
+		</mx:Canvas>
+	</mx:Canvas>
+</mx:Canvas>

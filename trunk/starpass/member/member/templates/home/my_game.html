@@ -1,0 +1,27 @@
+<%inherit file="index.html" />
+
+
+
+<%def name="html_content_title()">
+我的游戏
+</%def>
+
+
+
+
+<%def name="html_content()">
+
+%for game in c.games:
+<div class="youxi_big">
+ <div class="youxi_a">
+   <div class="youxi_atit" ><strong >《${game.name}》</strong>　　　　<a href="${game.website}" target="_blank" class="gw">官网</a></div>
+    <div class="youxi_title">游戏介绍</div>
+    <div class="youxi_pic"><img src="${game.pic_url}"/><dl id="dc">
+    ${game.description}
+    </dl></div>
+ </div>
+ <div class="botton_a"><a href="/home/game_server?game_id=${game.id}"><img src="/images/botton_01.jpg" border="0"/></a></div>
+</div> 
+%endfor
+
+</%def>

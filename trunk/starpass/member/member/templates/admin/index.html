@@ -1,0 +1,115 @@
+<%inherit file="_admin.html" />
+
+<%def name="html_head()">
+
+<script type="text/javascript" src="/scripts/jquery.js"></script>
+<script type="text/javascript" src="/scripts/chili-1.7.pack.js"></script>
+<script type="text/javascript" src="/scripts/jquery.easing.js"></script>
+<script type="text/javascript" src="/scripts/jquery.dimensions.js"></script>
+<script type="text/javascript" src="/scripts/jquery.accordion.js"></script>
+<script type="text/javascript" src="/scripts/jquery.cookie.js"></script>
+<script language="javascript">
+jQuery().ready(function(){
+        jQuery('#navigation').accordion({
+            header: '.head',
+            navigation: true, 
+            event: 'click',
+            fillSpace: true,
+            animated: 'easeslide'
+        });
+    });
+</script>
+
+
+</%def>
+
+<%def name="html_title()">
+<title>后台管理</title>
+</%def>
+
+<%def name="html_navigation()">
+
+  <ul id="navigation">
+    %if c.admin_level == 1:
+    <li> <a class="head">用户管理</a>
+      <ul>
+        <li><a href="/admin/user_list">用户管理</a></li>
+        <li><a href="/admin/expand_list">推广员管理</a></li>
+      </ul>
+    </li>
+    
+    <li> <a class="head">管理员管理</a>
+      <ul>
+        <li><a href="/admin/admin_list">管理员管理</a></li>
+        <li><a href="/admin/add_admin">添加管理员</a></li>
+      </ul>
+    </li>
+    
+    <li> <a class="head">游戏管理</a>
+      <ul>
+        <li><a href="/admin/game_list">游戏管理</a></li>
+        <li><a href="/admin/add_game">添加游戏</a></li>
+        <li><a href="/admin/line_list">游戏区管理</a></li>
+        <li><a href="/admin/add_line">添加游戏区</a></li>
+        <li><a href="/admin/server_list">游戏服管理</a></li>
+        <li><a href="/admin/add_server">添加游戏服</a></li>
+      </ul>
+    </li>
+    %endif
+    
+    <li> <a class="head">结算中心</a>
+      <ul>
+        <li><a href="/admin/settlement">游戏结算</a></li>
+      </ul>
+    </li>
+    
+    
+    <li> <a class="head">新手卡</a>
+      <ul>
+        <li><a href="/admin/game_gift">添加新手卡</a></li>
+      </ul>
+    </li>
+    
+    <li> <a class="head">充值折扣</a>
+      <ul>
+        <li><a href="/admin/recharge_rate">充值折扣列表</a></li>
+        <li><a href="/admin/add_recharge_rate">添加新的折扣</a></li>
+      </ul>
+    </li>
+    
+    %if c.admin_level == 1:
+    <li> <a class="head">日志查看</a>
+      <ul>
+        <li><a href="/admin/recharge_log">充值记录 </a></li>
+        <li><a href="/admin/exchange_log">兑换记录</a></li>
+        <li><a href="/admin/operation_log">操作记录</a></li>
+      </ul>
+    </li>
+    %endif
+    
+    <li> <a class="head">系统设置</a>
+      <ul>
+        <li><a href="/admin/edit_password">修改密码 </a></li>
+        %if c.admin_level == 1:
+        <li><a href="/admin/yibao_setting">易宝设置</a></li>
+        <li><a href="/admin/alipay_setting">支付宝设置</a></li>
+        <li><a href="/admin/expand_setting">推广设置</a></li>
+        <li><a href="/admin/home_page">首页设置</a></li>
+        <li><a href="/admin/recharge_interface_setting">其他平台充值设置</a></li>
+        %endif
+      </ul>
+    </li>
+    
+  </ul>
+</%def>
+
+
+<%def name="html_content()">
+欢迎。。。
+<p>这是内容</p>
+</%def>
+
+<%def name="html_extra()">
+<div class="admin_name">${c.admin_name}</div>
+<div class="logout"><a href="/admin/logout">退出</a></div>
+</%def>

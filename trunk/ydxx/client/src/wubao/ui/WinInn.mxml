@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="490" height="334" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import net.tcp.model.wubao.TcpGrant;
+			import utils.events.ConfirmEvent;
+			import utils.ui.WinAsk;
+			import wubao.model.UserTreasure;
+			import general.model.General;
+			import net.tcp.model.wubao.TcpAppGen;
+			import utils.WinManager;
+			import wubao.model.Dignitie;
+			import utils.PubUnit;
+			import wubao.model.WuBao;
+			import net.tcp.TcpManager;
+			import utils.GameManager;
+			
+			private var gameWubao:WuBao = null;
+			private var gameGeneral:General = null;
+			
+			private function init():void
+			{
+				setTitle("客　栈");
+				helpID = 31;
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				gameGeneral = gameWubao.generalStand;
+				generalInfo.gameGeneral = gameGeneral;
+				
+				if (gameGeneral != null)
+				{
+					lblInfo.visible = false;
+					lblInfo.includeInLayout = false;
+					generalInfo.visible = true;
+					generalInfo.includeInLayout = true;
+					generalInfo.gameGeneral = gameGeneral;
+				}
+				else
+				{
+					lblInfo.visible = true;
+					lblInfo.includeInLayout = true;
+					generalInfo.visible = false;
+					generalInfo.includeInLayout = false;
+				}
+			}
+			
+			private function appointGeneral():void
+			{
+				var num:int = gameWubao.generalList.length;
+				var dig:Dignitie = GameManager.gameMgr.digList.getObjByID(gameWubao.digID) as Dignitie;
+				var max:int = dig.generalMax;
+				
+				if (gameGeneral == null)
+				{
+					WinManager.winMgr.showResult("当前没有武将可登用");
+					return;
+				}
+				
+				if (num >= max)
+				{
+					WinManager.winMgr.showResult("武将数目已达到上限，无法登用");
+					return;
+				}
+				
+				var ag:TcpAppGen = new TcpAppGen();
+				
+				ag.wbID = GameManager.gameMgr.wubao.uniqID;
+				ag.generalID = gameGeneral.uniqID;
+				
+				TcpManager.tcpMgr.sendAppGeneral(ag);
+			}
+			
+			private var winAsk:WinAsk = null;
+			
+			private var ut:UserTreasure = null;
+			
+			private function refreshGeneral():void
+			{
+				ut = GameManager.gameMgr.userTsList.getOneTreasure(8);
+				if (ut == null)
+				{
+					WinManager.winMgr.showResult("刷新武将需要招贤榜,请到商城去购买");
+					return;
+				}
+				
+				var str:String = "确定要使用招贤榜吗？";
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmRefresh);
+			}
+			
+			private function confirmRefresh(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmRefresh);
+				
+				if (ut != null)
+				{
+					var grant:TcpGrant = new TcpGrant();
+					grant.wbID = gameWubao.uniqID;
+					grant.type = 3;
+					grant.treasureID = ut.uniqID;
+					
+					TcpManager.tcpMgr.sendGrant(grant); 
+				}
+			}
+			
+			public function dealUse():void
+			{
+				if (ut != null)
+				{
+					ut.isUsed = 1;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="470" height="256" styleName="lowCanvas">
+		<GeneralInfo id="generalInfo" x="3" y="3">
+		</GeneralInfo>
+		<mx:Label id="lblInfo" text="当前没有可登用武将，请等待下月或者使用招贤榜立即刷新" fontSize="16" color="#FFFFFF" horizontalCenter="0" verticalCenter="0" visible="false" includeInLayout="false" fontWeight="bold"/>
+	</mx:Canvas>
+	
+	<GameButton x="249" width="64" height="24" label="登　用" click="appointGeneral();" y="300"/>
+	<GameButton x="177" y="300" width="64" height="24" label="刷　新" click="refreshGeneral();"/>
+	
+</GameWindow>

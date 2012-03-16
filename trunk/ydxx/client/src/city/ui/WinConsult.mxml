@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="576" height="344"
+	xmlns:ns1="utils.components.*" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.ui.PanelOperate;
+			import utils.ui.PanelDate;
+			import utils.TipInfo;
+			import task.model.Task;
+			import wubao.model.User;
+			import net.tcp.model.wubao.TcpVisit;
+			import wubao.model.Dignitie;
+			import utils.events.ConfirmEvent;
+			import utils.PubUnit;
+			import net.tcp.TcpManager;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import general.model.Zhen;
+			import general.model.Skill;
+			import utils.components.XiulianList;
+			import wubao.model.WuBao;
+			import utils.GameManager;
+			import city.model.City;
+			import utils.components.events.BagEvent;
+			import general.model.General;
+			
+			private var gameGeneral:General = null;
+			
+			private var generalList:Array = [];
+			
+			private var _cityID:int = 0;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var gameCity:City = null; 
+			
+			private	var selItem:Object = null;
+			
+			private function init():void
+			{
+				setTitle("武将列表");
+				helpID = 40;
+				gvl1.addEventListener(BagEvent.ItemClick, onClick1);
+				
+				refresh();
+			}
+			
+			override public function refresh():void
+			{
+				gameCity = GameManager.gameMgr.cityList.getObjByID(cityID) as City;
+				if (gameCity != null)
+					generalList = gameCity.generalList.getVisitList().list;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				
+				gvl1.dataProvider = generalList;
+				gvl1.labelField = "generalName";
+				gvl1.itemID = "generalID";
+				gvl1.showData();
+					
+				selItem = null;
+			}
+			
+			private function onClick1(evt:BagEvent):void
+			{
+				var generalID:int = evt.itemObj.uniqID;
+				gameGeneral = gameCity.generalList.getObjByID(generalID) as General; 
+				generalInfo.gameGeneral = gameGeneral;
+				
+				selItem = null;
+				generalInfo.gsl1.clearAllGlow();
+			}
+			
+			private function give():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				var dig:Dignitie = GameManager.gameMgr.digList.getObjByID(gameWubao.digID) as Dignitie;
+				var generalMax:int = 0;
+				if (dig != null)
+					generalMax = dig.generalMax;
+				
+				var generalNum:int = gameWubao.generalList.length;
+				var str:String = "";
+				if (generalNum >= generalMax)
+				{
+					str = "武将数目已达上限";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				if (gameGeneral.userID == gameWubao.userID)
+				{
+					str = "无法结交自己的武将";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				if (gameGeneral.userID > 0)
+				{
+					str = "只能结交没有主公的武将";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				WinManager.winMgr.showGive(gameGeneral.uniqID);
+			}
+			
+			private function visit():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				if (gameCity.sphereID <= 0 || gameCity.sphereID != gameWubao.sphereID)
+				{
+					var str:String = "只能拜访本势力所占有的城池中的武将";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				if (gameGeneral.userID == gameWubao.userID)
+				{
+					str = "无法拜访自己的武将";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				var tcpVisit:TcpVisit = new TcpVisit();
+				tcpVisit.wbID = gameWubao.uniqID;
+				tcpVisit.generalID = gameGeneral.uniqID;
+				TcpManager.tcpMgr.sendVisitGeneral(tcpVisit);
+			}
+			
+			//=====================================================================================================
+			// 属性
+			//=====================================================================================================
+			
+			public function get cityID():int
+			{
+				return _cityID;
+			}
+			
+			public function set cityID(param:int):void
+			{
+				_cityID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="70" height="266" styleName="lowCanvas" verticalScrollPolicy="off">
+		<ns1:GameVerList id="gvl1" y="0" x="0">
+		</ns1:GameVerList>
+	</mx:Canvas>
+	<mx:Canvas x="86" y="34" width="480" height="266" styleName="lowCanvas">
+		<GeneralInfo id="generalInfo" x="8" y="8">
+		</GeneralInfo>
+	</mx:Canvas>
+	
+	<ns1:GameButton id="btnVisit" label="拜  访" width="64" height="24" x="220" click="visit();" y="308"/>
+	<ns1:GameButton id="btnGive" label="结  交" width="64" height="24" x="292" click="give();" y="308"/>
+	
+	<mx:Button id="btnGuid" x="325" y="190" width="45" height="16" label="" visible="false" includeInLayout="false"/>
+
+</GameWindow>

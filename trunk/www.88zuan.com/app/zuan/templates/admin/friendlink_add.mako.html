@@ -1,0 +1,27 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+    <form method="get" action="/admin/friendlink_do_add" >
+    <div class="row" style="height: 30px;">
+    	<div class="col">名称:</div>
+        <div class="col"><input type="text" class="longtext" name="name" value="" /></div>
+    </div>
+    <div class="row" style="height: 160px;">
+    	<div class="col">URL:</div>
+        <div class="col"><textarea name="url" class="txt"></textarea></div>
+    </div>
+    <div class="row" style="height: 30px;">
+    	<div class="col">首页显示:</div>
+        <div class="col">
+        	<input type="radio" name="is_in_home" value="0" checked="checked" />否
+            <input type="radio" name="is_in_home" value="1" />是
+        </div>
+    </div>
+    <div class="row" style="height: 30px;">
+    	<div class="col"></div>
+        <div class="col"><input class="button" type="submit" value="提 交"/></div>
+    </div>
+    </form>
+</%def>

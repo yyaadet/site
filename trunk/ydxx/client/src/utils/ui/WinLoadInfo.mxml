@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="0x000000" creationComplete="init();" xmlns:ns1="utils.components.*">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.WinManager;
+			import utils.GameManager;
+			import flash.utils.clearInterval;
+			import flash.utils.setInterval;
+			import mx.core.ScrollPolicy;
+			
+			private var tipIndex:int = 0;
+			private var tipList:Array = [];
+			
+			private var funcNum:int = 0;
+			
+			private function init():void
+			{
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				
+				lblInfo.visible = false;
+				lblInfo.includeInLayout = false;
+				lblTip.visible = false;
+				lblTip.includeInLayout = false;
+				
+				if (cvBG != null)
+				{
+					cvBG.progressHandle = loadProgress;
+					cvBG.addEventListener(GameImage.INIT_FINISH, loadBGFinish);
+					cvBG.imageName = "load_bg";
+					cvBG.imageURL = GameManager.gameMgr.resURL + "scene/load_bg.jpg";
+					
+					cvBG.x = (this.width - cvBG.width) * 0.5;
+					cvBG.y = (this.height - cvBG.height) * 0.5;
+				}
+				
+				tipList = ["军团的兵种取决于装备的种类", "爵位越高，能招募的武将越多", "声望越高，玩家可申请的官位越高"];
+			}
+			
+			private function loadBGFinish(evt:Event):void
+			{
+				WinManager.winMgr.winLoading.visible = false;
+				WinManager.winMgr.winLoading.includeInLayout = false;
+				swapChildIndex();
+				
+				lblInfo.visible = true;
+				lblInfo.includeInLayout = true;
+				lblTip.visible = true;
+				lblTip.includeInLayout = true;
+				
+				tipIndex = 0;
+				lblTip.text = tipList[tipIndex];
+				funcNum = setInterval(showNext, 3000);
+			}
+			
+			private function loadProgress(evt:ProgressEvent):void
+			{
+				var info:String = "正在加载背景图片，请稍候... " + int(evt.bytesLoaded / evt.bytesTotal * 100).toString() + "%";
+				WinManager.winMgr.showLoadingIntf(info);
+			}
+			
+			private function swapChildIndex():void
+			{
+				var i:int = 0;
+				var index:int = 1;
+				var label:Label = null;
+				
+				cvBG.setChildIndex(cvBG.imageUI, 0);
+				
+				for(i = 0; i < cvBG.numChildren;i++)
+				{
+					if (cvBG.getChildAt(i) is Label)
+					{
+						label = cvBG.getChildAt(i) as Label;
+						cvBG.setChildIndex(label, index);
+						index++;
+					}
+				}
+			}
+			
+			private function showNext():void
+			{
+				tipIndex ++;
+				if (tipIndex == tipList.length)
+					tipIndex = 0;
+					
+				lblTip.text = tipList[tipIndex];
+			}
+			
+			public function unLoad():void
+			{
+				cvBG.clear();
+				cvBG.removeAllChildren();
+				cvBG = null;
+				
+				clearInterval(funcNum);
+			}
+				
+		]]>
+	</mx:Script>
+	
+	<ns1:GameImage id="cvBG" x="0" y="0" width="1000" height="620">
+		<mx:Label id="lblInfo" x="302" y="274" text="正在加载信息，请稍候..." width="398" textAlign="center" fontSize="12" fontFamily="新宋体"/>
+		<mx:Label id="lblTip" x="302" y="320" text="" width="398" textAlign="center" fontSize="12" fontFamily="新宋体"/>
+	</ns1:GameImage>
+	
+</mx:Canvas>

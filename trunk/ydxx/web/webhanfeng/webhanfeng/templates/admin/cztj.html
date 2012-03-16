@@ -1,0 +1,25 @@
+<!-- 充值统计　Start-->
+ <table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    
+    <tr>
+          <td height="30" colspan="4" align="center" bgcolor="#f9f0e1" class="gray">　
+            总的平台币：${c.counts[0]}　　　总的金币：${c.counts[1]}　　　总的充值次数：${c.counts[2]}</td>
+    </tr>
+    
+        <tr>
+          <td height="30" align="center" bgcolor="#ac7e43" class="white_bc">　时间</td>
+          <td align="left" bgcolor="#ac7e43" class="white_bc">　平台币</td>
+          <td align="left" bgcolor="#ac7e43" class="white_bc">　金币</td>
+          <td align="left" bgcolor="#ac7e43" class="white_bc">　充值次数</td>
+          </tr>
+        %for item in c.data:
+        <tr>
+          <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item[0]}</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray">${item[1]}</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray">${item[2]}</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray">${item[3]}</td>
+        </tr>
+        %endfor
+</table>
+<!-- 玩家充值　end-->
+

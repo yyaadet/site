@@ -1,0 +1,85 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+<%namespace file="/user/index.mako.html" name="user" />
+
+
+<%def name="get_title()">添加游戏</%def>
+
+<%def name="get_content()">
+<script type="text/javascript">
+function check_webgame_name()
+{
+    var name = $("#webgame_name").val();
+    if ( name == "")
+    {
+        return;
+    }
+	$.getJSON("/webgame/check_name", {"name": name}, function(result) {
+		if (result.is_ok) {
+			$("#webgame_name_tip").html("游戏已入库，请添加其他游戏");
+		}
+		else {
+			var tips = "游戏尚未入库，可以添加";
+			$("#webgame_name_tip").html(tips);
+		}
+	});
+}
+</script>
+
+<div id="content">
+    <div id="content_left">
+    	${user.get_menu(u"添加游戏")}
+        
+        <form action="/webgame/do_add" method="post">
+        <div class="table">
+        	<div class="row">
+            	<div class="col">游戏名称：</div>
+                <div class="col"><input class="text" name="name" id="webgame_name" type="text" value="${c.name}" onblur="check_webgame_name();"/><label class="tip_text" id="webgame_name_tip">必须填写</label></div>
+            </div>
+            <div class="interval"></div>
+            <div class="row">
+            	<div class="col">开发者：</div>
+                <div class="col"><input class="text" name="author" type="text" value=""/></div>
+            </div>
+            <div class="interval"></div>
+            <div class="row">
+            	<div class="col">官方网站：</div>
+                <div class="col"><input class="url" name="site" type="text" value=""/></div>
+            </div>
+            <div class="interval"></div>
+            <div class="row">
+            	<div class="col">游戏介绍：</div>
+                <div class="col"><textarea class="text" name="info"></textarea><label class="tip_text">最多200字</label></div>
+            </div>
+            <div class="interval"></div>
+            <div class="row">
+            	<div class="col">类型：</div>
+                <div class="col" style="width: 530px;">
+                	<% from digg.model.webgame_group import WebgameGroup %>
+                	%for group in WebgameGroup:
+                    	<input type="radio" name="group_id" value="${group['id']}" /><label>${group['name']}</label>
+                    %endfor
+                    <label class="tip_text">必选</label>
+                </div>
+            </div>
+            <div class="interval"></div>
+            <div class="row">
+            	<div class="col"></div>
+                <div class="col">
+                	<input type="submit" class="button" value="添加" />
+                </div>
+            </div>
+        </div>
+       </form>
+    </div>
+    
+    <!-- content right -->
+    <div id="content_right">
+    	<%namespace file="/home/index.mako.html" name="home" />
+        ${home.get_content_right_add_link()}
+    	
+    </div>
+    <!-- content right end -->
+</div>
+</%def>

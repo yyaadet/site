@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="443" height="250" xmlns:ns1="utils.components.*" creationComplete="init();" horizontalScrollPolicy="off">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.FormatText;
+			import utils.events.ConfirmEvent;
+			import utils.ui.WinAsk;
+			import utils.WinManager;
+			import wubao.model.WuBao;
+			import net.tcp.TcpManager;
+			import net.tcp.model.wubao.TcpGrant;
+			import wubao.model.UserTreasure;
+			import utils.components.item.BagItem;
+			import utils.components.events.BagEvent;
+			import shop.list.TreasureList;
+			import wubao.list.UserTsList;
+			import utils.GameManager;
+			import mx.events.ItemClickEvent;
+			
+			private function init():void
+			{
+				setTitle("宝　库");
+				helpID = 21;
+				gs1.addEventListener(BagEvent.ItemClick, bagClick);
+				this.addEventListener(MouseEvent.CLICK, onClick);
+			}
+			
+			private function onClick(evt:MouseEvent):void
+			{
+				if (evt.target is BagItem)
+				{
+					var bagItem:BagItem = evt.target as BagItem;
+					if (bagItem != null && bagItem.num > 0)
+						return;
+				}
+			}
+			
+			private function listClick(evt:ItemClickEvent):void
+			{
+				showData(evt.index + 1);
+			}
+		
+			private function showData(type:int):void
+			{
+				var tsList:UserTsList = null;
+				
+				tsList = GameManager.gameMgr.userTsList.getAllBagInfo();
+				gs1.dataProvider = tsList.list;
+				gs1.itemID = "treasureID";
+				gs1.numField = "num";
+				gs1.urlField = "url";
+				gs1.tipField = "tip";
+				gs1.equalFun = "equal";
+				gs1.max = 96;
+				gs1.free = 96 - tsList.length;
+				gs1.showData();
+			}
+			
+			override public function refresh():void
+			{
+				showData(1);
+			}
+			
+			//点击背包中的道具
+			private var selBagItem:BagItem = null;
+			private var winAsk:WinAsk = null;
+			
+			private function bagClick(evt:BagEvent):void
+			{
+				var bagItem:BagItem = evt.bagItem;
+				if (bagItem == null || bagItem.obj == null) return;
+				
+				selBagItem = bagItem;
+				
+				//VIP道具和招贤榜,医疗包，功勋卡道具需要弹出菜单，其他不需要
+				var userTreasure:UserTreasure = bagItem.obj as UserTreasure;
+				if (userTreasure != null && userTreasure.treasure.type != 6 && userTreasure.treasure.type != 8 && 
+				    userTreasure.treasure.type != 9 && userTreasure.treasure.type != 10)
+				{
+					return;
+				}
+				
+				var str:String = "确定要使用一个" + FormatText.packegText("“" + userTreasure.treasure.name + "”") + "吗？";
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmUse);
+			}
+			
+			private function confirmUse(evt:ConfirmEvent):void
+			{
+				var bagItem:BagItem = selBagItem;
+				if (bagItem == null || bagItem.obj == null) return;
+				
+				var userTreasure:UserTreasure = null;
+				var type:int = 0;
+				var treasureID:int = 0;
+				
+				userTreasure = bagItem.obj as UserTreasure;
+				if (userTreasure != null)
+				{
+					type = userTreasure.treasure.type;
+					treasureID = userTreasure.treasureID;
+				}
+				else
+					return;
+				
+				//医疗包
+				if (type == 9)
+				{
+					var gameWubao:WuBao = GameManager.gameMgr.wubao;
+					var generalList:Array = gameWubao.generalList.getHurtList().list;
+					
+					if (generalList.length < 1)
+					{
+						WinManager.winMgr.showResult("当前没有伤兵");
+						return;
+					}
+				}
+				
+				userTreasure = GameManager.gameMgr.userTsList.getOneTreasure(type, treasureID);
+					
+				var grant:TcpGrant = new TcpGrant();
+				grant.wbID = GameManager.gameMgr.wubao.uniqID;
+				grant.type = 3;
+				grant.generalID = 0;
+				grant.treasureID = userTreasure.uniqID;
+				TcpManager.tcpMgr.sendGrant(grant);
+			}
+						
+			public function dealUse(treasureID:int):void
+			{
+				var bagItem:BagItem = null;
+				var userTreasure:UserTreasure = GameManager.gameMgr.userTsList.getObjByID(treasureID) as UserTreasure;
+				if (userTreasure != null)
+				{
+					userTreasure.isUsed = 1;
+					
+					bagItem = gs1.getItemByID(userTreasure.treasureID);
+					if (bagItem != null)
+						gs1.subItem(bagItem, 1);
+				}
+			}
+					
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvBag" x="10" y="34" width="423" height="206" styleName="lowCanvas">
+		<GameStore id="gs1" x="0" y="0" width="419" height="202">
+		</GameStore>
+	</mx:Canvas>
+	
+
+</GameWindow>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="138" creationComplete="init()">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.events.HintConfirmEvent;
+			import mx.managers.PopUpManager;
+			
+			//提示信息
+			private var _tipInfo:String = "";
+			
+			private function init():void
+			{
+				setTitle("提　示");
+				
+				isShowHelp(false);
+				isShowClose(false);	
+			}			
+			
+			private function okClick(evt:MouseEvent):void
+			{
+				var hintConfirmEvent:HintConfirmEvent = new HintConfirmEvent(HintConfirmEvent.CONFIRM);
+				dispatchEvent(hintConfirmEvent);
+				PopUpManager.removePopUp(this);
+			}			
+			
+			//================================================================
+			// 属性
+			//================================================================
+			
+			public function get tipInfo():String
+			{
+				return _tipInfo;
+			}
+			
+			public function set tipInfo(param:String):void
+			{
+				_tipInfo = param;
+				
+				if (tip != null)
+					tip.text = _tipInfo;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea id="tip" x="10" y="34" text="由于您在上一局中被淘汰出局，请您重新创建角色开始新的征程！" width="280" height="60" editable="false"/>
+	<OKButton id="btnOK" x="118" y="104" click="okClick(event);"/>
+	
+</GameWindow>

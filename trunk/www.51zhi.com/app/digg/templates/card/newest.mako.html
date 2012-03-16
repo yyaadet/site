@@ -1,0 +1,22 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_title()">最新提交的游戏卡</%def>
+
+<%def name="get_content()">
+
+<div id="content">
+    <div id="content_left">
+    	<%namespace name="card" file="/card/func.mako.html" />
+        ${card.get_list("newest", c.objs, c.webgame_id, c.start_page, c.page, c.end_page)}
+    </div>
+
+    <div id="content_right">
+    	<%namespace file="/home/index.mako.html" name="home" />
+        ${home.get_content_right_add_link()}
+
+    </div>
+</div>
+</%def>
+

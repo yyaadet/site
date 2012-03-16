@@ -1,0 +1,24 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_title()">我的主页</%def>
+
+
+<%def name="get_content()">
+<div id="content">
+    <div id="left">
+        <%namespace file="/user/func.mako.html" name="user" />
+        ${user.user_left_menu()}
+        
+    </div>
+    
+    <div id="mid">
+        ${user.get_news_list(c.objs, c.start_page, c.page, c.end_page)}
+    </div>
+    
+    <div id="right">
+        ${user.get_today_update_rss_list(c.user._id)}
+    </div>
+</div>
+</%def>

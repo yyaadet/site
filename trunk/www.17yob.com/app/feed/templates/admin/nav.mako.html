@@ -1,0 +1,48 @@
+## -*- coding: utf-8 -*-
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	
+$("ul#topnav li").hover(function() { //Hover over event on list item
+	$(this).css({'display' : 'block'});
+	//$(this).css({ 'display' : 'block'}); //Add background color + image on hovered list item
+	$(this).find("ul").show(); //Show the subnav
+} , function() { //on hover out...
+	$(this).css({ 'background' : 'none'}); //Ditch the background
+	$(this).find("ul").hide(); //Hide the subnav
+});
+	
+});
+</script>
+<div id="nav">	
+	<ul id="topnav">
+        <li id="head_nav"><a id="link" href="/admin/index">主页</a></li>
+        <li id="head_nav_line">|</li>
+        
+        <li id="head_nav">
+            <a id="link" href="#">用户</a>
+            <ul id="head_nav_sub"> 
+                <li id="head_nav_sub_item"><a href="#">增加新用户</a></li> 
+            </ul>
+        </li>
+        <li id="head_nav_line">|</li>
+        
+        <li id="head_nav">
+            <a id="link" href="/diamond/index">裸钻</a>
+            <ul id="head_nav_sub">
+                <li id="head_nav_sub_item"><a href="/diamond/new">加新钻</a> </li>
+            </ul>
+        </li>
+        <li id="head_nav_line">|</li>
+        
+        <li id="head_nav">
+            <a id="link" href="#">管理员</a>
+            <ul id="head_nav_sub">
+                <li id="head_nav_sub_item"><a href="#">加新管理员</a></li>
+            </ul>
+        </li>
+   </ul>
+</div>
+
+

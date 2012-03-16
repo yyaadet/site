@@ -1,0 +1,93 @@
+<%inherit file="index2.html" />
+
+
+
+<%def name="html_content_title()">
+充值记录
+</%def>
+
+
+
+
+<%def name="html_content()">
+<div class="chongjzl">
+<table width="672" border="1" cellpadding="0" cellspacing="0" bordercolor="#FFFFFF">
+         <tr>
+           <td width="190" height="35" bgcolor="#DCDCDE"><div align="center" class="x" >充值时间</div></td>
+           <td width="255" bgcolor="#DCDCDE">
+               <div align="center" class="x" >人民币</div></td>
+           <td width="231" bgcolor="#DCDCDE">
+               <div align="center" class="x" >平台币</div></td>
+           <td width="231" bgcolor="#DCDCDE"><div align="center"><span class="x">充值状态</span></div></td>
+           <td width="231" bgcolor="#DCDCDE"><div align="center"><span class="x">充值方式</span></div></td>
+         </tr>
+         %for item in c.data:
+         <tr>
+           <td height="35" bgcolor="#ECECEC"><div align="center">
+               <dl>
+                 ${readable_time(item.time)}
+               </dl>
+           </div></td>
+           <td bgcolor="#ECECEC"><div align="center">
+               <dl>
+                 ${item.rmb}
+               </dl>
+           </div></td>
+           <td bgcolor="#ECECEC"><div align="center">
+               <dl>
+                 ${item.gold}
+               </dl>
+           </div></td>
+           <td bgcolor="#ECECEC"><div align="center">
+             <dl>
+               %if item.state == 1:
+                    已支付
+               %else:
+                    未支付
+               %endif
+             </dl>
+           </div></td>
+           <td bgcolor="#ECECEC"><div align="center">
+             <dl>
+               %if item.come_from == 1:
+                    网银支付
+               %elif item.come_from == 2:
+                    移动充值支付
+               %elif item.come_from == 3:
+                    联通卡支付
+               %elif item.come_from == 4:
+                    支付宝支付
+               %elif item.come_from == 5:
+                    骏网一卡通支付
+               %elif item.come_from == 6:
+                    征途卡支付
+               %elif item.come_from == 7:
+                    盛大卡支付
+               %elif item.come_from == 8:
+                    Q币卡支付
+               %elif item.come_from == 9:
+                    久游一卡通支付
+               %elif item.come_from == 10:
+                    网易一卡通支付
+               %elif item.come_from == 11:
+                    完美一卡通支付
+               %elif item.come_from == 12:
+                    搜狐一卡通支付
+               %elif item.come_from == 13:
+                    易宝一卡通支付
+               %elif item.come_from == 14:
+                    电信卡支付
+               %else:
+                    其他方式
+               %endif
+             </dl>
+           </div></td>
+         </tr>
+         %endfor
+         
+       </table>
+       <%namespace file="/home/pager.html" import="*" />
+       ${pager("/home/recharge_log?page=")}
+</div>
+
+</%def>

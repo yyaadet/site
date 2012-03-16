@@ -1,0 +1,23 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+<%namespace file="/user/index.mako.html" name="user" />
+
+
+<%def name="get_title()">我建的游戏</%def>
+
+<%def name="get_content()">
+
+<div id="content">
+    <div id="content_left">
+    	${user.get_menu(u"我建的游戏")}
+        <%namespace file="/webgame/func.mako.html" name="webgame" />
+        ${webgame.get_webgame_list('my', c.objs, c.group_id, c.start_page, c.page, c.end_page)}
+    </div>
+    
+    <div id="content_right">
+    	<%namespace file="/home/index.mako.html" name="home" />
+        ${home.get_content_right_add_link()}
+    </div>
+</div>
+</%def>

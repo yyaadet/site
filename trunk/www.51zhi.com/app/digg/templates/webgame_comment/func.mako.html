@@ -1,0 +1,44 @@
+## -*- coding: utf-8 -*-
+
+<%def name="get_webgame_comment_list(webgame_id, objs, start_page, page, end_page, show_page = True)">
+%for obj in objs:
+<div class="table" style="border-bottom: dotted 1px #EFF7FF;">
+	<%
+    import time
+    now = int(time.time())
+    %>
+    <div class="row">
+        <div class="col">
+            <div class="col_line tip_text">${h.diff_time(obj.timestamp, now)} | ${obj.city} | ${obj.uname}</div>
+            <div class="col_line">${obj.cnt}</div>
+            %if (obj.uid and c.uid == obj.uid) or c.is_admin == 1:
+            <div class="col_line">
+                <a href="/webgame_comment/rem?id=${obj._id}">删除</a>
+            </div>
+            %endif
+        </div>
+    </div>
+</div>
+%endfor
+
+%if show_page:
+<!-- page -->
+<div class="table">
+    <div class="row">
+        %if start_page != 1:
+        <div class="col" style="width: 50px;"><a href="${h.static_webgame_news_detail_url(webgame_id, start_page - 1)}">上一页</a></div>
+        %endif
+        %for i in range(start_page, end_page + 1):
+        <div class="col" style="min-width: 0;width: 20px;">
+            %if i == page:
+            <strong><a href="${h.static_webgame_news_detail_url(webgame_id, i)}">[${i}]</a></strong>
+            %else:
+            <a href="${h.static_webgame_news_detail_url(webgame_id, i)}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col" style="width: 50px;"><a href="${h.static_webgame_news_detail_url(webgame_id, end_page + 1)}">下一页</a></div>
+    </div>
+</div>
+%endif
+</%def>

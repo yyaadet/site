@@ -1,0 +1,28 @@
+<!--运维成员管理－增加运维　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <input type="hidden" id="error" value="${c.error}" />
+    <tr></tr>
+    <tr>
+      <td colspan="4" height="35" align="center" bgcolor="#f9f0e1" class="gray">　<b>
+        赠送道具
+        </b></td>
+    </tr>
+    <tr>
+      <td  height="35" align="left" bgcolor="#f9f0e1" class="gray">　用户名：
+        <input name="username" id="username" class="gray" style="WIDTH: 150px " /></td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　道具名称：
+        <input name="treasure_name" id="treasure_name" class="gray" style="WIDTH: 150px " /></td>
+     <td align="left" bgcolor="#f9f0e1" class="gray">　
+        <a href="#" onclick="selectTab('/admin/give_treasure?action=give&username='+$('#username').val()
+            +'&treasure_name='+$('#treasure_name').val())">
+            <img src="/images/pic_24.gif" width="54" height="25" border="0" /></a></td>
+    </tr>
+    
+    
+    
+</table>
+<script type="text/javascript">
+    error = document.getElementById("error").value;
+    if(error==""){}else{alert(error);}
+</script>
+<!--运维成员管理－增加运维 end-->

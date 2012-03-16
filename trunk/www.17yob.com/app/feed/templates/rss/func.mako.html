@@ -1,0 +1,87 @@
+## -*- coding: utf-8 -*-
+
+<%def name="get_groups(sid_checked=0)">
+<% from feed.model.group import Groups, SubGroups %>
+    %for gp in Groups:
+        <p> 
+        <b>${gp['name']}</b>
+        %for sid in gp['sub']:
+            %if sid_checked == sid:
+            <input type="radio" name="group_id" value="${sid}" checked="checked" />
+            %else:
+            <input type="radio" name="group_id" value="${sid}" />
+            %endif
+            <label>${SubGroups[sid]['name']}</label>
+        %endfor
+        </p>
+    %endfor
+</%def>
+
+<%def name="get_list(objs, start_page, page, end_page)">
+            <% 
+            from feed.model.group import SubGroups
+            %>
+            <table id="mytable">
+            <tr>
+              <th>名称</th>
+              <th>类别</th>
+              <th>人气</th>
+              <th>转化率</th>
+              <th>今日新闻数</th>
+              <th>新闻数</th>
+              <th>添加时间</th>
+              <th>最近更新时间</th>
+              <th>编辑</th>
+              <th>删除</th>
+            </tr>
+            %for obj in objs:
+            <tr>
+               <td><a href="/user/index?rss_id=${obj._id}" target="_blank" title="${obj.url}">${obj.name}</a></td>
+               <td>${SubGroups[obj.group_id]['name']}</td>
+               <td>${obj.visited_num}</td>
+               <td>${round(float(obj.go_num)/float(obj.visited_num + obj.go_num + 1), 4)}</td>
+               <td>${obj.today_fetch_num}</td>
+               <td>${obj.fetch_num}</td>
+               <td>${h.fmt_time(obj.add_timestamp)}</td>
+               <td>${h.fmt_time(obj.fetch_timestamp)}</td>
+               <td><a href="/rss/edit?id=${obj._id}">编辑</a></td>
+               <td><a href="/rss/rem?id=${obj._id}">删除</a></td>
+            </tr>
+            %endfor
+            </table>
+            
+            <!-- page -->
+            <div class="table">
+                <div class="row">
+                    %if c.start_page != 1:
+                    <div class="col" style="width: 50px;"><a href="/rss/index?page=${start_page - 1}">上10页</a></div>
+                    %endif
+                    %for i in range(start_page, end_page + 1):
+                    <div class="col" style="min-width: 0;width: 35px; text-align: center;">
+                        %if i == page:
+                        <strong><a href="/rss/index?page=${i}">[${i}]</a></strong>
+                        %else:
+                        <a href="/rss/index?page=${i}">${i}</a>
+                        %endif
+                    </div>
+                    %endfor
+                    <div class="col" style="width: 50px;"><a href="/rss/index?page=${end_page + 1}">下10页</a></div>
+                </div>
+            </div>
+</%def>
+
+<%def name="get_rss_info(obj)">
+<% from feed.model.group import SubGroups %>
+<div class="rss_section">
+    <div class="rss_section_title">${obj.name}</div>
+    <div class="rss_section_line">订阅人：${obj.uname}</div>
+    <div class="rss_section_line">类别：${SubGroups[obj.group_id]['name']}</div>
+    <div class="rss_section_line">添加时间：${h.fmt_time(obj.add_timestamp)}</div>
+    <div class="rss_section_line">更新时间：${h.fmt_time(obj.fetch_timestamp)}</div>
+    <div class="rss_section_line">新闻数：${obj.fetch_num}</div>
+    <div class="rss_section_line">今日新闻数：${obj.today_fetch_num}</div>
+    <div class="rss_section_line">人气：${obj.visited_num}</div>
+    <div class="rss_section_line">围观：${obj.go_num}</div>
+    <div class="rss_section_line"><div class="link_button"><a href="/user/join_rss?rss_id=${obj._id}">点击订阅</a></div></div>
+</div>
+</%def>

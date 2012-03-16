@@ -1,0 +1,11 @@
+body {margin: 0px;text-align:center;font-size:12px;color:#2E2E2E;font-family:Arial, Helvetica, sans-serif;}
+ul {list-style: none; }
+.clean {clear:both;} 
+div,form,img,ul,ol,li,dl,dt,dd { margin: 0; padding: 0; border: 0;}
+.admin{ width:670px; height:518px; margin:119px auto 0px auto;}
+.admin_top{ float:left;}
+.admin_md{ width:670px; height:184px; background-image:url(/images/admin_md.jpg);float:left;}
+.admin_mdbig{ width:280px; height:124px; float:left;padding:33px 0px 0px 90px;}
+.yh_a{ width:275px; height:40px; float:left;font-size:14px;}
+.top{ width:100%;height:88px;  clear:both; margin:auto; background-image:url(/images/top_bg.jpg);}
+.top dl{ float:right;}

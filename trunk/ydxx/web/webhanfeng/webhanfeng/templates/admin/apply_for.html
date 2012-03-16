@@ -1,0 +1,209 @@
+<script type="text/javascript">  
+    function show(){  
+        var loadbox =document.getElementById("loadlayer");  
+        var overlayer = document.getElementById("overlayer");  
+        loadbox.style.display = "block" ;  
+        overlayer.style.display = "block" ;  
+    }  
+      
+    function hide(){  
+        var loadbox =document.getElementById("loadlayer");  
+        var overlayer = document.getElementById("overlayer");  
+        loadbox.style.display = "none" ;  
+        overlayer.style.display = "none" ;  
+    }  
+</script>  
+   
+<style type="text/css">      
+#overlayer{  
+    position: absolute;  
+    top: 0px;  
+    left: 0;  
+    z-index: 90;  
+    width: 100%;  
+    height: 120%;  
+    background-color: #000000;  
+    filter:alpha(opacity=0);  
+    -moz-opacity: 0.6;  
+    opacity: 0.6;  
+    display:none;  
+    }  
+   
+#loadbox{  
+    position: absolute;  
+    top: 40%;  
+    left: 0;  
+    width: 100%;  
+    z-index: 100;  
+    text-align: center;  
+    }  
+   
+#loadlayer{  
+    display:none;  
+    }  
+   
+</style>  
+
+<div id="overlayer"></div>
+<div id="loadbox" >  
+  <div id="loadlayer">  
+      <img src="/images/loading.gif" />  <font color=white>请稍候。。。 </font>
+    </div>  
+</div>  
+
+
+
+<!--玩家申请　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+<input type="hidden" id="error" value="${c.error}">
+
+<tr>
+      <td height="30" colspan="13" bgcolor="#FFFFFF"><table width="100%" height="45" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td  align="left" bgcolor="#f9f0e1"><ul class="img">
+            <li>
+            <input 
+                  name="s_name" class="gray" id="s_name" style="WIDTH: 150px " value=${c.s_name} >  </li>   
+             <li><a href="#" onclick="selectTab('/admin/apply_for?action=search&flag=search&s_name='+$('#s_name').val())"><img src="/images/pic_15.gif" width="76" height="25" border="0" /></a></li>
+             </ul></td>
+          </tr>
+      </table></td>
+    </tr>
+
+<tr>
+  <td height="30" align="center" bgcolor="#ac7e43" class="white_bc">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">ID</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">用户</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">年龄</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">性别</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">行业</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">邮件</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">地址</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">每日上线时间</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">收入</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">来源</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">申请理由</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">申请时间</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">处理状态</td>
+  <td align="center" bgcolor="#ac7e43" class="white_bc">操作</td>
+</tr>
+%for item in c.data:
+<%
+from webhanfeng.model.user import get_user_by_id
+user = get_user_by_id(item.user_id)
+if user:
+    name = user.oid
+else:
+    name = ""
+%>
+<tr>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">
+    <input type="checkbox" id="id${item.id}" name="id${item.id}" /></td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.id}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${name}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.age}</td>
+  %if item.sex == 1:
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">男</td>
+  %else:
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">女</td>
+  %endif
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.profession}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.email}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.place}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.game_hour}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.income}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.know_from}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${cut_string(item.reason,20)}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${readable_time(item.date)}</td>
+  <td height="30" align="center" bgcolor="#f9f0e1" class="gray">
+    %if item.state == 0:
+    未处理
+    %elif item.state == 1:
+    已同意
+    %else:
+    已拒绝
+    %endif
+    </td>
+  <td align="center" bgcolor="#f9f0e1" class="gray">
+    <a href="#" onclick="selectTab('/admin/apply_for?action=view&page=${c.page_num}&id=${item.id}')">查看</a>/
+    <a href="#" onclick="selectTab('/admin/apply_for?action=del&page=${c.page_num}&id=${item.id}')">删除</a>
+    %if item.state == 0: 
+    /
+    <a href="#" onclick="show();selectTab('/admin/apply_for?action=ok&page=${c.page_num}&id=${item.id}')">同意</a>/
+    <a href="#" onclick="show();selectTab('/admin/apply_for?action=refuse&page=${c.page_num}&id=${item.id}')">拒绝</a>
+    %endif
+  </td>
+</tr>
+%endfor
+<tr>
+  <td height="30" align="center" bgcolor="#ac7e43" class="menu1"><a href="#" class="menu2" onclick="checkAll();">全选</a></td>
+  <td height="30" align="center" bgcolor="#ac7e43" class="gray"><a href="#" class="menu2" onclick="uncheckAll();">不选</a></td>
+  <td height="30" align="left" bgcolor="#ac7e43" class="gray">
+    <span class="menu">　　<a href="#" class="menu2" onclick="selectTab('/admin/apply_for?action=del_more&page=${c.page_num}'
+            %for item in c.data:
+            +'&id${item.id}='+$('#id${item.id}').attr('checked')
+            %endfor
+            )">删除所选</a></span></td>
+  <td height="30" bgcolor="#ac7e43" class="gray"><a href="#" class="menu2" onclick="javascript:if(confirm('确定要清空所有数据吗？')){selectTab('/admin/apply_for?action=del_all')}">清空</a></td>
+  <td height="30" bgcolor="#ac7e43" class="gray">
+    <a href="#" class="menu2" onclick="show();selectTab('/admin/apply_for?action=ok_more&page=${c.page_num}'
+            %for item in c.data:
+            +'&id${item.id}='+$('#id${item.id}').attr('checked')
+            %endfor
+            )">同意所选</a>
+    </td>
+  <td align="center" bgcolor="#ac7e43" class="gray">
+    <a href="#" class="menu2" onclick="show();selectTab('/admin/apply_for?action=refuse_more&page=${c.page_num}'
+            %for item in c.data:
+            +'&id${item.id}='+$('#id${item.id}').attr('checked')
+            %endfor
+            )">拒绝所选</a>
+    </td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td align="center" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+</tr>
+
+%if c.flag == "search":
+    <%namespace file="/admin/mypager.html" import="*" />
+    ${footer_page("/admin/apply_for?action=search&flag=search&s_name="+c.s_name+"&page=")}
+%else:
+    <%namespace file="/admin/mypager.html" import="*" />
+    ${footer_page("/admin/apply_for?page=")}
+%endif
+</table>
+<script>
+    function checkAll()
+{
+var code_Values = document.getElementsByTagName("input");
+for(i = 0;i < code_Values.length;i++){
+if(code_Values[i].type == "checkbox")
+{
+code_Values[i].checked = true;
+}
+}
+}
+
+function uncheckAll()
+{
+var code_Values = document.getElementsByTagName("input");
+for(i = 0;i < code_Values.length;i++){
+if(code_Values[i].type == "checkbox")
+{
+code_Values[i].checked = false;
+}
+}
+} 
+</script>
+<script type="text/javascript">
+    error = document.getElementById("error").value;
+    if(error==""){}else{alert(error);}
+</script>
+<!--游戏礼包 end-->
+

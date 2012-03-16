@@ -1,0 +1,36 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_title()">
+更好头像
+</%def>
+
+<%def name="get_content()">
+<div id="content">
+    <div id="content_left">
+        ${self.get_left_list(u'个人中心')}
+    </div>
+    <div id="content_right">
+    <form action="/user/do_upload_head" method="post" enctype="multipart/form-data">
+    <div class="table">
+        <div class="row" style="height:120px;">
+        	<div class="col">
+            <%
+            from zuan.controllers.user import get_user_head_img_url
+            src = "/user/head_img.jpg"
+            if c.user.head_img:
+            	src = get_user_head_img_url(c.user, c.setting)
+            %>
+            <img class="head_img" src="${src}" />
+            </div>
+        </div>
+    	<div class="row">
+        	<div class="col"><input type="file" name="head" /></div>
+            <div class="col"><input type="submit" value="提交" /></div>
+        </div>
+    </div>
+    </form>
+    </div>
+</div>
+</%def>

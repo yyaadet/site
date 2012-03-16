@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1440" height="900" fontSize="12" color="0xFFFFFF" backgroundColor="0x000000"
+	 creationComplete="init();" xmlns:ns1="utils.components.*">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Label;
+			import mx.events.FlexEvent;
+			import mx.controls.TextArea;
+			import flash.utils.getTimer;
+			import utils.components.GameImage;
+			import images.AssetsManager;
+			import flash.utils.setTimeout;
+			import battle.list.BattleList;
+			import utils.components.GameSwfLoader;
+			import utils.WinManager;
+			import utils.components.GameButton;
+			import battle.list.GatewayList;
+			import battle.model.Battle;
+			import battle.model.Gateway;
+			import wubao.model.User;
+		
+			import utils.GameManager;
+		
+			import mx.core.ScrollPolicy;
+			
+			private var gameUser:User = null;
+			private var swfLoader:GameSwfLoader = new GameSwfLoader();
+			private var curBattleID:int = 0;
+			private var userBattleID:int = 0;
+			private var battleList:BattleList = null;
+			
+			private function init():void
+			{
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+			}
+			
+			public function initUI():void
+			{
+				this.width = GameManager.gameMgr.gameWidth;
+				this.height = GameManager.gameMgr.gameHeight;
+				battleBG.width = 1440;
+				battleBG.height = 720;
+				battleBG.x = int((this.width - battleBG.width) / 2);
+				battleBG.y = int((this.height - battleBG.height) / 2);
+				if (battleBG.width > this.width || battleBG.height > this.height)
+					battleBG.addEventListener(MouseEvent.MOUSE_DOWN, mapDown);
+				
+				btnPrior.addEventListener(MouseEvent.CLICK, priorBattle);
+				btnNext.addEventListener(MouseEvent.CLICK, nextBattle);
+			}
+			
+			private function mapDown(evt:MouseEvent):void
+			{
+				var maxWidth:int = this.width - battleBG.width;
+				var maxHeight:int = this.height - battleBG.height;
+				
+				var startX:int = int((this.width - battleBG.width) / 2);
+				
+				if (maxWidth > 0)
+				{
+					maxWidth = 0;
+				}
+				else
+					startX = 0;
+				
+				battleBG.startDrag(false, new Rectangle(startX, 0, maxWidth, maxHeight));
+				battleBG.addEventListener(MouseEvent.MOUSE_UP, mapUp);
+			}
+			
+			private function mapUp(evt:MouseEvent):void
+			{
+				battleBG.removeEventListener(MouseEvent.MOUSE_UP, mapUp);
+				battleBG.stopDrag();
+			}
+			
+			public function show():void
+			{
+				battleList = GameManager.gameMgr.battleList;
+				gameUser = GameManager.gameMgr.user;
+				var gateWay:Gateway = null;
+				
+				if (curBattleID == 0)
+				{
+					if (gameUser.gateID == 0)
+						curBattleID = 1;
+					else
+					{
+						gateWay = GameManager.gameMgr.gateList.getObjByID(gameUser.gateID) as Gateway;
+						curBattleID = gateWay.battleID;
+						userBattleID = gateWay.battleID;
+					} 
+				}
+				
+				battleBG.visible = false;
+				battleBG.includeInLayout = false;
+				cvMenu.visible = false;
+				cvMenu.includeInLayout = false;
+				showBattle();
+			}
+			
+			private var gameBattle:Battle = null;
+			private function showBattle():void
+			{
+				battleBG.removeAllChildren();
+				
+				gameBattle = battleList.getObjByID(curBattleID) as Battle;
+				if (gameBattle != null)
+				{
+					battleBG.progressHandle = loadProgress;
+					battleBG.addEventListener(GameImage.INIT_FINISH, loadComplete);
+					battleBG.imageName = "battle" + gameBattle.picURL;
+					battleBG.imageURL = GameManager.gameMgr.resURL + "scene/" + gameBattle.picURL + ".jpg";
+				}
+			}
+			
+			private function loadProgress(evt:ProgressEvent):void
+			{
+				var info:String = "正在加载战役背景，请稍候... " + int(evt.bytesLoaded / evt.bytesTotal * 100).toString() + "%";
+				WinManager.winMgr.showLoadingIntf(info);
+			}
+			
+			private function loadComplete(evt:Event):void
+			{
+				hideInfo();
+				
+				battleBG.visible = true;
+				battleBG.includeInLayout = true;
+				cvMenu.visible = true;
+				cvMenu.includeInLayout = true;
+				
+				var cvInfo:Canvas = new Canvas();
+				cvInfo.width = 302;
+				cvInfo.height = 102;
+				cvInfo.setStyle("styleName", "winCanvas");
+				cvInfo.x = battleBG.width - cvInfo.width - 10;
+				cvInfo.y = 30;
+				battleBG.addChild(cvInfo);
+				
+				var cvTitle:Canvas = new Canvas();
+				cvTitle.width = 100;
+				cvTitle.height = 28;
+				cvTitle.setStyle("styleName", "lowCanvas");
+				cvTitle.x = int((battleBG.width - cvTitle.width) / 2);
+				cvTitle.y = 30;
+				battleBG.addChild(cvTitle);
+				
+				var lblTitle:Label = new Label();
+				lblTitle.text = gameBattle.title;
+				lblTitle.width = 96;
+				lblTitle.height = 24;
+				lblTitle.x = 0;
+				lblTitle.y = 0;
+				lblTitle.setStyle("fontWeight", "bold");
+				lblTitle.setStyle("fontSize", 20);
+				lblTitle.setStyle("textAlign", "center");
+				lblTitle.setStyle("fontFamily", "新宋体");
+				cvTitle.addChild(lblTitle);
+				
+				var taInfo:TextArea = new TextArea();
+				taInfo.text = gameBattle.info;
+				taInfo.width = 300;
+				taInfo.height = 100;
+				taInfo.x = 0;
+				taInfo.y = 0;
+				taInfo.editable = false;
+				cvInfo.addChild(taInfo);
+				
+				var i:int = 0;
+				var len:int = 0;
+				var gateWay:Gateway = null;
+				var gateList:GatewayList = GameManager.gameMgr.gateList.getListByBattleID(curBattleID);
+				len = gateList.length;
+				
+				for (i = 0; i < len; i++)
+				{
+					gateWay = gateList.getObjByIndex(i) as Gateway;
+					if (gateWay != null && gateWay.uniqID <= gameUser.gateID + 1)
+					{
+						createGate(gateWay);
+					}
+				}
+				
+				var priorBattle:Battle = null;
+				var nextBattle:Battle = null;
+				
+				priorBattle = battleList.getObjByID(curBattleID - 1) as Battle;
+				if (priorBattle == null)
+				{
+					btnPrior.visible = false;
+					btnPrior.includeInLayout = false;
+				}
+				else
+				{
+					btnPrior.visible = true;
+					btnPrior.includeInLayout = true;
+					btnPrior.label = priorBattle.title + " <";
+				}
+				
+				nextBattle = battleList.getObjByID(curBattleID + 1) as Battle;
+				var lastGate:Gateway = null;
+				if (nextBattle == null)
+				{
+					btnNext.visible = false;
+					btnNext.includeInLayout = false;
+				}
+				else
+				{
+					btnNext.visible = true;
+					btnNext.includeInLayout = true;
+					btnNext.label = nextBattle.title + " >";
+					
+					if (curBattleID < userBattleID)
+					{
+						btnNext.enabled = true;
+					}
+					else
+					{
+						btnNext.enabled = false;
+						
+						lastGate = gateList.getObjByIndex(gateList.length - 1) as Gateway;
+						if (gameUser.gateID >= lastGate.uniqID)
+							btnNext.enabled = true;
+						else
+							btnNext.enabled = false;
+					}
+				}
+			}
+			
+			private function hideInfo():void
+			{
+				WinManager.winMgr.winLoading.visible = false;
+				WinManager.winMgr.winLoading.includeInLayout = false;
+			}
+			
+			private function createGate(gateWay:Gateway):void
+			{
+				var btn1:GameImage = new GameImage();
+				btn1.width = 80;
+				btn1.height = 80;
+				btn1.x = gateWay.x - btn1.width / 2;
+				btn1.y = gateWay.y - btn1.height / 2;
+				battleBG.addChild(btn1);
+				var gateClass:Class;
+				if (gateWay.uniqID <= gameUser.gateID)
+				{
+					if (gateWay.type == 0)
+						gateClass = AssetsManager.assetsMgr.FIGHT_GATE2;
+					else
+						gateClass = AssetsManager.assetsMgr.FIGHT_GATE2_J;
+				}
+				else
+				{
+					if (gateWay.type == 0)
+						gateClass = AssetsManager.assetsMgr.FIGHT_GATE1;
+					else
+						gateClass = AssetsManager.assetsMgr.FIGHT_GATE1_J;
+				}
+					
+				var gateBitmap:Bitmap = new gateClass();
+				btn1.canSel = true;
+				btn1.imageURL = gateBitmap;
+				btn1.toolTip = gateWay.name;
+				btn1.addEventListener(MouseEvent.CLICK, gateClick);
+				
+				function gateClick(evt:MouseEvent):void
+				{
+					WinManager.winMgr.showGate(gateWay.uniqID);
+				}
+			}
+			
+			private function priorBattle(evt:MouseEvent):void
+			{
+				curBattleID --;
+				showBattle();
+			}
+			
+			private function nextBattle(evt:MouseEvent):void
+			{
+				curBattleID ++;
+				showBattle();
+			}
+			
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameImage id="battleBG" x="0" y="0" width="1440" height="720" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	</ns1:GameImage>
+	
+	<mx:Canvas id="cvMenu" width="220" height="30" horizontalCenter="0" bottom="20">
+		<ns1:GameButton id="btnPrior" x="0" y="1" label="" width="100" height="28" btnType="mapMenu"/>
+		<ns1:GameButton id="btnNext" x="120" y="1" label="" width="100" height="28" btnType="mapMenu"/>
+	</mx:Canvas>
+	
+</mx:Canvas>

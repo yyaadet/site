@@ -1,0 +1,24 @@
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+        <tr>
+          <td width="8%" height="35" align="right" bgcolor="#f9f0e1" class="gray">　举报者ID：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${c.report.sender_id}　            </td>
+          </tr>
+        <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">　作弊者名称：</td>
+          <td align="left" bgcolor="#f9f0e1" class="gray"> 　${c.report.name}　            </td>
+          </tr>
+        <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">作弊描述：</td>
+          <td height="35" align="left" bgcolor="#f9f0e1" class="gray">&nbsp;&nbsp; 
+            <textarea name="textarea" cols="70" rows="6" class="textarev" id="textarev" >${c.report.description}</textarea></td>
+        </tr>
+        <tr>
+          <td height="35" align="right" bgcolor="#f9f0e1" class="gray">日期：</td>
+          <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　${readable_time(c.report.date)}</td>
+        </tr>
+        <tr>
+          <td height="35" colspan="2" align="left" valign="middle" bgcolor="#f9f0e1" class="gray">　　　　　　　　
+            <a href="#"><img src="/images/pic_40.gif" width="51" height="21" border="0" onclick="selectTab('/admin/report?action=del&id=${c.report.id}')"/></a>　　
+            <a href="#"><img src="/images/pic_41.gif" width="51" height="21" border="0" onclick="selectTab('/admin/report')"/></a></td>
+          </tr>
+</table>

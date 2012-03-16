@@ -1,0 +1,3 @@
+include zuan/config/deployment.ini_tmpl
+recursive-include zuan/public *
+recursive-include zuan/templates *

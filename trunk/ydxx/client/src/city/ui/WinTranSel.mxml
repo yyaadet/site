@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="166" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			import net.tcp.TcpManager;
+			import net.tcp.model.wubao.TcpTrans;
+			import utils.PubUnit;
+			import general.model.General;
+			import city.model.City;
+			
+			private var _toCity:City = null;
+			
+			private var _gameGeneral:General = null;
+			
+			private var costTime:Number = 0;
+			
+			private function init():void
+			{
+				setTitle("派遣选择");
+			}
+			
+			override public function refresh():void
+			{
+				rb1.selected = true;
+				showInfo(false);
+				
+				if (costTime < 3)
+					rb2.enabled = false;
+				else
+					rb2.enabled = true;
+					
+				rb1.label = "普通速度";
+				rb2.label = "星夜兼程，花费 " + PubUnit.getAcceCoin(Math.ceil(costTime / 2)) + " 金币，所需时间减半";
+			}
+			
+			private function showInfo(isAcce:Boolean = false):void
+			{
+				costTime = PubUnit.getTranTime(gameGeneral, toCity.uniqID);
+				if (isAcce)
+					costTime = Math.ceil(costTime / 2);
+				
+				var timeStr:String = PubUnit.getGameDate(costTime);
+				if (timeStr == "")
+					timeStr = "00:00";
+				
+				if (gameGeneral.place == 2 && gameGeneral.placeID == toCity.uniqID)
+					lblInfo.text = "派遣" + gameGeneral.generalName + "到【坞堡】需要 " + timeStr;
+				else		
+					lblInfo.text = "派遣" + gameGeneral.generalName + "到【" + toCity.cityName + "】需要 " + timeStr;
+			}
+			
+			private function change1():void
+			{
+				showInfo(false);
+			}
+			
+			private function change2():void
+			{
+				showInfo(true);
+				rb2.label = "星夜兼程，花费 " + PubUnit.getAcceCoin(costTime) + " 金币，所需时间减半";
+			}
+			
+			private function send():void
+			{
+				if (toCity == null) return;
+				
+				var type:int = 0;
+				var fromCity:City = null;
+				var fromID:int = 0;
+				var toID:int = 0;
+				var gameWubao:WuBao = GameManager.gameMgr.wubao;
+				
+				//坞堡-->城池
+				if (gameGeneral.place == 1)
+				{
+					type = 1;
+					toID = toCity.uniqID;
+				}
+				else if (gameGeneral.place == 2)
+				{
+					//城池-->坞堡
+					if (gameGeneral.placeID == toCity.uniqID)
+					{
+						type = 3;
+						toID = gameWubao.uniqID;
+					}
+					//城池-->城池
+					else
+					{
+						type = 2;
+						toID = toCity.uniqID;
+					}
+				}
+						
+				var tcpTran:TcpTrans = new TcpTrans();
+				tcpTran.generalID = gameGeneral.uniqID;
+				tcpTran.type = type; 
+				tcpTran.toID = toID;
+				tcpTran.isAcce = rb1.selected ? 0 : 1;
+				TcpManager.tcpMgr.sendTranGeneral(tcpTran);
+			}
+			
+			public function get toCity():City
+			{
+				return _toCity;
+			}
+			
+			public function set toCity(param:City):void
+			{
+				_toCity = param;
+			}
+			
+			public function get gameGeneral():General
+			{
+				return _gameGeneral;
+			}
+			
+			public function set gameGeneral(param:General):void
+			{
+				_gameGeneral = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label id="lblInfo" x="10" y="34" text="Label" width="280" height="20"/>
+	<mx:Canvas x="10" y="54" width="280" height="70" styleName="lowCanvas">
+		<mx:RadioButton id="rb1" x="8" y="8" label="" width="260" click="change1();" height="20"/>
+		<mx:RadioButton id="rb2" x="8" y="38" label="" width="260" click="change2();" height="20"/>
+	</mx:Canvas>
+	<OKButton x="118" y="132" click="send();"/>
+	
+</GameWindow>

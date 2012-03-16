@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="190" height="132" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.SceneManager;
+			import mx.core.ScrollPolicy;
+			import army.model.Army;
+			import army.ui.item.ItemArmy;
+			import utils.GameManager;
+			import army.list.ArmyList;
+			
+			private var armyList:ArmyList = null;
+			
+			private function init():void
+			{
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+			}
+			
+			public function createArmy():void
+			{
+				this.removeAllChildren();
+				
+				var i:int = 0;
+				var len:int = 0;
+				var gameArmy:Army = null;
+				var itemArmy:ItemArmy = null;
+				
+				armyList = GameManager.gameMgr.armyList.getSelfArmy();
+				len = armyList.length;
+				
+				for (i = 0; i < len; i++)
+				{
+					gameArmy = armyList.getObjByIndex(i) as Army;
+					itemArmy = new ItemArmy();
+					itemArmy.x = 0;
+					itemArmy.y = i * itemArmy.height;
+					this.addChild(itemArmy);
+					this.height = len * itemArmy.height; 
+					itemArmy.type = 2;
+					itemArmy.gameArmy = gameArmy;
+				}
+			}
+			
+			/**
+			 * 按类型刷军团信息
+			 * 1--刷新基本信息  2--刷新阵型信息
+			 * 
+			 **/
+			public function refresh(type:int = 1):void
+			{
+				var i:int = 0;
+				var len:int = 0;
+				var gameArmy:Army = null;
+				var itemArmy:ItemArmy = null;
+				
+				armyList = GameManager.gameMgr.armyList.getSelfArmy();
+				len = this.numChildren;
+				
+				for (i = 0; i < len; i++)
+				{
+					if (this.getChildAt(i) as ItemArmy)
+					{
+						itemArmy = this.getChildAt(i) as ItemArmy;
+						if (itemArmy != null)
+						{
+							gameArmy = armyList.getObjByID(itemArmy.gameArmy.uniqID) as Army;
+							itemArmy.type = type;
+							itemArmy.gameArmy = gameArmy;
+						}
+					}
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	
+</mx:Canvas>

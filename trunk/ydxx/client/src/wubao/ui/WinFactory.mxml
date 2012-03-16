@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="490" height="250" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import guid.GuidManager;
+			import utils.TipInfo;
+			import task.model.Task;
+			import wubao.model.User;
+			import mx.events.FlexEvent;
+			import utils.events.ConfirmEvent;
+			import net.tcp.model.wubao.TcpMade;
+			import utils.ui.WinAsk;
+			import utils.FormatText;
+			import wubao.model.Build;
+			import utils.WinManager;
+			import net.tcp.TcpManager;
+			import utils.PubUnit;
+			import wubao.model.Weapon;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			[Bindable]
+			private var weaponList:Array = [];
+			
+			private var selWeapon:Weapon = null;
+			
+			private var selIndex:int = 0;
+			
+			private var madeMax:int = 0;
+			private var leftMade:int = 0;
+			
+			private var max:int = 0;
+			private var resAry:Array = [];
+			
+			private var isInit:Boolean = false; 
+			
+			private function init():void
+			{
+				cbWeapon.selectedIndex = 0; 
+				tiNum.text = "1";
+				numChange();
+				max = getMaxNum();
+				helpID = 28;
+				isInit = true;
+				refresh();
+			}
+			
+			private function onComp(evt:FlexEvent):void
+			{
+				lblLevel.removeEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+				
+				lblLevel.x = cvImage.width - lblLevel.width - 5;
+				lblLevel.y = 5;
+				
+				PubUnit.drawBackground(lblLevel);
+			}
+			
+			override public function refresh():void
+			{
+				var type:int = Build.FACTORY;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				if (gameWubao != null)
+				{
+					
+					var build:Build = gameWubao.buildList.getObjByID(type) as Build;
+					if (build != null)
+					{
+						madeMax = PubUnit.getMaxMade();
+						leftMade = PubUnit.getLeftMade();
+						lblWubaoMade.text = leftMade.toString() + " / " + madeMax.toString();
+						lblStoreLeft.text = gameWubao.store.left.toString();
+						
+						lblLevel.addEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+						lblLevel.text = build.level.toString();
+						weaponList = PubUnit.getCanMadeWeanpon(build.level);
+						
+						if (isInit)
+							setTitle(build.title);
+					}
+				}
+				
+				lu1.type = type;
+				lu1.refresh();
+				
+				cbWeapon.selectedIndex = selIndex;
+				max = getMaxNum();
+				numChange();
+			}
+			
+			public function reset():void
+			{
+				selIndex = 0;
+				cbWeapon.selectedIndex = selIndex;
+				max = getMaxNum();
+				tiNum.text = "1";
+				numChange();
+			}
+			
+			private function wpChange():void
+			{
+				selIndex = cbWeapon.selectedIndex;
+				max = getMaxNum();
+				tiNum.text = "1";
+				numChange();
+			}
+			
+			private function getMax():void
+			{
+				max = getMaxNum();
+				tiNum.text = max.toString();
+				numChange();
+				
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+			private function getMaxNum():int
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				
+				var ret:int = 0;
+				var weapon:Weapon = weaponList[cbWeapon.selectedIndex] as Weapon;
+				if (weapon != null)
+				{
+					selWeapon = weapon;
+					
+					resAry = PubUnit.getWeaponReq(weapon.type);
+					if (resAry.length > 0)
+					{
+						var maxWood:int = 0;
+						var maxIron:int = 0;
+						var maxHorse:int = 0;
+						var maxSkin:int = 0;
+						var maxMoney:int = 0;
+						var maxMade:int = 0;
+						
+						if (gameWubao.wood < resAry[0] || gameWubao.iron < resAry[1] || gameWubao.horse < resAry[2] || 
+						    gameWubao.skin < resAry[3] || gameWubao.money < resAry[4] || gameWubao.leftMade < resAry[5])
+							return 0;
+							
+						maxWood = int(gameWubao.wood / resAry[0]);
+						maxIron = int(gameWubao.iron / resAry[1]);
+						maxHorse = int(gameWubao.horse / resAry[2]);
+						maxSkin = int(gameWubao.skin / resAry[3]);
+						maxMoney = int(gameWubao.money / resAry[4]);
+						maxMade = int(leftMade/ resAry[5]);
+						
+						var ary:Array = [];
+						if (maxWood > 0) ary.push(maxWood);
+						if (maxIron > 0) ary.push(maxIron);
+						if (maxHorse > 0) ary.push(maxHorse);
+						if (maxSkin > 0) ary.push(maxSkin);
+						if (maxMoney > 0) ary.push(maxMoney);
+						if (maxMade > 0) ary.push(maxMade);
+						
+						ret = PubUnit.getMinNum(ary);
+					}
+				}
+				
+				return ret;
+			}
+			
+			private function numChange():void
+			{
+				var num:int = int(tiNum.text);
+				
+				if (num > max)
+				{
+					num = max;
+					tiNum.text = num.toString();
+				}
+				
+				if (resAry.length > 0)
+				{
+					var woodNum:int = resAry[0] * num;
+					if (gameWubao.wood < woodNum)
+						lblWood.htmlText = FormatText.packegText(woodNum.toString(), FormatText.RED);
+					else
+						lblWood.htmlText = FormatText.packegText(woodNum.toString(), FormatText.GREEN);
+						
+					var ironNum:int = resAry[1] * num;
+					if (gameWubao.iron < ironNum)
+						lblIron.htmlText = FormatText.packegText(ironNum.toString(), FormatText.RED);
+					else
+						lblIron.htmlText = FormatText.packegText(ironNum.toString(), FormatText.GREEN);
+						
+					var horseNum:int = resAry[2] * num;
+					if (gameWubao.horse < horseNum)
+						lblHorse.htmlText = FormatText.packegText(horseNum.toString(), FormatText.RED);
+					else
+						lblHorse.htmlText = FormatText.packegText(horseNum.toString(), FormatText.GREEN);
+						
+					var skinNum:int = resAry[3] * num;
+					if (gameWubao.skin < skinNum)
+						lblSkin.htmlText = FormatText.packegText(skinNum.toString(), FormatText.RED);
+					else
+						lblSkin.htmlText = FormatText.packegText(skinNum.toString(), FormatText.GREEN);
+						
+					var moneyNum:int = resAry[4] * num;
+					if (gameWubao.money < moneyNum)
+						lblMoney.htmlText = FormatText.packegText(moneyNum.toString(), FormatText.RED);
+					else
+						lblMoney.htmlText = FormatText.packegText(moneyNum.toString(), FormatText.GREEN);
+						
+					var madeNum:int = resAry[5] * num;
+					if (gameWubao.leftMade < madeNum)
+						lblMade.htmlText = FormatText.packegText(madeNum.toString(), FormatText.RED);
+					else
+						lblMade.htmlText = FormatText.packegText(madeNum.toString(), FormatText.GREEN);
+				}
+			}
+			
+			private function onKeyUp():void
+			{
+				numChange();
+			}
+			
+			private var winAsk:WinAsk = null;
+			
+			private function madeWeapon():void
+			{
+				if (selWeapon == null)
+				{
+					WinManager.winMgr.showResult("请选择装备");
+					return;
+				}
+				
+				if (int(tiNum.text) < 1)
+				{
+					WinManager.winMgr.showResult("生产数量不能为0");
+					return;
+				}
+				
+				if (gameWubao.store.left < 1)
+				{
+					WinManager.winMgr.showResult("库房空间不够");
+					return;
+				}
+				
+				var str:String = FormatText.packegText("确定要生产 ") + FormatText.packegText(tiNum.text, FormatText.GREEN) +
+				                 FormatText.packegText(" 个 " + selWeapon.name + " 吗？");
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmMade);
+			}
+			
+			private function confirmMade(evt:ConfirmEvent):void
+			{
+				winAsk.removeEventListener(ConfirmEvent.CONFIRM, confirmMade);
+				
+				var made:TcpMade = new TcpMade();
+				
+				made.wbID = gameWubao.uniqID;
+				made.type = selWeapon.type;
+				made.num = int(tiNum.text);
+				
+				TcpManager.tcpMgr.sendMadeWeapon(made);
+			}
+			
+			private function recoverMade():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				if (gameWubao != null)
+				{
+					madeMax = gameWubao.family * 10;
+					leftMade = madeMax - gameWubao.useMade;
+				}
+				
+				if (leftMade == madeMax)
+				{
+					WinManager.winMgr.showResult("工时已满");
+					return;
+				}   
+				
+				var str:String = "花费10金币可立即增加10000工时\n\n" + FormatText.packegText("注：总工时数不可超过上限值", FormatText.RED);
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmRecover);
+				
+				function confirmRecover(evt:ConfirmEvent):void
+				{
+					TcpManager.tcpMgr.sendRecoverMade(null);
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvImage" x="10" y="34" width="128" height="128">
+		<mx:backgroundImage>@Embed(source='../../images/assets/wubao/win/factory.swf')</mx:backgroundImage>
+		<mx:Label id="lblLevel" fontSize="16" fontWeight="bold" fontFamily="Arial" textAlign="center"/>
+	</mx:Canvas>
+	
+	<mx:Canvas x="146" y="34" width="334" height="60">
+		<mx:Label x="5" y="5" text="工时：" height="20" width="45"/>
+		<mx:Label id="lblWubaoMade" x="45" y="3" height="20" width="100" styleName="number"/>
+		<GameButton id="btnRecover" height="15" width="17" click="recoverMade();" btnType="add" x="145" y="5"/>
+		
+		<mx:Label x="167" y="5" text="库房空间：" height="20" width="65"/>
+		<mx:Label id="lblStoreLeft" x="232" y="3" height="20" width="20" styleName="number"/>
+		
+		<mx:Label x="5" y="32" text="生产：" height="20" width="45"/>
+		<mx:ComboBox id="cbWeapon" x="45" y="30" width="60" dataProvider="{weaponList}" labelField="name" change="wpChange();" height="20" paddingRight="0"></mx:ComboBox>
+		
+		<GameTextInput id="tiNum" x="110" y="30" width="40" isNUM="true" keyUp="onKeyUp();" height="20" textAlign="left"/>
+		<GameButton x="155" y="30" label="Max" btnType="max" height="20" width="40" click="getMax();"/>
+		
+		<GameButton id="btnMade" x="265" y="5" label="生　产" click="madeWeapon();"/>
+	</mx:Canvas>
+	<mx:Canvas x="146" y="97" width="334" height="65" styleName="winCanvas">
+		<mx:Label x="10" y="10" text="工时：" height="20" width="45"/>
+		<mx:Label id="lblMade" x="55" y="10" text="0" height="20" width="55"/>
+			
+		<mx:Label x="110" y="10" text="木料：" height="20" width="45"/>
+		<mx:Label id="lblWood" x="155" y="10" text="0" height="20" width="55"/>
+			
+		<mx:Label x="210" y="10" text="矿石：" height="20" width="45"/>
+		<mx:Label id="lblIron" x="255" y="10" text="0" height="20" width="55"/>
+			
+		<mx:Label x="10" y="35" text="钱币：" height="20" width="45"/>
+		<mx:Label id="lblMoney" x="55" y="35" text="0" height="20" width="55"/>
+			
+		<mx:Label x="110" y="35" text="皮革：" height="20" width="45"/>
+		<mx:Label id="lblSkin" x="155" y="35" text="0" height="20" width="55"/>
+			
+		<mx:Label x="210" y="35" text="马匹：" height="20" width="45"/>
+		<mx:Label id="lblHorse" x="255" y="35" text="0" height="20" width="55"/>
+	</mx:Canvas>
+
+	<LevelUp id="lu1" x="10" y="170">
+	</LevelUp>
+	
+</GameWindow>

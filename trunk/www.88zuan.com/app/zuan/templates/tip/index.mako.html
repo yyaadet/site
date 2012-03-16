@@ -1,0 +1,25 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+<%namespace name="flash_game" file="/flash_game/func.mako.html" />
+
+
+<%def name="get_title()">专注的小游戏网站</%def>
+
+<%def name="get_content()">
+
+<div id="content">
+    <div id="content_left">
+    </div>
+    <div id="content_right">
+             
+        <!-- tips -->
+        <div class="table" style="border: solid 1px #ccc; margin-left: 10px;">
+            	<div class="row" style="color: red; height: 40px;">
+                	<h1>${c.tip}</h1>
+                </div>
+         </div>
+                
+    </div>
+</div>
+</%def>

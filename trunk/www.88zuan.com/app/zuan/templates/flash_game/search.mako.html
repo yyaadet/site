@@ -1,0 +1,110 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+<%namespace name="flash_game" file="/flash_game/func.mako.html" />
+
+
+<%def name="get_title()">搜索：${c.query}</%def>
+
+<%def name="ad_head()">
+<script type='text/javascript'>
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+(function() {
+var gads = document.createElement('script');
+gads.async = true;
+gads.type = 'text/javascript';
+var useSSL = 'https:' == document.location.protocol;
+gads.src = (useSSL ? 'https:' : 'http:') + 
+'//www.googletagservices.com/tag/js/gpt.js';
+var node = document.getElementsByTagName('script')[0];
+node.parentNode.insertBefore(gads, node);
+})();
+</script>
+
+<script type='text/javascript'>
+googletag.cmd.push(function() {
+googletag.defineSlot('/13427485/88zuan_搜索游戏结果页_顶部横幅_728_90', [728, 90], 'div-gpt-ad-1325991298711-0').addService(googletag.pubads());
+googletag.pubads().enableSingleRequest();
+googletag.enableServices();
+});
+</script>
+</%def>
+
+<%def name="get_content()">
+<%
+import urllib
+from zuan.controllers.flash_game import get_flash_game_pic_url
+from zuan.controllers.flash_game import GROUP_INFO
+%>
+<div id="content">
+    <div id="content_left">
+    	${flash_game.get_left_rank_list()}
+    </div>
+    <div id="content_right">
+    	
+        <!-- 88zuan_搜索游戏结果页_顶部横幅_728_90 -->
+        <div id='div-gpt-ad-1325991298711-0' style='width:728px; height:90px;'>
+        <script type='text/javascript'>
+        googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325991298711-0'); });
+        </script>
+        </div>
+        
+    	<div id="content_right_top">
+         	<h3>搜索关键字:<label style="color: red;"> ${c.query} </label>，搜索结果：<label style="color: red;"> ${c.total_num} </label>条记录</h3>
+        </div>
+        	
+       <!-- flash game container -->
+      <div class="table">
+        	<div class="row" style="height: 30px; margin-top: 5px; border-bottom: dotted 1px #ccc;">本页总共有 ${len(c.fgs)} 小游戏</div>
+            %for obj in c.fgs:
+            <div class="row" style="height: 80px; margin-top: 5px; border-bottom: dotted 1px #ccc;">
+              <%
+              name = h.short_text(obj.name, 30)
+              pic = get_flash_game_pic_url(obj, c.setting)
+              info = h.short_text(obj.info, 100)
+              %>
+              <div class="col" style="width: 80px;">
+                  <a target="_blank" href="${h.static_flash_game_detail_url(obj._id)}" title="${obj.name}">
+                    <img border="0" class="fg_logo" src="${pic}" align="middle" alt="${obj.name}" />
+                  </a>
+              </div>
+              <div class="col" style="width: 600px;">
+              <%
+              from zuan.controllers.flash_game import get_group
+              import time
+              now = int(time.time())
+              group = get_group(obj.group_id)
+              %>
+                <div class="col_line">
+                  <a target="_blank" href="${h.static_flash_game_detail_url(obj._id)}" title="${obj.name}">${obj.name}</a>
+                   总人气：${obj.total_play}， 总游戏时长: ${round(obj.total_play_time/3600, 2)} 小时，得分：${round(obj.score, 2)}，最近游戏时间：${h.diff_time(obj.last_play_timestamp, now)}前
+                </div>
+                <div class="col_line">${info}</div>
+              </div>
+            </div>
+            %endfor 
+        </div>
+            
+            
+            <!-- flash game page -->
+            <div class="table">
+            	<div class="row">
+                	%if c.start_page != 1:
+                    <div class="col" style="width: 50px;"><a href="/flash_game/search?query=${urllib.quote(c.query.encode("utf-8"))}&page=${c.start_page - 1}">上一页</a></div>
+                    %endif
+                	%for i in range(c.start_page, c.end_page + 1):
+                   	<div class="col" style="width: 20px; min-width: 0; margin-left: 0;">
+                    	%if i == c.page:
+                        <strong><a href="/flash_game/search?query=${urllib.quote(c.query.encode("utf-8"))}&page=${i}">${i}</a></strong>
+                        %else:
+                        <a href="/flash_game/search?query=${urllib.quote(c.query.encode("utf-8"))}&page=${i}">${i}</a>
+                        %endif
+                    </div>
+                    %endfor
+                    <div class="col" style="width: 50px;"><a href="/flash_game/search?query=${urllib.quote(c.query.encode("utf-8"))}&page=${c.end_page + 1}">下一页</a></div>
+                </div>
+            </div>
+    </div>
+</div>
+</%def>

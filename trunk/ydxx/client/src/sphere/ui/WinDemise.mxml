@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="306" height="180" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.WinManager;
+			import utils.GameManager;
+			import wubao.model.User;
+			import net.tcp.TcpManager;
+		
+			import net.tcp.model.sphere.TcpDemise;
+			
+			private var _sphereID:int = 0;
+		
+			private function init():void
+			{
+				setTitle("势力禅让");
+				helpID = 11;
+			}
+			
+			override public function refresh():void
+			{
+				tiUserName.text = "";
+			}
+			
+			private function demise():void
+			{
+				if (tiUserName.text == "") return;
+				
+				var tcpDemise:TcpDemise = new TcpDemise();
+				tcpDemise.sphereID = sphereID;
+				
+				var gameUser:User = GameManager.gameMgr.userList.getUserByName(tiUserName.text) as User;
+				if (gameUser == null)
+				{
+					WinManager.winMgr.showResult("没有找到该玩家");
+					return;
+				}
+				
+				tcpDemise.userID = gameUser.uniqID;
+				TcpManager.tcpMgr.sendDemise(tcpDemise);
+			}
+			
+			public function get sphereID():int
+			{
+				return _sphereID;
+			}
+			
+			public function set sphereID(param:int):void
+			{
+				_sphereID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="286" height="102" styleName="lowCanvas">
+		<mx:TextArea x="8" y="8" width="266" text="只能把势力君主禅让给本势力成员，&#xa;禅让后君主将成为普通成员。"/>
+		<mx:Label x="27" y="67" text="请输入势力新君主名称"/>
+		<GameTextInput id="tiUserName" x="157" y="66" width="105" isCH="true"/>
+	</mx:Canvas>
+	
+	<OKButton x="121" y="144" click="demise();"/>
+	
+</GameWindow>

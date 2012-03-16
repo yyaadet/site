@@ -1,0 +1,80 @@
+<%inherit file="index3.html" />
+
+
+
+<%def name="html_content_title()">
+推广工具
+</%def>
+
+
+<%def name="html_content()">
+
+<!-- 申请推广员-->
+     <div class="tuiguan_big">
+         <div class="tuiguan_w"><font size="3"><strong>发送链接形式：</strong></font>
+           <table width="700" border="0" cellspacing="0" cellpadding="0">
+             <tr>
+               <td width="67" align="right"><font size="2"><strong>地址：</strong></font></td>
+               <td colspan="2" align="left"><textarea name="textarea" id="expand_url" cols="60" rows="9">${c.expand_txt}
+${c.url}</textarea>
+                 <a href="#"></a></td>
+             </tr>
+             <tr>
+               <td height="40" align="right">&nbsp;</td>
+               <td width="442" align="left"><a href="#" onclick="copyToClipboard($('#expand_url').val());"><img src="/images/tuiguan_05.jpg" width="111" height="26" border="0" /></a></td>
+               <td width="191" align="left">&nbsp;</td>
+             </tr>
+             <tr>
+               <td colspan="3" align="left">操作提示：<br />
+                 *复制推广编码，系统为您生成专用的链接代码。<br />
+                  *通过QQ、MSN等聊天工具发送给朋友、同事、网友。他们通过该链接的页面注册成为我们用户，充值后，您就可以获得奖励积分。<br /></td>
+               </tr>
+           </table>
+         </div>
+         </div>
+     <!--end 申请推广员-->
+
+</%def>
+
+<%def name="foot_js()">
+
+<script>
+
+function copyToClipboard(txt) {   
+     if(window.clipboardData) {   
+             window.clipboardData.clearData();   
+             window.clipboardData.setData("Text", txt);   
+     } else if(navigator.userAgent.indexOf("Opera") != -1) {   
+          window.location = txt;   
+     } else if (window.netscape) {   
+          try {   
+               netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");   
+          } catch (e) {   
+               alert("被浏览器拒绝！\n请在浏览器地址栏输入'about:config'并回车\n然后将'signed.applets.codebase_principal_support'设置为'true'");   
+          }   
+          var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);   
+          if (!clip)   
+               return;   
+          var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);   
+          if (!trans)   
+               return;   
+          trans.addDataFlavor('text/unicode');   
+          var str = new Object();   
+          var len = new Object();   
+          var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);   
+          var copytext = txt;   
+          str.data = copytext;   
+          trans.setTransferData("text/unicode",str,copytext.length*2);   
+          var clipid = Components.interfaces.nsIClipboard;   
+          if (!clip)   
+               return false;   
+          clip.setData(trans,null,clipid.kGlobalClipboard);   
+          alert("复制成功！")   
+     }   
+}  
+
+
+
+</script>
+
+</%def>

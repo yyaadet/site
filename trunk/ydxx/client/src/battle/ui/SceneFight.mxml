@@ -1,0 +1,980 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="600" color="#FFFFFF" fontSize="12" backgroundColor="0x000000" backgroundAlpha="1" 
+	xmlns:ns1="utils.components.*" xmlns:ns2="com.sanguo.view.city.scene.*" xmlns:ns3="battle.ui.item.*">
+
+	<mx:Script>
+		<![CDATA[
+			import wubao.model.Weapon;
+			import battle.model.Gateway;
+			import flash.utils.setTimeout;
+			import battle.events.MoveFadeEvent;
+			import battle.model.MoveFade;
+			import mx.core.UIComponent;
+			import mx.events.EffectEvent;
+			import mx.effects.Move;
+			import utils.PubUnit;
+			import utils.SceneManager;
+			import utils.components.GameSwfLoader;
+			import general.list.GeneralList;
+			import mx.core.ScrollPolicy;
+			import utils.GameManager;
+			import general.model.Skill;
+			import utils.WinManager;
+			import net.tcp.model.fight.TcpFightNtf;
+			import general.model.General;
+			import mx.controls.Label;
+			import images.AssetsManager;
+			
+			private var _fight:TcpFightNtf = null;
+			
+			//是否已初始化
+			private var _isInit:Boolean = false;
+			
+			//战斗过程是否结束
+			private var isEnd:Boolean = false;
+			
+			//战斗场景的素材下载器
+			private var swfLoader:GameSwfLoader = null;
+			
+			//之前已经加入过的需要下载的兵种动画列表，存放的是动画素材的文件名称
+			//增加这个是为了不重复下载
+			private var soliderSwfList:Array = [];
+			
+			//战斗场景中所有的素材下载列表，存放的是素材的名称，地址，内容包括背景，兵种动画，特技动画
+			private var loadList:Array = [];
+			
+			//战斗场景中当前下载的素材索引
+			private var loadIndex:int = 0;
+			
+			//战斗场景中已经下载的素材列表,存放的是素材名称，素材动画类, 包括背景，兵种动画，特技动画
+			private var swfList:Array = [];
+			
+			/**
+			 * 初始化 
+			 * 
+			 */ 
+			public function init():void
+			{
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+				this.width = GameManager.gameMgr.gameWidth;
+				this.height = GameManager.gameMgr.gameHeight;
+				
+				isInit = true;
+			}
+			
+			public function showFight():void
+			{
+				isEnd = false;
+				cvTitle.visible = false;
+				cvTitle.includeInLayout = false;
+				cvBG.visible = false;
+				cvBG.includeInLayout = false;
+				btnResult.visible = false;
+				btnResult.includeInLayout = false;
+				showBaseInfo();
+				getLoadList();
+				loadIndex = 0;
+				startLoad();
+			}
+			
+			//重放
+			public function reShow():void
+			{
+				isEnd = false;
+				setUI();
+				setTimeout(setWarBase, 200);
+			}
+			
+			public function clear():void
+			{
+				hideAllItem();
+			}
+			
+			private function showBaseInfo():void
+			{
+				lblSelf.text = _fight.selfName;
+				if (_fight.eneName == "npc")
+				{
+					var gate:Gateway = GameManager.gameMgr.gateList.getObjByID(_fight.gateID) as Gateway;
+					if (gate != null)
+						lblEne.text = gate.name;
+					else
+						lblEne.text = "npc";
+				}
+				else
+					lblEne.text = _fight.eneName;
+			}
+			
+			//获取需要加载的素材列表
+			private function getLoadList():void
+			{
+				loadList.length = 0;
+				soliderSwfList.length = 0;
+				swfList.length = 0;
+				
+				var obj:Object;
+				var i:int = 0;
+				var len:int = 0;
+				var gameGeneral:General = null;
+				var swfInfo:String = "";
+				var swfName:String = "";
+				var swfURL:String = "";
+				var roundObj:Object;
+				
+				//背景
+				obj = new Object();
+				obj.swfInfo = "战斗背景";
+				var random:int = PubUnit.getRandom(1, 2);
+				swfName = "bg" + random.toString();
+				obj.swfName = swfName;
+				obj.swfURL = GameManager.gameMgr.resURL + "scene/" + swfName + ".jpg";
+				loadList.push(obj);
+				
+				//己方军团动画
+				len = _fight.selfList.length;
+				for (i = 0; i < len; i++)
+				{
+					gameGeneral = _fight.selfList[i];
+					swfName = PubUnit.getSoliderName(gameGeneral)[1];
+					if (PubUnit.isObjInArray(swfName, soliderSwfList)) continue;
+					
+					swfInfo = gameGeneral.soliderName;
+					swfURL = GameManager.gameMgr.resURL + "scene/" + swfName + ".swf";
+					
+					addToLoadList();
+				}
+				
+				//敌方军团动画
+				len = _fight.eneList.length;
+				for (i = 0; i < len; i++)
+				{
+					gameGeneral = _fight.eneList[i];
+					swfName = PubUnit.getSoliderName(gameGeneral)[1];
+					if (PubUnit.isObjInArray(swfName, soliderSwfList)) continue;
+					
+					swfInfo = gameGeneral.soliderName;
+					swfURL = GameManager.gameMgr.resURL + "scene/" + swfName + ".swf";
+					
+					addToLoadList();
+				}
+				
+				//特效动画
+				swfName = "texiao1";
+				swfInfo = "特效动画1";
+				swfURL = GameManager.gameMgr.resURL + "scene/" + swfName + ".swf";
+				addToLoadList();
+				
+				swfName = "texiao2";
+				swfInfo = "特效动画2";
+				swfURL = GameManager.gameMgr.resURL + "scene/" + swfName + ".swf";
+				addToLoadList();
+				
+				//特技动画
+				swfName = "teji";
+				swfInfo = "特技动画";
+				swfURL = GameManager.gameMgr.resURL + "scene/" + swfName + ".swf";
+				addToLoadList();
+				
+				function addToLoadList():void
+				{
+					obj = new Object();
+					obj.swfInfo = swfInfo;
+					obj.swfName = swfName;
+					obj.swfURL = swfURL;
+					loadList.push(obj);
+					soliderSwfList.push(swfName);
+				}
+			}
+			
+			//开始加载所需素材
+			private function startLoad():void
+			{
+				var swfURL:String = loadList[loadIndex].swfURL;
+				swfLoader = new GameSwfLoader();
+				swfLoader.addEventListener(Event.COMPLETE, loadComplete);
+				swfLoader.loadSwf(swfURL, loadProgress);
+			}
+			
+			private function loadProgress(evt:ProgressEvent):void
+			{
+				var info:String = "正在加载" + loadList[loadIndex].swfInfo + "，请稍候... " + int(evt.bytesLoaded / evt.bytesTotal * 100).toString() + "%";
+				WinManager.winMgr.showLoadingIntf(info);
+			}
+			
+			private function loadComplete(evt:Event):void
+			{
+				var obj:Object = new Object();
+				obj.swfName = loadList[loadIndex].swfName;
+				obj.soliderSwf = swfLoader;
+				swfList.push(obj);
+				
+				//所有的素材动画全部下载完毕
+				if (loadIndex == loadList.length - 1)
+				{
+					hideInfo();
+					setUI();
+					setTimeout(setWarBase, 200);
+					return;
+				}
+				
+				loadIndex ++;
+				startLoad();
+			}
+			
+			private function hideInfo():void
+			{
+				WinManager.winMgr.winLoading.visible = false;
+				WinManager.winMgr.winLoading.includeInLayout = false;
+			}
+			
+			//初始化界面
+			private function setUI():void
+			{
+				var soliderSwf:GameSwfLoader = null;
+				
+				cvTitle.visible = true;
+				cvTitle.includeInLayout = true;
+				cvBG.visible = true;
+				cvBG.includeInLayout = true;
+				btnResult.visible = true;
+				btnResult.includeInLayout = true;
+				
+				//第一个是战斗背景
+				cvBG.removeAllChildren();
+				soliderSwf = swfList[0].soliderSwf as GameSwfLoader;
+				cvBG.addChild(soliderSwf);
+				
+				var i:int = 0;
+				var len:int = 0;
+				var gameGeneral:General = null;
+				var swfName:String = "";
+				
+				//先隐藏所有的军团
+				hideAllItem();
+				
+				//显示己方军团
+				len = _fight.selfList.length;
+				var itemFight:ItemFight = null;
+				var itemObj:Object;
+				
+				for (i = 0; i < len; i++)
+				{
+					gameGeneral = _fight.selfList[i];
+					swfName = PubUnit.getSoliderName(gameGeneral)[1];
+					soliderSwf = getFromSwfList(swfName);
+					itemFight = this["self" + (i + 1).toString()] as ItemFight;
+					itemFight.visible = true;
+					itemFight.includeInLayout = true;
+					if (i < 3)
+						itemFight.x = 100;
+					else
+						itemFight.x = 0;
+					itemFight.y = 255 + (i % 3) * 95;
+					itemFight.soliderSwf = soliderSwf;
+					itemFight.gameGeneral = gameGeneral;
+					itemFight.showType = 1;
+					itemObj = new Object();
+					itemObj.uniqID = gameGeneral.uniqID;
+					itemObj.x = itemFight.x;
+					itemObj.y = itemFight.y;
+					itemFight.data = itemObj;
+					itemFight.show();
+				}
+				
+				//显示敌方军团
+				len = _fight.eneList.length;
+				for (i = 0; i < len; i++)
+				{
+					gameGeneral = _fight.eneList[i];
+					swfName = PubUnit.getSoliderName(gameGeneral)[1];
+					soliderSwf = getFromSwfList(swfName);
+					itemFight = this["ene" + (i + 1).toString()] as ItemFight;
+					itemFight.visible = true;
+					itemFight.includeInLayout = true;
+					if (i < 3)
+						itemFight.x = 770;
+					else
+						itemFight.x = 870;
+					itemFight.y = 255 + (i % 3) * 95;
+					itemFight.soliderSwf = soliderSwf;
+					itemFight.gameGeneral = gameGeneral;
+					itemFight.showType = 2;
+					itemObj = new Object();
+					itemObj.uniqID = gameGeneral.uniqID;
+					itemObj.x = itemFight.x;
+					itemObj.y = itemFight.y;
+					itemFight.data = itemObj;
+					itemFight.show();
+				}
+			}
+			
+			//回合列表
+			private var roundList:Array = [];
+			
+			//当前正在进行的回合
+			private var round:Object;
+			
+			//当前正在进行的回合索引值
+			private var roundIndex:int = 0;
+			
+			//军团轮换次数
+			private var armyRound:int = 0;
+			
+			//当前战斗双方的军团ID
+			private var warSelfID:int = 0;
+			private var warEneID:int = 0;
+			
+			//军团移动到战斗地点时间长度
+			private var armyMoveTime:int = 1500;
+			
+			//士兵战斗动画时间长度
+			private var soliderTime:int = 1000;
+			
+			//特技动画时间长度
+			private var skillTime:int = 1000;
+			
+			//特技标签动画时间长度
+			private var skillLabelTime:int = 1500;
+			
+			//特效动画时间长度
+			private var effectTime:int = 600;
+			
+			//死亡兵力标签动画时间长度
+			private var dieLabelTime:int = 1500;
+			
+			//战斗时双方军团的战斗地点
+			private var selfWarPoint:Point = new Point();
+			private var eneWarPoint:Point = new Point();
+			
+			private var armyMoveMax:int = 0;
+			private var armyMoveCount:int = 0;
+			
+			private var showFlashList:Array = [];
+			
+			private function setWarBase():void
+			{
+				roundList = _fight.roundList;
+				selfWarPoint.x = cvWar.x;
+				selfWarPoint.y = cvWar.y;
+				eneWarPoint.x = cvWar.x + cvWar.width - ene1.width;
+				eneWarPoint.y = cvWar.y;
+				roundIndex = 0;
+				warSelfID = 0;
+				warEneID = 0;
+				armyRound = 0;
+				showFlashList.length = 0;
+				
+				showWar();
+			}
+			
+			//开始显示战斗动画
+			private function showWar():void
+			{
+				if (isEnd) return;
+				
+				if (roundList.length == 0)
+				{
+					showNormalResult();
+					return;
+				}
+				
+				round = roundList[roundIndex];
+				
+				armyMoveCount = 0;
+				armyMoveMax = 0;
+				
+				//计算军团所需的最大移动次数
+				if (round.selfID != warSelfID)
+				{
+					armyMoveMax ++;
+					if (warSelfID != 0)
+						armyMoveMax ++;
+				}
+				if (round.eneID != warEneID)
+				{
+					armyMoveMax ++;
+					if (warEneID != 0)
+						armyMoveMax ++;
+				}
+				
+				//如果需要军团移动
+				if (armyMoveMax > 0)
+				{
+					var itemFight:ItemFight = null;
+					var itemFight1:ItemFight = null;
+					
+					if (round.selfID != warSelfID)
+					{
+						itemFight = getSelfItemFight(round.selfID);
+						
+						if (warSelfID == 0)
+						{
+							armyMove(itemFight, selfWarPoint.x, selfWarPoint.y, armyMoveTime);
+						}
+						else
+						{
+							itemFight1 = getSelfItemFight(warSelfID);
+							if (itemFight1.visible)
+								armyMove(itemFight1, itemFight1.data.x, itemFight1.data.y, armyMoveTime);
+							armyMove(itemFight, selfWarPoint.x, selfWarPoint.y, armyMoveTime);
+						}
+						
+						warSelfID = itemFight.data.uniqID;
+					}
+					
+					if (round.eneID != warEneID)
+					{
+						itemFight = getEneItemFight(round.eneID);
+						
+						if (warEneID == 0)
+						{
+							armyMove(itemFight, eneWarPoint.x, eneWarPoint.y, armyMoveTime);
+						}
+						else
+						{
+							itemFight1 = getEneItemFight(warEneID);
+							if (itemFight1.visible)
+								armyMove(itemFight1, itemFight1.data.x, itemFight1.data.y, armyMoveTime);
+							armyMove(itemFight, eneWarPoint.x, eneWarPoint.y, armyMoveTime);
+						}
+						
+						warEneID = itemFight.data.uniqID;
+					}
+				}
+				//不需要军团移动
+				else
+				{
+					showRound();
+				}
+			}
+			
+			private function armyMove(target:UIComponent, xTo:int, yTo:int, time:int):void
+			{
+				var itemFight:ItemFight = target as ItemFight;
+				if (itemFight != null)
+				{
+					itemFight.playMove();
+				}
+				
+				var move:Move = new Move();
+				move.target = target;
+				move.xFrom = target.x;
+				move.yFrom = target.y;
+				move.xTo = xTo;
+				move.yTo = yTo;
+				move.duration = time;
+				move.play();
+				move.addEventListener(EffectEvent.EFFECT_END, moveEnd);
+			}
+			
+			private function moveEnd(evt:EffectEvent):void
+			{
+				armyMoveCount ++;
+				var move:Move = evt.target as Move;
+				if (move != null)
+				{
+					var itemFight:ItemFight = move.target as ItemFight;
+					if (itemFight != null)
+					{
+						itemFight.stop();
+					}
+				}
+				
+				//参加战斗的军团移动完毕
+				if (armyMoveCount == armyMoveMax)
+				{
+					showRound();
+				}
+			}
+			
+			//显示当前回合的战斗动画
+			private function showRound():void
+			{
+				if (isEnd) return;
+				
+				var selfItemFight:ItemFight = null;
+				var eneItemFight:ItemFight = null;
+				var gsl1:GameSwfLoader = null;
+				var gsl2:GameSwfLoader = null;
+								
+				selfItemFight = getSelfItemFight(warSelfID);
+				eneItemFight = getEneItemFight(warEneID);
+				
+				//士兵动画
+				selfItemFight.play();
+				eneItemFight.play();
+				
+				//特技动画(比如无双)
+				var selfSkill:int = round.selfSkill;
+				var eneSkill:int = round.eneSkill;
+				var gameSkill:Skill = null;
+				
+				if (selfSkill > 0)
+				{
+					gsl1 = getFromSwfList("teji");
+					var tjLoader1:Loader = new Loader();
+					tjLoader1.contentLoaderInfo.addEventListener(Event.COMPLETE, tjLoad1Comp);
+					tjLoader1.loadBytes(gsl1.swfLoader.contentLoaderInfo.bytes);
+					
+					//特技标签
+					gameSkill = GameManager.gameMgr.skillList.getObjByID(selfSkill) as Skill;
+					if (gameSkill != null)
+					{
+						var cvSkill1:UIComponent = createSkillLabel(selfSkill, selfItemFight);
+						var skill1MoveFade:MoveFade = new MoveFade();
+						skill1MoveFade.target = cvSkill1;
+						skill1MoveFade.duration = skillLabelTime;
+						skill1MoveFade.play();
+					}
+				}
+				
+				function tjLoad1Comp(evt:Event):void
+				{
+					if (isEnd) return;
+					
+					var mc:MovieClip = evt.target.content as MovieClip;
+					var ui:UIComponent = new UIComponent();
+					ui.addChild(mc);
+					cvStage.addChild(ui);
+					showFlashList.push(ui);
+					ui.x = selfItemFight.x + (selfItemFight.width - evt.target.width) / 2;
+					ui.y = selfItemFight.y + (selfItemFight.height - evt.target.height) / 2;
+					
+					mc.play();
+					setTimeout(removeEffectFlash, skillTime, mc, ui);
+				}
+				
+				if (eneSkill > 0)
+				{
+					gsl1 = getFromSwfList("teji");
+					var tjLoader2:Loader = new Loader();
+					tjLoader2.contentLoaderInfo.addEventListener(Event.COMPLETE, tjLoad2Comp);
+					tjLoader2.loadBytes(gsl1.swfLoader.contentLoaderInfo.bytes);
+					
+					//特技标签
+					gameSkill = GameManager.gameMgr.skillList.getObjByID(eneSkill) as Skill;
+					if (gameSkill != null)
+					{
+						var cvSkill2:UIComponent = createSkillLabel(eneSkill, eneItemFight);
+						var skill2MoveFade:MoveFade = new MoveFade();
+						skill2MoveFade.target = cvSkill2;
+						skill2MoveFade.duration = skillLabelTime;
+						skill2MoveFade.play();
+					}
+				}
+				
+				function tjLoad2Comp(evt:Event):void
+				{
+					if (isEnd) return;
+					
+					var mc:MovieClip = evt.target.content as MovieClip;
+					var ui:UIComponent = new UIComponent();
+					ui.addChild(mc);
+					cvStage.addChild(ui);
+					showFlashList.push(ui);
+					ui.x = eneItemFight.x + (eneItemFight.width - evt.target.width) / 2;
+					ui.y = eneItemFight.y + (eneItemFight.height - evt.target.height) / 2;
+					
+					mc.play();
+					setTimeout(removeEffectFlash, skillTime, mc, ui);
+				}
+				
+				setTimeout(showEffectFlash, soliderTime);
+				
+				function showEffectFlash():void
+				{
+					if (isEnd) return;
+					
+					//显示特效动画(每回合都会播放)
+					var txLoader1:Loader = null;
+					var txLoader2:Loader = null;
+					
+					if (isSendArrow(selfItemFight.gameGeneral))
+						gsl1 = getFromSwfList("texiao1");
+					else
+						gsl1 = getFromSwfList("texiao2");
+					
+					if (isSendArrow(eneItemFight.gameGeneral))
+						gsl2 = getFromSwfList("texiao1");
+					else
+						gsl2 = getFromSwfList("texiao2");
+					
+					txLoader1 = new Loader();
+					txLoader1.contentLoaderInfo.addEventListener(Event.COMPLETE, txLoad1Comp);
+					txLoader1.loadBytes(gsl1.swfLoader.contentLoaderInfo.bytes);
+					
+					txLoader2 = new Loader();
+					txLoader2.contentLoaderInfo.addEventListener(Event.COMPLETE, txLoad2Comp);
+					txLoader2.loadBytes(gsl2.swfLoader.contentLoaderInfo.bytes);
+					
+					setTimeout(showMoveFade, effectTime);
+				}
+				
+				function txLoad1Comp(evt:Event):void
+				{
+					if (isEnd) return;
+					
+					var mc:MovieClip = evt.target.content as MovieClip;
+					var ui:UIComponent = new UIComponent();
+					ui.addChild(mc);
+					cvStage.addChild(ui);
+					showFlashList.push(ui);
+					ui.x = cvWar.x + 70;
+					ui.y = cvWar.y;
+					
+					mc.play();
+					setTimeout(removeEffectFlash, effectTime, mc, ui);
+				}
+				
+				function txLoad2Comp(evt:Event):void
+				{
+					if (isEnd) return;
+					
+					var mc:MovieClip = evt.target.content as MovieClip;
+					PubUnit.flipHorizontal(mc);
+					var ui:UIComponent = new UIComponent();
+					ui.addChild(mc);
+					cvStage.addChild(ui);
+					showFlashList.push(ui);
+					ui.x = cvWar.x + 50;
+					ui.y = cvWar.y;
+					
+					mc.play();
+					setTimeout(removeEffectFlash, effectTime, mc, ui);
+				}
+				
+				function removeEffectFlash(mc:MovieClip, ui:UIComponent):void
+				{
+					if (mc != null && ui != null)
+					{
+						mc.gotoAndStop(1);
+						ui.removeChild(mc);
+						mc = null;
+						cvStage.removeChild(ui);
+						ui = null;
+					}
+				}
+			
+				function showMoveFade():void
+				{
+					if (isEnd) return;
+					
+					//死亡兵力
+					var moveFade:MoveFade = null;
+					
+					var selfDie:Label = null;
+					if (round.selfDie >= 0)
+						selfDie = createLabel("-" + round.selfDie, PubUnit.RED, selfItemFight, 25);
+					else
+						selfDie = createLabel("+" + Math.abs(round.selfDie).toString(), PubUnit.GREEN, selfItemFight, 25);
+					moveFade = new MoveFade();
+					moveFade.target = selfDie;
+					moveFade.duration = dieLabelTime;
+					moveFade.play();
+					
+					var eneDie:Label = null;
+					if (round.eneDie >= 0)
+						eneDie = createLabel("-" + round.eneDie, PubUnit.RED, eneItemFight, 25);
+					else
+						eneDie = createLabel("+" + Math.abs(round.eneDie).toString(), PubUnit.GREEN, eneItemFight, 25);
+					moveFade = new MoveFade();
+					moveFade.target = eneDie;
+					moveFade.duration = dieLabelTime;
+					moveFade.play();
+					
+					selfItemFight.setDieNum(round.selfDie);
+					eneItemFight.setDieNum(round.eneDie);
+					if (selfItemFight.isDie)
+						warSelfID = 0;
+					if (eneItemFight.isDie)
+						warEneID = 0;
+					
+					//士气，训练度
+					if (round.selfSpirit != 0)
+					{
+						var selfSpirit:Label = null;
+						if (round.selfSpirit < 0)
+							selfSpirit = createLabel("士气 -" + Math.abs(round.selfSpirit).toString(), PubUnit.RED, selfItemFight, 0);
+						else
+							selfSpirit = createLabel("士气 +" + round.selfSpirit, PubUnit.GREEN, selfItemFight, 0);
+						moveFade = new MoveFade();
+						moveFade.target = selfSpirit;
+						moveFade.duration = dieLabelTime;
+						moveFade.play();
+						
+						selfItemFight.setGeneralInfo(round.selfSpirit, round.selfTrain);
+					}
+					
+					if (round.eneSpirit != 0)
+					{
+						var eneSpirit:Label = null;
+						if (round.eneSpirit < 0)
+							eneSpirit = createLabel("士气 -" + Math.abs(round.eneSpirit).toString(), PubUnit.RED, eneItemFight, 0);
+						else if (round.eneSpirit > 0)
+							eneSpirit = createLabel("士气 +" + round.eneSpirit, PubUnit.GREEN, eneItemFight, 0);
+						moveFade = new MoveFade();
+						moveFade.target = eneSpirit;
+						moveFade.duration = dieLabelTime;
+						moveFade.play();
+						
+						eneItemFight.setGeneralInfo(round.eneSpirit, round.eneTrain);
+					}
+					
+					roundIndex ++;
+					//战斗动画显示结束
+					if (roundIndex == roundList.length)
+					{
+						showNormalResult();
+						return;
+					}
+					
+					setTimeout(showWar, dieLabelTime);
+				}
+			}
+			
+			private function createLabel(info:String, labelColor:uint, target:UIComponent, offSet:int = 25):Label
+			{
+				var label:Label = new Label();
+				label.text = info;
+				label.setStyle("fontSize", 20);
+				label.setStyle("fontWeight", "bold");
+				label.setStyle("color", labelColor);
+				label.setStyle("textAlign", "center");
+				label.filters = [new GlowFilter(PubUnit.BLACK)];
+				label.mouseChildren = false;
+				label.mouseEnabled = false;
+				label.width = target.width;
+				label.height = 26;
+				label.x = target.x;
+				label.y = target.y + (target.height - label.height) / 2 - offSet;
+				cvStage.addChild(label);
+				showFlashList.push(label);
+				
+				return label;
+			}
+			
+			private function createSkillLabel(skillID:int, target:UIComponent):UIComponent
+			{
+				var ui:UIComponent = new UIComponent();
+				ui.width = 60;
+				ui.height = 30;
+				ui.mouseChildren = false;
+				ui.mouseEnabled = false;
+				ui.x = target.x + (target.width - ui.width) / 2;
+				ui.y = target.y + (target.height - ui.height) / 2 - 25;
+				cvStage.addChild(ui);
+				showFlashList.push(ui);
+				
+				var skillAssets:Class = getSkillAssets(skillID);
+				var bmp:Bitmap = new skillAssets();
+				ui.graphics.beginBitmapFill(bmp.bitmapData);
+				ui.graphics.drawRect(0, 0, ui.width, ui.height);
+				ui.graphics.endFill();
+				
+				return ui;
+			}
+			
+			private function getSkillAssets(skillID:int):Class
+			{
+				var ret:Class;
+				
+				if (skillID == 25)
+					ret = AssetsManager.assetsMgr.FIGHT_WUSHUANG;
+				else if (skillID == 26)
+					ret = AssetsManager.assetsMgr.FIGHT_POZHEN;
+				else if (skillID == 27)
+					ret = AssetsManager.assetsMgr.FIGHT_JIANSHOU;
+				else if (skillID == 28)
+					ret = AssetsManager.assetsMgr.FIGHT_QIXI;
+				else if (skillID == 29)
+					ret = AssetsManager.assetsMgr.FIGHT_HUNLUAN;
+				else if (skillID == 31)
+					ret = AssetsManager.assetsMgr.FIGHT_MAZHEN;
+				else if (skillID == 32)
+					ret = AssetsManager.assetsMgr.FIGHT_GUWU;
+				
+				return ret;
+			}
+			
+			//根据素材名称获取对应的素材
+			private function getFromSwfList(swfName:String):GameSwfLoader
+			{
+				var ret:GameSwfLoader = null;
+				
+				for each(var obj:Object in swfList)
+				{
+					if (obj.swfName == swfName)
+					{
+						ret = obj.soliderSwf as GameSwfLoader;
+						break;
+					}
+				}
+				
+				return ret;
+			}
+			
+			//根据军团ID获取己方军团对象
+			private function getSelfItemFight(generalID:int):ItemFight
+			{
+				var ret:ItemFight = null;
+				var i:int = 0;
+				
+				for (i = 0; i < 6; i++)
+				{
+					ret = this["self" + (i + 1).toString()] as ItemFight;
+					if (ret.data.uniqID == generalID)
+						break;
+				}
+				
+				return ret;
+			}
+			
+			//根据军团ID获取地方军团对象
+			private function getEneItemFight(generalID:int):ItemFight
+			{
+				var ret:ItemFight = null;
+				var i:int = 0;
+				
+				for (i = 0; i < 6; i++)
+				{
+					ret = this["ene" + (i + 1).toString()] as ItemFight;
+					if (ret.data.uniqID == generalID)
+						break;
+				}
+				
+				return ret;
+			}
+			
+			//军团是否需要发射箭矢(动画显示判断)
+			private function isSendArrow(gameGenera:General):Boolean
+			{
+				var ret:Boolean = false;
+				
+				if (gameGenera.w1Type == Weapon.NU || gameGenera.w4Type == Weapon.NUCHE || gameGenera.w1Type == Weapon.SHENBI)
+					ret = true;
+				
+				return ret;
+			}
+			
+			//隐藏所有的军团
+			private function hideAllItem():void
+			{
+				var i:int = 0;
+				
+				for (i = 0; i < 6; i++)
+				{
+					ItemFight(this["self" + (i + 1).toString()]).visible = false; 
+					ItemFight(this["self" + (i + 1).toString()]).includeInLayout = false;
+					ItemFight(this["self" + (i + 1).toString()]).data = null;
+					ItemFight(this["ene" + (i + 1).toString()]).visible = false; 
+					ItemFight(this["ene" + (i + 1).toString()]).includeInLayout = false;
+					ItemFight(this["ene" + (i + 1).toString()]).data = null;
+				}
+			}
+			
+			private function hideAllFlash():void
+			{
+				var i:int = 0;
+				
+				for (i = 0; i < showFlashList.length; i++)
+				{
+					var ui:UIComponent = showFlashList[i];
+					if (ui != null)
+					{
+						ui.visible = false;
+						ui.includeInLayout = false;
+					}
+				}
+			}
+			
+			//正常显示结果
+			private function showNormalResult():void
+			{
+				isEnd = true;
+				btnResult.visible = false;
+				btnResult.includeInLayout = false;
+				WinManager.winMgr.showBattleResult(_fight);
+			}
+			
+			//强制显示结果
+			private function showResult():void
+			{
+				if (isEnd) return;
+				
+				isEnd = true;
+				btnResult.visible = false;
+				btnResult.includeInLayout = false;
+				hideAllItem();
+				hideAllFlash();
+				WinManager.winMgr.showBattleResult(_fight);
+			}
+			
+			//==================================================================================
+			// 属性
+			//==================================================================================
+			
+			public function get isInit():Boolean
+			{
+				return _isInit;
+			}
+			
+			public function set isInit(param:Boolean):void
+			{
+				_isInit = param;
+			}
+			
+			public function get fight():TcpFightNtf
+			{
+				return _fight;
+			}
+			
+			public function set fight(param:TcpFightNtf):void
+			{
+				_fight = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvStage" width="1000" height="600" horizontalCenter="0" verticalCenter="0">
+		<mx:Canvas id="cvBG" x="0" y="0" width="1000" height="600">
+		</mx:Canvas>
+		<ns1:GameButton id="btnResult" label="结　果" btnType="fight" click="showResult();" bottom="20" horizontalCenter="0"/>
+		
+		<mx:Canvas id="cvTitle" y="10" width="420" height="60" horizontalCenter="0">
+			<mx:backgroundImage>@Embed(source='../../images/assets/fight/title.swf')</mx:backgroundImage>
+			<mx:Label id="lblSelf" x="49" y="6" width="100" textAlign="center" height="20" fontFamily="新宋体"/>
+			<mx:Label id="lblEne" x="264" y="6" width="100" textAlign="center" height="20" fontFamily="新宋体"/>
+		</mx:Canvas>
+		
+		<mx:Canvas id="cvWar" x="225" y="330" width="550" height="220">
+		</mx:Canvas>
+		
+		<ns3:ItemFight id="self4" x="0" y="285">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="self5" x="0" y="380">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="self6" x="0" y="475">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="self1" x="100" y="285">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="self2" x="100" y="380">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="self3" x="100" y="475">
+		</ns3:ItemFight>
+		
+		<ns3:ItemFight id="ene4" x="873" y="285">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="ene5" x="873" y="380">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="ene6" x="873" y="475">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="ene1" x="773" y="285">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="ene2" x="773" y="380">
+		</ns3:ItemFight>
+		<ns3:ItemFight id="ene3" x="773" y="475">
+		</ns3:ItemFight>
+	</mx:Canvas>
+</mx:Canvas>

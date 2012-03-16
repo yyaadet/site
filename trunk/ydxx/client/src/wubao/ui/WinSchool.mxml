@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="utils.components.*" width="490" height="385" creationComplete="init();" xmlns:ns2="wubao.ui.item.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import wubao.model.Build;
+			import mx.events.ScrollEvent;
+			import wubao.list.TechList;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var pos1:int = 0;
+			
+			private var pos2:int = 0;
+			
+			private var isInit:Boolean = false;
+			
+			private function init():void
+			{
+				helpID = 26;
+				tilelist1.addEventListener(ScrollEvent.SCROLL, onScroll1);
+				tilelist2.addEventListener(ScrollEvent.SCROLL, onScroll2);
+				isInit = true;
+				refresh();
+			}
+			
+			private function onScroll1(evt:ScrollEvent):void
+			{
+				evt.target.offscreenExtraRowsOrColumns = 9;
+				pos1 = evt.position;
+			}
+			
+			private function onScroll2(evt:ScrollEvent):void
+			{
+				evt.target.offscreenExtraRowsOrColumns = 6;
+				pos2 = evt.position;
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				
+				var weaponList:TechList = gameWubao.techList.getWeaponList();
+				pagination1.dataSource = weaponList;
+				pagination1.pageNum = 9;
+				pagination1.dataUI = tilelist1;
+				pagination1.dataUIProvider = "dataProvider";
+				pagination1.refresh();
+				
+				tilelist1.verticalScrollPosition = pos1;
+				
+				var resList:TechList = gameWubao.techList.getResList();
+				pagination2.dataSource = resList;
+				pagination2.pageNum = 6;
+				pagination2.dataUI = tilelist2;
+				pagination2.dataUIProvider = "dataProvider";
+				pagination2.refresh();
+				
+				tilelist2.verticalScrollPosition = pos2;
+				
+				var type:int = Build.SCHOOL;
+				lu1.type = type;
+				lu1.refresh();
+				
+				if (gameWubao != null)
+				{
+					var build:Build = gameWubao.buildList.getObjByID(type) as Build
+					if (build != null && isInit)
+						setTitle(build.title);
+				}
+				
+			}
+		]]>
+	</mx:Script>
+	
+	<ns1:GameToggleButtonBar id="listBar" x="10" y="34" dataProvider="vs1" height="22" width="470">
+	</ns1:GameToggleButtonBar>
+	
+	<mx:ViewStack id="vs1" x="10" y="56" width="470" height="240" creationPolicy="all">
+		<mx:Canvas label="装备技术" width="100%" height="100%">
+			<mx:Canvas x="0" y="0" width="470" height="240" styleName="lowCanvas">
+				<mx:TileList id="tilelist1" width="460" height="230" columnCount="1" itemRenderer="wubao.ui.item.ItemTech" 
+					x="3" y="3" useRollOver="false" selectable="false" backgroundAlpha="0" variableRowHeight="true" borderColor="#434A0C">
+				</mx:TileList>
+			</mx:Canvas>
+		</mx:Canvas>
+		
+		<mx:Canvas label="资源技术" width="100%" height="100%">
+			<mx:Canvas x="0" y="0" width="470" height="240" styleName="lowCanvas">
+				<mx:TileList id="tilelist2" width="460" height="230" columnCount="1" itemRenderer="wubao.ui.item.ItemTech" 
+					x="3" y="3" useRollOver="false" selectable="false" backgroundAlpha="0" variableRowHeight="true" borderColor="#434A0C">
+				</mx:TileList>
+			</mx:Canvas>
+		</mx:Canvas>
+		
+	</mx:ViewStack>
+	
+	<LevelUp id="lu1" x="10" y="305">
+	</LevelUp>
+	
+	<Pagination id="pagination1" x="10" y="400" visible="false" includeInLayout="false">
+	</Pagination>
+	<Pagination id="pagination2" x="10" y="400" visible="false" includeInLayout="false">
+	</Pagination>
+</GameWindow>

@@ -1,0 +1,29 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">首页设置</span>
+</div>
+
+<div class="content_content">
+<form action="/admin/home_page" method="post">
+    <input type="hidden" name="act" value="edit" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="home_url">首页URL</label>
+    <input size="60" type="text" id="home_url" name="home_url" value="${c.home_url}"/>
+    </p>
+    
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+</div>
+
+</%def>

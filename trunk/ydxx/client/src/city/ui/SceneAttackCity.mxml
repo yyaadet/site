@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1440" height="900" fontSize="12" color="0xFFFFFF" backgroundColor="0x000000"
+	 creationComplete="init();" xmlns:ns1="utils.components.*">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+			import utils.SceneManager;
+			import mx.controls.Label;
+			import flash.utils.setTimeout;
+			import images.AssetsManager;
+			import mx.events.EffectEvent;
+			import mx.effects.Move;
+			import city.list.AttackArmyList;
+			import net.tcp.model.fight.TcpFightNtf;
+			import net.tcp.TcpManager;
+			import net.tcp.model.war.TcpExitAttack;
+			import wubao.model.User;
+			import city.list.AttackCityList;
+			import city.model.AttackCity;
+			import city.model.AttackArmy;
+			import utils.components.GameButton;
+			import utils.WinManager;
+			import utils.components.GameImage;
+			import utils.GameManager;
+		
+			import mx.core.ScrollPolicy;
+			
+			private var _warID:int = 0;
+			
+			private var _isWin:int = 0;
+			
+			private var btnExit:GameButton = null;
+			
+			private var armyList:AttackArmyList = new AttackArmyList();
+			
+			private var timer1:Timer = new Timer(1000);
+			private var leftTime:int = 0;
+			
+			private function init():void
+			{
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+				
+				timer1.addEventListener(TimerEvent.TIMER, onTimer);
+				timer1.stop();
+			}
+			
+			public function initUI():void
+			{
+				sl1.source = AssetsManager.assetsMgr.FIGHT_BOMB;
+				sl1.visible = false;
+				sl1.includeInLayout = false;
+				
+				this.width = GameManager.gameMgr.gameWidth;
+				this.height = GameManager.gameMgr.gameHeight;
+				attackBG.width = 1000;
+				attackBG.height = 600;
+				attackBG.x = int((this.width - attackBG.width) / 2);
+				attackBG.y = int((this.height - attackBG.height) / 2);
+				if (attackBG.width > this.width || attackBG.height > this.height)
+					attackBG.addEventListener(MouseEvent.MOUSE_DOWN, mapDown);
+				
+			}
+			
+			private function mapDown(evt:MouseEvent):void
+			{
+				var maxWidth:int = this.width - attackBG.width;
+				var maxHeight:int = this.height - attackBG.height;
+				
+				var startX:int = int((this.width - attackBG.width) / 2);
+				
+				if (maxWidth > 0)
+				{
+					maxWidth = 0;
+				}
+				else
+					startX = 0;
+				
+				attackBG.startDrag(false, new Rectangle(startX, 0, maxWidth, maxHeight));
+				attackBG.addEventListener(MouseEvent.MOUSE_UP, mapUp);
+			}
+			
+			private function mapUp(evt:MouseEvent):void
+			{
+				attackBG.removeEventListener(MouseEvent.MOUSE_UP, mapUp);
+				attackBG.stopDrag();
+			}
+			
+			public function show():void
+			{
+				attackBG.visible = false;
+				attackBG.includeInLayout = false;
+				attackBG.removeAllChildren();
+				cvList.removeAllChildren();
+				attackBG.progressHandle = loadProgress;
+				attackBG.addEventListener(GameImage.INIT_FINISH, loadComplete);
+				attackBG.imageName = "attack1";
+				attackBG.imageURL = GameManager.gameMgr.resURL + "scene/bg3.jpg";
+			}
+			
+			private function loadProgress(evt:ProgressEvent):void
+			{
+				var info:String = "正在加载战斗背景，请稍候... " + int(evt.bytesLoaded / evt.bytesTotal * 100).toString() + "%";
+				WinManager.winMgr.showLoadingIntf(info);
+			}
+			
+			private function loadComplete(evt:Event):void
+			{
+				attackBG.removeEventListener(GameImage.INIT_FINISH, loadComplete);
+				hideInfo();
+				
+				attackBG.visible = true;
+				attackBG.includeInLayout = true;
+				cvList.visible = false;
+				cvList.includeInLayout = false;
+				
+				btnExit = new GameButton();
+				btnExit.label = "退　出";
+				btnExit.x = (attackBG.width - btnExit.width) / 2;
+				btnExit.y = attackBG.height - btnExit.height - 10;
+				attackBG.addChild(btnExit);
+				btnExit.addEventListener(MouseEvent.CLICK, onClick);
+				
+				var i:int = 0;
+				var armyX:int = 0;
+				var armyY:int = 0;
+				var count:int = 0;
+				
+				armyList.removeAll();
+				for (i = 0; i < 40; i++)
+				{
+					var army1:AttackArmy = new AttackArmy();
+					if (i == 0)
+					{
+						armyX = 20;
+						armyY = 280;
+						count = 0;
+					}
+					else if (i == 9)
+					{
+						armyX = 20;
+						armyY = 220;
+						count = 0;
+					}
+					else if (i == 20)
+					{
+						armyX = 600;
+						armyY = 15;
+						count = 0;
+					}
+					else if (i == 29)
+					{
+						armyX = 520;
+						armyY = 15;
+						count = 0;
+					}
+					
+					army1.x = armyX + count * 40;
+					army1.y = armyY + count * 31.5;
+					count ++;
+					army1.uniqID = i;
+					army1.index = i;
+					army1.init();
+					attackBG.addChild(army1);
+					armyList.add(army1);
+					army1.visible = false;
+					army1.includeInLayout = false;
+				}
+				
+				refresh(warID);
+			}
+			
+			private function onClick(evt:MouseEvent):void
+			{
+				var attackCityList:AttackCityList = GameManager.gameMgr.atkCityList;
+				var attackCity:AttackCity = attackCityList.getObjByID(warID) as AttackCity;
+				if (attackCity == null)
+				{
+					this.visible = false;
+					this.includeInLayout = false;
+					GameManager.gameMgr.cityFightList.length = 0;
+					return;
+				}
+				
+				var tcpExit:TcpExitAttack = new TcpExitAttack();
+				tcpExit.warID = warID;
+				TcpManager.tcpMgr.sendExitAttack(tcpExit);
+			}
+			
+			private function hideInfo():void
+			{
+				WinManager.winMgr.winLoading.visible = false;
+				WinManager.winMgr.winLoading.includeInLayout = false;
+			}
+			
+			public function refresh(wID:int):void
+			{
+				if (wID != warID) return;
+				
+				var i:int = 0;
+				var army1:AttackArmy = null;
+				
+				for (i = 0; i < armyList.length; i++)
+				{
+					army1 = armyList.getObjByIndex(i) as AttackArmy;
+					if (army1 != null)
+					{
+						army1.visible = false;
+						army1.includeInLayout = false;
+					}
+				}
+				
+				var attackCityList:AttackCityList = GameManager.gameMgr.atkCityList;
+				var attackCity:AttackCity = attackCityList.getObjByID(warID) as AttackCity;
+				if (attackCity == null) return;
+				
+				var gameUser:User = null;
+				for (i = 0; i < attackCity.atkUserList.length; i++)
+				{
+					gameUser = attackCity.atkUserList.getObjByIndex(i) as User;
+					if (gameUser != null)
+					{
+						army1 = armyList.getObjByIndex(i) as AttackArmy;;
+						if (army1 != null)
+						{
+							army1.visible = true;
+							army1.includeInLayout = true;
+							army1.gameUser = gameUser;
+							army1.isAttack = true;
+							army1.refresh();
+						}
+					}
+				}
+				
+				for (i = 0; i < attackCity.dfsUserList.length; i++)
+				{
+					gameUser = attackCity.dfsUserList.getObjByIndex(i) as User;
+					if (gameUser != null)
+					{
+						army1 = armyList.getObjByIndex(20 + i) as AttackArmy;
+						if (army1 != null)
+						{
+							army1.visible = true;
+							army1.includeInLayout = true;
+							army1.gameUser = gameUser;
+							army1.isAttack = false;
+							army1.refresh();
+						}
+					}
+				}
+				
+				leftTime = (attackCity.warTime - GameManager.gameMgr.gameTime) * 20;
+				lblTime.text = PubUnit.getActGameDate(leftTime);
+				cvTime.visible = true;
+				cvTime.includeInLayout = true;
+				cvTime.x = attackBG.x + (attackBG.width - cvTime.width) / 2;
+				cvTime.y = attackBG.y + (attackBG.height - cvTime.height) / 2;
+				if (timer1.running) timer1.stop();
+				timer1.start();
+			}
+			
+			public function refreshTime():void
+			{
+				var attackCityList:AttackCityList = GameManager.gameMgr.atkCityList;
+				var attackCity:AttackCity = attackCityList.getObjByID(warID) as AttackCity;
+				
+				if (attackCity == null) return;
+				
+				leftTime = (attackCity.warTime - GameManager.gameMgr.gameTime) * 20;
+				if (timer1.running) timer1.stop();
+				timer1.start();
+			}
+			
+			private function onTimer(evt:TimerEvent):void
+			{
+				leftTime --;
+				lblTime.text = PubUnit.getActGameDate(leftTime);
+			}
+			
+			private var fightIndex:int = 0;
+			private var moveCount:int = 0;
+			private var moveMax:int = 0;
+			private var tcpFight:TcpFightNtf = null;
+			
+			public function start(wID:int):void
+			{
+				if (wID != warID) return;
+				
+				btnExit.visible = false;
+				btnExit.includeInLayout = false;
+				cvTime.visible = false;
+				cvTime.includeInLayout = false;
+				timer1.stop();
+				
+				fightIndex = 0;
+				moveCount = 0;
+				moveMax = 0;
+				showFight();
+			}
+			
+			private function showFight():void
+			{
+				attackCityList = GameManager.gameMgr.atkCityList;
+				var attackCity:AttackCity = attackCityList.getObjByID(warID) as AttackCity;
+				if (attackCity == null) return;
+				
+				var fightList:Array = GameManager.gameMgr.cityFightList;
+				var attackCityList:AttackCityList = null;
+				
+				//播放结束
+				if (fightIndex >= fightList.length)
+				{
+					attackCityList = GameManager.gameMgr.atkCityList;
+					attackCityList.removeObjByID(warID);
+					GameManager.gameMgr.gameApp.panelAttackCity.refresh();
+					btnExit.visible = true;
+					btnExit.includeInLayout = true;
+					
+					var str1:String = "";
+					var str2:String = "";
+					
+					if (attackCity.atkSphereID == GameManager.gameMgr.user.sphereID)
+					{
+						str1 = "攻城";
+						if (isWin == 0)
+							str2 = "失败";
+						else
+							str2 = "成功";
+					}
+					else
+					{
+						str1 = "守城";
+						if (isWin == 0)
+							str2 = "成功";
+						else
+							str2 = "失败";
+					}
+					
+					WinManager.winMgr.showResult(str1 + str2);
+					
+					return;
+				}
+				
+				tcpFight = fightList[fightIndex];
+				if (tcpFight == null) return;
+				
+				var attackID:int = tcpFight.selfID;
+				var army1:AttackArmy = armyList.getByUserID(attackID) as AttackArmy;
+				
+				var defenseID:int = tcpFight.eneID;
+				var army2:AttackArmy = armyList.getByUserID(defenseID) as AttackArmy;
+				
+				moveCount = 0;
+				
+				if (fightIndex == 0)
+				{
+					moveMax = 2;
+					startMove(army1, army2);
+				}
+				else if (fightIndex <= fightList.length - 1)
+				{
+					moveMax = 1;
+					var tcpFightLast:TcpFightNtf = fightList[fightIndex - 1];
+					if (tcpFight.selfID != tcpFightLast.selfID)
+						startMove(army1, null);
+					else if (tcpFight.eneID != tcpFightLast.eneID)
+						startMove(null, army2);
+					
+				}
+				
+				var lbl1:Label = new Label();
+				lbl1.x = (fightIndex % 2) * 135;
+				lbl1.y = int(fightIndex / 2) * 20;
+				lbl1.width = 125;
+				lbl1.height = 20;
+				lbl1.setStyle("fontSize", 12);
+				lbl1.setStyle("fontFmaily", "新宋体");
+				lbl1.setStyle("textAlign", "center");
+				lbl1.text = army1.gameUser.userName + " vs " + army2.gameUser.userName;
+				cvList.addChild(lbl1); 
+				lbl1.data = tcpFight;
+				lbl1.useHandCursor = true;
+				lbl1.buttonMode = true;
+				lbl1.mouseChildren = false;
+				lbl1.addEventListener(MouseEvent.CLICK, fightClick);
+				
+				cvList.visible = true;
+				cvList.includeInLayout = true;
+				cvList.x = attackBG.x;
+				cvList.y = attackBG.y;
+			}
+			
+			private function startMove(army1:AttackArmy, army2:AttackArmy):void
+			{
+				if (army1 != null)
+				{
+					var move1:Move = new Move();
+					move1.target = army1;
+					move1.xFrom = army1.x;
+					move1.yFrom = army1.y;
+					move1.xTo = (attackBG.width - army1.width) / 2 - 15;
+					move1.yTo = (attackBG.height - army1.height) / 2 + 14;
+					move1.duration = 1000;
+					move1.addEventListener(EffectEvent.EFFECT_END, move1End);
+					move1.play();
+				}
+				
+				if (army2 != null)
+				{
+					var move2:Move = new Move();
+					move2.target = army2;
+					move2.xFrom = army2.x;
+					move2.yFrom = army2.y;
+					move2.xTo = (attackBG.width - army2.width) / 2 + 15;
+					move2.yTo = (attackBG.height - army2.height) / 2 - 14;
+					move2.duration = 1000;
+					move2.addEventListener(EffectEvent.EFFECT_END, move2End);
+					move2.play();
+				}
+			}
+			
+			private function move1End(evt:EffectEvent):void
+			{
+				var move:Move = evt.target as Move;
+				if (move != null)
+				{
+					move.target = null;
+					move = null;
+				}
+				
+				moveCount ++;
+				if (moveCount >= moveMax)
+					playFightSwf();	
+			}
+			
+			private function move2End(evt:EffectEvent):void
+			{
+				var move:Move = evt.target as Move;
+				if (move != null)
+				{
+					move.target = null;
+					move = null;
+				}
+				
+				moveCount ++;
+				if (moveCount >= moveMax)
+					playFightSwf();	
+			}
+			
+			private function playFightSwf():void
+			{
+				playSwf(sl1);
+				setTimeout(stopFightSwf, 2000); 
+			}
+			
+			private function stopFightSwf():void
+			{
+				stopSwf(sl1);
+				
+				var army1:AttackArmy = null;
+				if (tcpFight.isWin)
+					army1 = armyList.getByUserID(tcpFight.eneID) as AttackArmy;
+				else
+					army1 = armyList.getByUserID(tcpFight.selfID) as AttackArmy;
+				
+				if (army1 != null)
+				{
+					army1.visible = false;
+					army1.includeInLayout = false;
+				}
+				
+				fightIndex ++;
+				
+				setTimeout(showFight, 200);
+			}
+			
+			private function playSwf(swfLoader:SWFLoader):void
+			{
+				var mc:MovieClip = swfLoader.content as MovieClip;
+				if (mc != null)
+					mc.play();
+				
+				swfLoader.x = attackBG.x + attackBG.width / 2;
+				swfLoader.y = attackBG.y + attackBG.height / 2;	
+				swfLoader.visible = true;
+				swfLoader.includeInLayout = true;
+			}
+			
+			private function stopSwf(swfLoader:SWFLoader):void
+			{
+				var mc:MovieClip = swfLoader.content as MovieClip;
+				if (mc != null)
+					mc.stop();
+					
+				swfLoader.visible = false;
+				swfLoader.includeInLayout = false;
+			}
+			
+			private function fightClick(evt:MouseEvent):void
+			{
+				if (evt.target is Label)
+					var lbl1:Label = evt.target as Label;
+					
+				var tcpFight1:TcpFightNtf = lbl1.data as TcpFightNtf; 
+				SceneManager.sceneMgr.enterFight(tcpFight1);
+			}
+			
+			public function get warID():int
+			{
+				return _warID;
+			}
+			
+			public function set warID(param:int):void
+			{
+				_warID = param;
+			}
+			
+			public function get isWin():int
+			{
+				return _isWin;
+			}
+			
+			public function set isWin(param:int):void
+			{
+				_isWin = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns1:GameImage id="attackBG" x="0" y="0" width="1000" height="600" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	</ns1:GameImage>
+	
+	<mx:Canvas id="cvList" x="0" y="0" width="280" height="202">
+	</mx:Canvas>
+	
+	<mx:SWFLoader id="sl1" x="400" y="92" width="132" height="71" mouseChildren="false" mouseEnabled="false"/>
+	<mx:Canvas id="cvTime" x="300" y="300" width="100" height="50" styleName="lowCanvas">
+		<mx:Label id="lblTime" fontSize="20" text="" height="26" width="66" horizontalCenter="0" verticalCenter="-2"/>
+	</mx:Canvas>
+	
+</mx:Canvas>

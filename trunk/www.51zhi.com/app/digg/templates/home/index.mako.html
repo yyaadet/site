@@ -1,0 +1,100 @@
+#-*- encoding: utf-8 -*-
+<%inherit file="/home/base.mako.html" />
+
+
+<%def name="get_content()">
+<div id="content">
+    <!-- content left -->
+    <div id="content_left">
+
+        <div class="table" style="border-bottom: solid 1px #CEE3F8;background: #EFF7FF;">
+        	<div class="row">
+            	<div class="col" style="font-size: 1.3em; ">
+                    今日新闻：${c.today_news_num} &nbsp;
+                    游戏：${h.fmt_digit(c.webgame_num)} &nbsp;
+                    新闻：${h.fmt_digit(c.webgame_news_num)} &nbsp;
+                    卡数：${c.card_num}
+                </div>
+            </div>
+        </div>
+        
+    	<%namespace name="webgame_news" file="/webgame_news/func.mako.html" />
+        ${webgame_news.get_webgame_news_list('', c.webgame_news, 0, 0, 0, 0, False, False, limit=100)}
+        
+        <div class="table">
+        	<div class="row">
+            	<div class="col" style="font-size: 1em;">
+                	<a href="${h.static_webgame_news_page_url('hotest', 0, 2)}">更多...</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- content left end -->
+    
+    <!-- content right -->
+    <div id="content_right">
+    	${self.get_content_right_add_link(False)}
+
+        ${self.get_youxi_big_ads()}
+        
+        <%namespace name="webgame" file="/webgame/func.mako.html" />
+        ${webgame.get_webgame_today_hot_list(0)}
+        
+        ${webgame.get_webgame_hot_list(0)}
+
+        <%namespace name="card" file="/card/func.mako.html" />
+        ${card.get_card_new()}
+
+    </div>
+    <!-- content right end -->
+</div>
+</%def>
+
+
+<%def name="get_content_right_add_link(show_share = True)">
+
+<div class="table">
+        
+       <div class="row" style="text-align: center; height: 40px;">
+              <a href="/webgame_news/add"><img src="/user/tijiao.jpg" /></a>
+       </div>
+       
+%if show_share:
+	<div class="row"style="text-align: center; margin-top: 10px; height: 60px; border-bottom: solid 1px #CEE3F8; padding-left: 0px;">
+            <!-- JiaThis Button BEGIN -->
+            <div id="jiathis_style_32x32">
+                <a class="jiathis_button_qzone"></a>
+                <a class="jiathis_button_tsina"></a>
+                <a class="jiathis_button_tqq"></a>
+                <a class="jiathis_button_renren"></a>
+                <a class="jiathis_button_kaixin001"></a>
+                <a href="http://www.jiathis.com/share/?uid=1501989" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+                <a class="jiathis_counter_style"></a>
+            </div>
+            <script type="text/javascript">var jiathis_config = {data_track_clickback:true};</script>
+            <script type="text/javascript" src="http://v2.jiathis.com/code/jia.js?uid=1501989" charset="utf-8"></script>
+            <!-- JiaThis Button END -->
+       </div>
+%endif   
+       
+       <div class="row">
+                <form action="/webgame/search" method="get">
+                    <input onclick="clear_query_input(this);" type="text" class="text" name="query" value="" />
+                    <input type="submit" value="找游戏" class="button" />
+                </form>
+        </div> 
+</div>
+</%def>
+
+<%def name="get_right_big_ads()">
+<div class="table" style="width: 320px; height: 250px; overflow:hidden;">
+    <iframe width="100%" height="100%" src="/ad/bu_right.html" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+</div>
+</%def>
+
+<%def name="get_youxi_big_ads()">
+<div class="table" style="width: 340px; overflow:hidden;">
+    <script type="text/javascript">/*51zhi_全站右侧_336*280*/ var cpro_id = 'u800941';</script><script src="http://cpro.baidu.com/cpro/ui/c.js" type="text/javascript"></script>
+</div>
+</%def>

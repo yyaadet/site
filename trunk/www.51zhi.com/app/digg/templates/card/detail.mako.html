@@ -1,0 +1,54 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+
+<%def name="get_title()">${c.obj.title}</%def>
+
+<%def name="get_description()">${h.short_text(c.obj.cnt, 100)}</%def>
+
+<%def name="get_content()">
+<script type="text/javascript">
+function get_card(statu, id)
+{
+    $.getJSON("/card/get_card", {"statu": statu, "id": id}, function(data) {
+       $("#get_card_tip").html("谢谢您的反馈，我们将做的更好。");
+    });
+}
+</script>
+<div id="content">
+        <div class="table" style="border-bottom: solid 1px #CEE3F8; height: 35px;">
+        	<div class="row">
+            	<div class="col" style="font-size: 1.3em; background: #EFF7FF;">分享给好友</div>
+                <div class="col">
+                    <!-- JiaThis Button BEGIN -->
+                    <div id="jiathis_style_32x32">
+                        <a class="jiathis_button_qzone"></a>
+                        <a class="jiathis_button_tsina"></a>
+                        <a class="jiathis_button_tqq"></a>
+                        <a class="jiathis_button_renren"></a>
+                        <a class="jiathis_button_kaixin001"></a>
+                        <a href="http://www.jiathis.com/share/?uid=1501989" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+                        <a class="jiathis_counter_style"></a>
+                    </div>
+                    <script type="text/javascript">var jiathis_config = {data_track_clickback:true};</script>
+                    <script type="text/javascript" src="http://v2.jiathis.com/code/jia.js?uid=1501989" charset="utf-8"></script>
+                    <!-- JiaThis Button END -->
+                </div>
+            </div>
+        </div>
+		<%namespace name="card" file="/card/func.mako.html" />
+        ${card.get_list('', [c.obj], 0, 0, 0, 0, False, False, True)}
+
+    <div class="table">
+        <div class="row">
+            <div class="col">领卡状态：</div>
+            <div class="col link_button" style="text-align: center;"><a onclick="get_card(1, '${c.obj._id}')">成功</a></div>
+            <div class="col link_button" style="text-align: center;"><a onclick="get_card(0, '${c.obj._id}')">失败</a></div>
+            <div class="col hot" id="get_card_tip"></div>
+        </div>
+    </div>
+
+    <iframe width="100%" src="${c.obj.url}" height="860" style="overflow: auto;" frameborder="0" scrolling="yes" marginheight="0" marginwidth="0"></iframe>
+</div>
+</%def>

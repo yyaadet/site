@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="490" height="250" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.FormatText;
+			import utils.ui.WinAsk;
+			import utils.events.ConfirmEvent;
+			import net.tcp.TcpManager;
+			import utils.TipInfo;
+			import utils.WinManager;
+			import mx.events.FlexEvent;
+			import utils.PubUnit;
+			import wubao.model.Build;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var build:Build = null;
+			
+			private var isInit:Boolean = false;
+			
+			private function init():void
+			{
+				helpID = 27;
+				taInfo.htmlText = TipInfo.getCampInfo();
+				isInit = true;
+				refresh();
+			}
+			
+			private function onComp(evt:FlexEvent):void
+			{
+				lblLevel.removeEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+				
+				lblLevel.x = cvImage.width - lblLevel.width - 5;
+				lblLevel.y = 5;
+				
+				PubUnit.drawBackground(lblLevel);
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				var type:int = Build.CAMP;
+				
+				lu1.type = type;
+				lu1.refresh();
+				
+				if (gameWubao != null)
+				{
+					build = gameWubao.buildList.getObjByID(type) as Build;
+					if (build != null)
+					{
+						lblLevel.addEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+						lblLevel.text = build.level.toString();
+						lblFit.text = gameWubao.solNum.toString() + " / " + PubUnit.getSolMax(build.level).toString() + " 人";
+						
+						if (isInit)
+							setTitle(build.title);
+					}	
+				}
+			}
+			
+			private var winAsk:WinAsk = null;
+			
+			private function recoverSolider():void
+			{
+				var str:String = "军营会自动募集士卒，但花费10金币可立即增加500步卒，确定要花费10金币立即增加士卒吗？\n" + FormatText.packegText("注：总步卒数可超过上限值", FormatText.RED);
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmRecover);
+				
+				function confirmRecover(evt:ConfirmEvent):void
+				{
+					TcpManager.tcpMgr.sendRecoverSolider(null);
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvImage" x="10" y="34" width="128" height="128">
+		<mx:backgroundImage>@Embed(source='../../images/assets/wubao/win/camp.swf')</mx:backgroundImage>
+		<mx:Label id="lblLevel" fontSize="16" fontWeight="bold" fontFamily="Arial" textAlign="center"/>
+	</mx:Canvas>
+	
+	<mx:Canvas x="146" y="34" width="334" height="60">
+		<mx:Label text="步卒：" height="20" x="5" y="5" width="41"/>
+		<mx:Label id="lblFit" height="20" styleName="number" x="45" y="4" width="180"/>
+		<GameButton x="265" y="5" label="征　兵" id="btnRecover" click="recoverSolider();"/>
+	</mx:Canvas>
+		
+	<mx:TextArea id="taInfo" x="146" y="97" width="334" height="65" editable="false"/>
+	
+	<LevelUp id="lu1" x="10" y="170">
+	</LevelUp>
+</GameWindow>

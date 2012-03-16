@@ -1,0 +1,91 @@
+#-*- encoding: utf-8 -*-
+<%inherit file="/home/base.mako.html" />
+
+<%def name="get_title()">帮助中心</%def>
+
+<%def name="get_content()">
+<div id="content">
+
+<div id="content_left">
+   <div class="table">
+   		<div class="row">
+        	<div class="col">
+                <ul>
+                    <li><h2><a href="#whatisjy">什么是巨游？</a></h2></li>
+                    <li><h2><a href="#addscore">如何增加积分？</a> </h2></li>
+                    <li><h2><a href="#addgame">如何做游戏入库呢？</a> </h2></li>
+                    <li><h2><a href="#addnews">如何发布新闻呢？</a> </h2></li>
+                </ul>
+           </div>
+        </div>
+   </div> 
+   
+   <div class="table">
+        <div class="row"><div class="col"><h2 id="whatisjy">什么是巨游？</h2></div></div>
+        <div class="row">
+        	<div class="col">
+            <p>
+            	巨游网，致力于帮助网民找到当今<strong>最流行</strong>的游戏应用服务，帮助开发商推广自己的产品。<br  />
+                您会发现，巨游网的游戏、新闻是流动的。我们采用了一套全新的<strong>流行度</strong>跟踪机制，这也是我们的优势所在。<br  />
+                相信在这里，是一定可以帮您找到当今<strong>最流行</strong>的游戏的！<br />
+                <label class="hot">媒体朋友，在这里，可以让自己的媒体平台得到更多的新闻曝光率。</label><br />
+                <label class="hot">开发商朋友，在这里，可以让自己的产品让更多人知道，并且获得更多的用户。</label><br />
+        	</p>
+            </div>
+        </div>
+       <div class="row"><div class="col"><h2 id="addscore">如何增加积分？</h2></div></div>
+        <div class="row">
+        	<div class="col">
+            <p>
+            	有如下几个方式：<br />
+                <ul>
+                <li>增加游戏入库</li>
+                <li>发布新闻链接</li>
+                <li>发表评论</li>
+                </ul>
+                增加的内容越多，您的人气会越高，在个人中心可以看到
+        	</p>
+            </div>
+        </div>
+       <div class="row"><div class="col"><h2 id="addgame">如何做游戏入库呢？</h2></div></div>
+        <div class="row">
+        	<div class="col">
+            <p>
+            	步骤如下：<br />
+                <ul>
+                <li>确保已经是网站会员，<a target="_blank" href="/user/reg">点击这里完成注册</a>或是<a href="/user/login" target="_blank">使用QQ号码登录</a> </li>
+                <li>在网站的最上方右边，点击【我的主页】--> 【添加游戏】</li>
+                <li>按照提示，依次添加各项游戏内容，点击【添加】</li>
+                </ul>
+        	</p>
+            </div>
+        </div>
+
+       <div class="row"><div class="col"><h2 id="addnews">如何发布新闻呢？</h2></div></div>
+        <div class="row">
+        	<div class="col">
+            <p>
+            	会员和非会员都可以发布新闻，如下：<br />
+                <ul>
+                <li>点击网站右边的【提交新闻链接】，进入提交新闻页面</li>
+                <li>包括了两种方式：链接和文字形式。链接添加步骤如下：
+                    <ul>
+                        <li>游戏名称，可选。如果输入了游戏名称，必须确保该游戏在库中。可以通过点击[【验证游戏】来确认游戏，是否在库中。</li>
+                        <li>URL，必填。新闻的url链接，点击【获取】，将会自动获取该新闻链接的标题和内容简介。当然，也可以手工添加和编辑。</li>
+                        <li>标题，必填。</li>
+                        <li>内容，可选。</li>
+                    </ul>
+                </li>
+                <li>点击【添加】完成。</li>
+                </ul>
+        	</p>
+            </div>
+        </div>
+   </div>
+</div>
+<div id="content_right">
+   <%namespace file="/home/index.mako.html" name="home" />
+   ${home.get_content_right_add_link()}
+</div>
+</div>
+</%def>

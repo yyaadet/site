@@ -1,0 +1,27 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+
+<%def name="get_title()">信息提示</%def>
+
+<%def name="get_content()">
+<div id="content">
+    <div id="left">
+
+    </div>
+    
+    <div id="mid">
+        <!-- tips -->
+        <div class="table">
+            	<div class="row">
+                	<div class="col error">出现了一点小状况：</div>
+                    <div class="col bigword">${c.tip}</div>
+                </div>
+         </div>
+    </div>
+    
+    <div id="right">
+    	  
+    </div>
+</div>
+</%def>

@@ -1,0 +1,43 @@
+<!--游戏礼包_添加礼包码　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <tr>
+      <td width="9%" height="40" align="right" bgcolor="#f9f0e1" class="gray">数量：</td>
+      <td width="91%" align="left" bgcolor="#f9f0e1" class="white_bc"><span class="gray">
+      　
+          <input 
+                  name="code_num" id="code_num" class="gray" style="WIDTH: 150px " />
+      </span></td>
+      </tr>
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　面　值：</td>
+      <td height="30" align="left" bgcolor="#f9f0e1" class="gray">　
+        <input 
+                  name="money" id="money" class="gray" style="WIDTH: 150px " /></td>
+      </tr>
+      
+<tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　类型：</td>
+      <td height="30" align="left" bgcolor="#f9f0e1" class="gray">　
+        <input type="radio" name="is_oneoff" value="0" checked="checked"/>无限使用
+        <input type="radio" name="is_oneoff" value="1" />新手卡
+        <input type="radio" name="is_oneoff" value="2" />工会卡
+        <input type="radio" name="is_oneoff" value="3" />黄金新手卡
+        </td>
+      </tr>
+
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　有效期（天）：</td>
+      <td height="30" align="left" bgcolor="#f9f0e1" class="gray">　
+        <input name="date" id="date" class="gray" style="WIDTH: 150px " />&nbsp;&nbsp;默认30天</td>
+      </tr>
+    <tr>
+      <td height="40" colspan="2" align="left" valign="bottom" bgcolor="#f9f0e1" class="gray">
+        <a href="#" onclick="selectTab('/admin/game_gift?action=add&money='+$('#money').val()
+            +'&code_num='+$('#code_num').val()
+            +'&is_oneoff='+$('input[name=\'is_oneoff\']:checked').val()
+            +'&date='+$('#date').val()
+            )"><img src="/images/pic_24.gif" width="54" height="25" border="0" /></a></td>
+      </tr>
+</table>
+<!--游戏礼包_添加礼包码 end-->
+

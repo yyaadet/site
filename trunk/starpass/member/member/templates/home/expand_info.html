@@ -1,0 +1,23 @@
+<%inherit file="index3.html" />
+
+
+
+<%def name="html_content_title()">
+推广员资料
+</%def>
+
+
+
+
+<%def name="html_content()">
+
+<div class="zhiliao">
+<ul>
+<li class="red">您的佣金：${c.expand_people.rmb}</li>
+<li>邮箱账号：${c.expand_people.email}</li>
+<li>支付宝账号：${c.expand_people.alipay}</li>
+<li>成功推广人数：${c.cnt}</li>
+</ul>
+</div>
+
+</%def>

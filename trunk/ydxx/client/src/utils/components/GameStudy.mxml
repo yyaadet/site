@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="460" height="105" fontSize="12" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.FormatText;
+			import general.list.ZhenList;
+			import mx.events.ItemClickEvent;
+			import general.list.SkillList;
+			import general.model.Zhen;
+			import general.model.Skill;
+			import general.model.General;
+			import utils.PubUnit;
+			import utils.GameManager;
+			
+			public static const FINISH:String = "finish";
+			
+			public static const ITEM_CLICK:String = "item_click";
+			
+			private var skillAry:Array = [];
+			
+			private var zhenAry:Array = [];
+		
+			private var _gameGeneral:General = null;
+			
+			private var _buttonWidth:int = 46;
+			
+			private var _buttonHeight:int = 20;
+			
+			private var _selItem:Object = null;
+			
+			private var _skillItemSelected:Boolean = false;
+			
+			private var _zhenItemSelected:Boolean = false;
+			
+			private function init():void
+			{
+			}
+			
+			public function showData():void
+			{
+				skillContainer.removeAllChildren();
+				zhenContainer.removeAllChildren();
+				skillAry.length = 0;
+				zhenAry.length = 0;
+				
+				showSkill();
+				showZhen();
+				
+				this.dispatchEvent(new Event(FINISH));
+			}
+			
+			private function showSkill():void
+			{
+				var i:int = 0;
+				var specRow:int = 0;
+				var specCol:int = 6;
+				var gameSkill:Skill = null;
+				var skillList:SkillList = GameManager.gameMgr.skillList;
+				var count:int = skillList.length;
+				var skillX:int = 0;
+				var skillY:int = 0;
+				var isSkill:Boolean = false;
+				
+				for (i = 0; i < count; i++)
+				{
+					isSkill = false;
+					gameSkill = skillList.getObjByIndex(i) as Skill;
+					
+					//如果是特殊技能
+					if (gameSkill.skillType == 3)
+					{
+						if (gameGeneral.canSkill(gameSkill.uniqID) && !gameGeneral.hasSkill(gameSkill.uniqID))
+						{
+							isSkill = true;
+						}
+						
+						specCol = 6 + int((i - 24) / 2);
+						specRow = (i - 24) % 2;
+						skillX = specCol * buttonWidth;
+						skillY = specRow * buttonHeight;
+						createSkill(gameSkill, isSkill, skillX, skillY);
+					}
+					else
+					{
+						isSkill = false;
+						gameSkill = skillList.getObjByIndex(i) as Skill;
+						if (gameGeneral.canSkill(gameSkill.uniqID) && !gameGeneral.hasSkill(gameSkill.uniqID))
+						{
+							isSkill = true;
+						}
+						skillX = int(i / 4) * buttonWidth;
+						skillY = buttonHeight * (i % 4);
+						createSkill(gameSkill, isSkill, skillX, skillY);
+					}
+				}
+				
+				for (i = 0; i < 8; i++)
+				{
+					var gameButton:GameButton = new GameButton();
+					specCol = 6 + int(i / 2);
+					specRow = i % 2 + 2;
+					skillX = specCol * buttonWidth;
+					skillY = specRow * buttonHeight;
+					gameButton.x = skillX;
+					gameButton.y = skillY; 
+					gameButton.width = buttonWidth;
+					gameButton.height = buttonHeight;
+					gameButton.toggle = true;
+					
+					skillContainer.addChild(gameButton);
+					gameButton.label = "";
+					gameButton.btnType = "canXiu";
+					gameButton.enabled = false;
+				}
+			}
+			
+			private function createSkill(gameSkill:Skill, isSkill:Boolean, skillX:int, skillY:int):void
+			{
+				var skillButton:GameButton = new GameButton();
+				skillButton.x = skillX;
+				skillButton.y = skillY;
+				skillButton.width = buttonWidth;
+				skillButton.height = buttonHeight;
+				skillButton.toggle = true;
+				
+				skillContainer.addChild(skillButton);
+				skillButton.label = gameSkill.skillName;
+				
+				if (isSkill)
+				{
+					skillButton.btnType = "canXiu";
+					skillButton.enabled = true;
+					skillButton.toolTip = FormatText.packegText("可学习", FormatText.YELLOW, "12") + "\n\n" +
+						           FormatText.packegText("所需功勋：", FormatText.DEFAULT, "12") + "\n" + 
+						           FormatText.packegText(gameSkill.pre.toString(), FormatText.YELLOW, "12") + "\n" +
+					               FormatText.packegText("武略效果：", FormatText.DEFAULT, "12") + "\n" + 
+			      				   FormatText.packegText(gameSkill.info, FormatText.YELLOW, "12");
+				}
+				else
+				{
+					if (gameGeneral.hasSkill(gameSkill.uniqID))
+					{
+						skillButton.btnType = "xiuGeneral";
+						skillButton.enabled = true;
+						skillButton.toolTip = FormatText.packegText("已学习", FormatText.YELLOW, "12") + "\n\n" +
+						               FormatText.packegText("武略效果：", FormatText.DEFAULT, "12") + "\n" + 
+				      				   FormatText.packegText(gameSkill.info, FormatText.YELLOW, "12");
+					}
+					else
+					{
+						skillButton.btnType = "xiuGeneral";
+						skillButton.enabled = false;
+						skillButton.toolTip = FormatText.packegText("不可学习", FormatText.YELLOW, "12") + "\n\n" +
+						               FormatText.packegText("学习条件：", FormatText.DEFAULT, "12") + "\n" + 
+						               FormatText.packegText(gameSkill.condi, FormatText.YELLOW, "12") + "\n" +
+							           FormatText.packegText("所需功勋：", FormatText.DEFAULT, "12") + "\n" + 
+							           FormatText.packegText(gameSkill.pre.toString(), FormatText.YELLOW, "12") + "\n" +
+				      				   FormatText.packegText("武略效果：", FormatText.DEFAULT, "12") + "\n" + 
+				      				   FormatText.packegText(gameSkill.info, FormatText.YELLOW, "12");
+					}
+				}
+								
+				skillButton.data = gameSkill;
+				skillButton.addEventListener(MouseEvent.CLICK, onSkillClick);
+				skillAry.push(skillButton);
+			}
+			
+			private function showZhen():void
+			{
+				var i:int = 0;
+				var count:int = GameManager.gameMgr.zhenList.length;
+				var gameZhen:Zhen = null;
+				var isZhen:Boolean = false;
+				var zhenX:int = 0;
+				var zhenY:int = 0;
+				
+				for (i = 0; i < count; i++)
+				{
+					isZhen = false;
+					gameZhen = GameManager.gameMgr.zhenList.getObjByIndex(i) as Zhen;
+					
+					if (gameGeneral.canZhen(gameZhen.uniqID) && !gameGeneral.hasZhen(gameZhen.uniqID))
+					{
+						isZhen = true;
+					}
+					
+					zhenX = i * buttonWidth;
+					zhenY = 0;
+					
+					createZhen(gameZhen, isZhen, zhenX, zhenY);
+				}
+			}
+			
+			private function createZhen(gameZhen:Zhen, isZhen:Boolean, zhenX:int, zhenY:int):void
+			{
+				var zhenButton:GameButton = new GameButton();
+				zhenButton.x = zhenX;
+				zhenButton.y = zhenY;
+				zhenButton.width = buttonWidth;
+				zhenButton.height = buttonHeight;
+				zhenButton.toggle = true;
+				zhenContainer.addChild(zhenButton);
+				zhenButton.label = gameZhen.zhenName;
+				if (isZhen)
+				{
+					zhenButton.btnType = "canXiu";
+					zhenButton.enabled = true;
+					zhenButton.toolTip = FormatText.packegText("可学习", FormatText.YELLOW, "12") + "\n\n" +
+						           FormatText.packegText("所需功勋：", FormatText.DEFAULT, "12") + "\n" + 
+						           FormatText.packegText(gameZhen.pre.toString(), FormatText.YELLOW, "12") + "\n" +
+					               FormatText.packegText("阵法效果：", FormatText.DEFAULT, "12") + "\n" + 
+			                       FormatText.packegText(gameZhen.info, FormatText.YELLOW, "12");
+				}
+				else
+				{
+					if (gameGeneral.hasZhen(gameZhen.uniqID))
+					{
+						zhenButton.btnType = "xiuGeneral";
+						zhenButton.enabled = true;
+						zhenButton.toolTip = FormatText.packegText("已学习", FormatText.YELLOW, "12") + "\n\n" +
+						               FormatText.packegText("阵法效果：", FormatText.DEFAULT, "12") + "\n" + 
+				                       FormatText.packegText(gameZhen.info, FormatText.YELLOW, "12");
+					}
+					else
+					{
+						zhenButton.btnType = "xiuGeneral";
+						zhenButton.enabled = false;
+						zhenButton.toolTip = FormatText.packegText("不可学习", FormatText.YELLOW, "12") + "\n\n" +
+						               FormatText.packegText("学习条件：", FormatText.DEFAULT, "12") + "\n" + 
+						               FormatText.packegText(gameZhen.condi, FormatText.YELLOW, "12") + "\n" +
+						               FormatText.packegText("所需功勋：", FormatText.DEFAULT, "12") + "\n" + 
+						               FormatText.packegText(gameZhen.pre.toString(), FormatText.YELLOW, "12") + "\n" +
+				                       FormatText.packegText("阵法效果：", FormatText.DEFAULT, "12") + "\n" + 
+				                       FormatText.packegText(gameZhen.info, FormatText.YELLOW, "12");
+					}
+				}
+				zhenButton.data = gameZhen;
+				zhenButton.addEventListener(MouseEvent.CLICK, onZhenClick);
+				zhenAry.push(zhenButton);
+			}
+			
+			private function onSkillClick(evt:MouseEvent):void
+			{
+				var skillButton:GameButton = null;
+				
+				if (evt.target is GameButton)
+				{
+					skillButton = evt.target as GameButton;
+					selItem = skillButton.data;
+					
+					if (skillButton.enabled && skillItemSelected)
+					{
+						clearAllGlow();
+						skillButton.setStyle("color", PubUnit.BLACK);
+					}
+				}
+				
+				this.dispatchEvent(new Event(ITEM_CLICK));
+			}
+			
+			private function onZhenClick(evt:MouseEvent):void
+			{
+				var zhenButton:GameButton = null;
+				
+				if (evt.target is GameButton)
+				{
+					zhenButton = evt.target as GameButton;
+					selItem = zhenButton.data;
+					
+					if (zhenButton.enabled && zhenItemSelected)
+					{
+						clearAllGlow();
+						zhenButton.setStyle("color", PubUnit.BLACK);
+					}
+				}
+				
+				this.dispatchEvent(new Event(ITEM_CLICK));
+			}
+			
+			public function clearAllGlow():void
+			{
+				var i:int = 0;
+				var count:int = skillContainer.numChildren;
+				var skillButton:GameButton = null;
+				
+				for(i = 0; i < count; i++)
+				{
+					if (skillContainer.getChildAt(i) is GameButton)
+					{
+						skillButton = skillContainer.getChildAt(i) as GameButton;
+						skillButton.setStyle("color", PubUnit.WHITE);
+					}
+				}
+				
+				count = zhenContainer.numChildren;
+				var zhenButton:GameButton = null;
+				
+				for(i = 0; i < count; i++)
+				{
+					if (zhenContainer.getChildAt(i) is GameButton)
+					{
+						zhenButton = zhenContainer.getChildAt(i) as GameButton;
+						zhenButton.setStyle("color", PubUnit.WHITE);
+					}
+				}
+				
+			}
+			
+			//=========================================================================
+			// 属性
+			//=========================================================================
+			
+			public function get gameGeneral():General
+			{
+				return _gameGeneral;
+			}
+			
+			public function set gameGeneral(param:General):void
+			{
+				_gameGeneral = param;
+				
+				showData();
+			}
+			
+			public function get buttonWidth():int
+			{
+				return _buttonWidth;
+			}
+			
+			public function set buttonWidth(param:int):void
+			{
+				_buttonWidth = param;
+			}
+			
+			public function get buttonHeight():int
+			{
+				return _buttonHeight;
+			}
+			
+			public function set buttonHeight(param:int):void
+			{
+				_buttonHeight = param;
+			}
+			
+			public function get selItem():Object
+			{
+				return _selItem;
+			}
+			
+			public function set selItem(param:Object):void
+			{
+				_selItem = param;
+			}
+			
+			public function get skillItemSelected():Boolean
+			{
+				return _skillItemSelected;
+			}
+			
+			public function set skillItemSelected(param:Boolean):void
+			{
+				_skillItemSelected = param;
+			}
+			
+			public function get zhenItemSelected():Boolean
+			{
+				return _zhenItemSelected;
+			}
+			
+			public function set zhenItemSelected(param:Boolean):void
+			{
+				_zhenItemSelected = param;
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Canvas id="skillContainer" x="0" y="0" width="460" height="80" backgroundColor="#8A9068" backgroundAlpha="0.2">
+	</mx:Canvas>
+	<mx:Canvas id="zhenContainer" x="0" y="85" width="460" height="20" backgroundColor="#8A9068" backgroundAlpha="0.2">
+	</mx:Canvas>
+	
+</mx:Canvas>

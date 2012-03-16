@@ -1,0 +1,78 @@
+
+<!--邀请码管理　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+<tr>
+  <td height="30" colspan="5" bgcolor="#FFFFFF"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td width="8%" height="45" align="center" bgcolor="#f9f0e1">
+        <a href="#" onclick="selectTab('/admin/add_invite_code')"><img src="/images/pic_33.gif" width="81" height="23" border="0" /></a></td>
+      <td width="92%" align="left" bgcolor="#f9f0e1">
+        <a href="#" onclick="window.open('/admin/invite_code?action=export')"><img src="/images/pic_34.gif" width="94" height="23" border="0" /></a></td>
+      </tr>
+  </table></td>
+</tr>
+
+<tr>
+  <td width="7%" height="30" align="center" bgcolor="#ac7e43" class="white_bc">&nbsp;</td>
+  <td width="9%" align="center" bgcolor="#ac7e43" class="white_bc">ID</td>
+  <td width="61%" align="left" bgcolor="#ac7e43" class="white_bc">　　邀请码</td>
+  <td width="11%" align="center" bgcolor="#ac7e43" class="white_bc">状态</td>
+  <td width="12%" align="center" bgcolor="#ac7e43" class="white_bc">操作</td>
+  </tr>
+%for item in c.data:
+<tr>
+      <td height="30" align="center" bgcolor="#f9f0e1" class="gray">
+        <input type="checkbox" id="id${item.id}" name="id${item.id}" /></td>
+      <td height="30" align="center" bgcolor="#f9f0e1" class="gray">${item.id}</td>
+      <td height="30" align="left" bgcolor="#f9f0e1" class="gray">${item.code}</td>
+      %if item.is_alloted == 1:
+      <td height="30" align="center" bgcolor="#f9f0e1" class="gray">己用</td>
+      %else:
+      <td height="30" align="center" bgcolor="#f9f0e1" class="gray">未用</td>
+      %endif
+      <td height="30" align="center" bgcolor="#f9f0e1" class="gray">
+        <a href="#" onclick="selectTab('/admin/invite_code?action=del&id=${item.id}')">删除</a></td>
+</tr>
+%endfor
+<tr>
+  <td height="30" align="center" bgcolor="#ac7e43" class="menu1">
+    <a href="#" class="menu2" onclick="checkAll();">全选</a></td>
+  <td height="30" align="center" bgcolor="#ac7e43" class="gray">
+    <a href="#" class="menu2" onclick="uncheckAll();">不选</a></td>
+  <td height="30" align="left" bgcolor="#ac7e43" class="gray"><span class="menu">　　
+    <a href="#" class="menu2" onclick="selectTab('/admin/invite_code?action=del_more'
+            %for item in c.data:
+            +'&id${item.id}='+$('#id${item.id}').attr('checked')
+            %endfor
+            )">删除所选</a></span></td>
+  <td height="30" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+  <td height="30" bgcolor="#ac7e43" class="gray">&nbsp;</td>
+</tr>
+<%namespace file="/admin/mypager.html" import="*" />
+${footer_page("/admin/invite_code?page=")}
+</table>
+<script>
+    function checkAll()
+{
+var code_Values = document.getElementsByTagName("input");
+for(i = 0;i < code_Values.length;i++){
+if(code_Values[i].type == "checkbox")
+{
+code_Values[i].checked = true;
+}
+}
+}
+
+function uncheckAll()
+{
+var code_Values = document.getElementsByTagName("input");
+for(i = 0;i < code_Values.length;i++){
+if(code_Values[i].type == "checkbox")
+{
+code_Values[i].checked = false;
+}
+}
+} 
+</script>
+<!--邀请码管理 end-->
+

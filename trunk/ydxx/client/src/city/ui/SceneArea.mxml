@@ -1,0 +1,594 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1440" height="900" fontSize="12" color="0xFFFFFF" backgroundColor="0x000000"
+	 creationComplete="init();" xmlns:ns1="city.ui.menu.*" xmlns:ns2="utils.components.*">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.core.UIComponent;
+			import utils.FormatText;
+			import utils.PubUnit;
+			import utils.SceneManager;
+			import city.ui.menu.MenuArea;
+			import sphere.list.DipList;
+			import utils.WinManager;
+			import city.ui.events.AreaEvent;
+			import wubao.model.User;
+			import mx.controls.Label;
+			import wubao.list.UserList;
+			import mx.core.ScrollPolicy;
+			import city.model.City;
+			import utils.GameManager;
+			
+			private var _cityID:int = 0;
+			
+			private var _gameCity:City = null;
+			
+			//名称标签列表
+			private var nameList:Array = [];
+			
+			private var userList:UserList = null;
+			private var selUser:User = null;
+			
+			private var menuArea:MenuArea = null;
+			
+		 	//总记录数
+		 	private var totalNum:int = 0;
+		 	
+		 	//总页数
+		 	private var totalPage:int = 0;
+		 	
+		 	//当前所在页数
+		 	private var curPage:int = 1;
+		 	
+		 	//每页显示的数目，默认26条
+		 	private var pageNum:int = 26;
+		 	
+		 	private var showList:Array = [];
+		 	
+			private function init():void
+			{
+				this.horizontalScrollPolicy = ScrollPolicy.OFF;
+				this.verticalScrollPolicy = ScrollPolicy.OFF;
+				this.addEventListener(MouseEvent.CLICK, onClick);
+			}
+			
+			public function initUI():void
+			{
+				this.width = GameManager.gameMgr.gameWidth;
+				this.height = GameManager.gameMgr.gameHeight;
+				cvBG.width = 1000;
+				cvBG.height = 600;
+				cvBG.x = int((this.width - cvBG.width) / 2);
+				cvBG.y = int((this.height - cvBG.height) / 2);
+				
+				if (cvBG.width > this.width || cvBG.height > this.height)
+					cvBG.addEventListener(MouseEvent.MOUSE_DOWN, mapDown);
+				
+				var i:int = 0;
+				for (i = 1; i <= pageNum; i++)
+				{
+					var lblName:Label = new Label();
+					lblName.id = "lblName" + i.toString();
+					lblName.width = this["cvWubao" + i.toString()].width;
+					lblName.height = 20;
+					lblName.text = "";
+					lblName.setStyle("fontSize", 12);
+					lblName.setStyle("fontFamily", "新宋体");
+					lblName.setStyle("textAlign", "center");
+					lblName.x = this["cvWubao" + i.toString()].x;
+					lblName.y = this["cvWubao" + i.toString()].y - lblName.height + 5;
+					cvBG.addChild(lblName);
+					nameList.push(lblName);
+				}
+				
+				if (menuArea == null)
+				{
+					menuArea = new MenuArea();
+					menuArea.x = 0;
+					menuArea.y = 0;
+					cvBG.addChild(menuArea);
+					menuArea.addEventListener(AreaEvent.ROB, onRob);
+					menuArea.addEventListener(AreaEvent.MAIL, onMail);
+				}	
+				
+				menuArea.visible = false;
+				menuArea.includeInLayout = false;
+			}
+			
+			private function mapDown(evt:MouseEvent):void
+			{
+				var maxWidth:int = this.width - cvBG.width;
+				var maxHeight:int = this.height - cvBG.height;
+				
+				var startX:int = int((this.width - cvBG.width) / 2);
+				
+				if (maxWidth > 0)
+				{
+					maxWidth = 0;
+				}
+				else
+					startX = 0;
+				
+				cvBG.startDrag(false, new Rectangle(startX, 0, maxWidth, maxHeight));
+				cvBG.addEventListener(MouseEvent.MOUSE_UP, mapUp);
+			}
+			
+			private function mapUp(evt:MouseEvent):void
+			{
+				cvBG.removeEventListener(MouseEvent.MOUSE_UP, mapUp);
+				cvBG.stopDrag();
+			}
+			
+			public function show():void
+			{
+				hideAll();
+				cvBG.progressHandle = loadProgress;
+				cvBG.addEventListener(GameImage.INIT_FINISH, loadBGFinish);
+				cvBG.imageName = "area_bg";
+				cvBG.imageURL = GameManager.gameMgr.resURL + "scene/area_bg.jpg";
+			}
+			
+			private function loadBGFinish(evt:Event):void
+			{
+				WinManager.winMgr.winLoading.visible = false;
+				WinManager.winMgr.winLoading.includeInLayout = false;
+				swapChildIndex();
+				showInfo();
+			}
+			
+			private function loadProgress(evt:ProgressEvent):void
+			{
+				var info:String = "正在加载地区背景，请稍候... " + int(evt.bytesLoaded / evt.bytesTotal * 100).toString() + "%";
+				WinManager.winMgr.showLoadingIntf(info);
+			}
+			
+			private function swapChildIndex():void
+			{
+				var i:int = 0;
+				var index:int = 1;
+				var cv:Canvas = null;
+				var label:Label = null;
+				
+				cvBG.setChildIndex(cvBG.imageUI, 0);
+				
+				for(i = 0; i < cvBG.numChildren;i++)
+				{
+					if (cvBG.getChildAt(i) is Canvas)
+					{
+						cv = cvBG.getChildAt(i) as Canvas;
+						cvBG.setChildIndex(cv, index);
+						index++;
+					}
+				}
+				
+				for(i = 0; i < cvBG.numChildren;i++)
+				{
+					if (cvBG.getChildAt(i) is Label)
+					{
+						label = cvBG.getChildAt(i) as Label;
+						cvBG.setChildIndex(label, index);
+						index++;
+					}
+				}
+			}
+			
+			private function hideAll():void
+			{
+				var i:int = 0;
+				var cv:Canvas = null;
+				var label:Label = null;
+				
+				for(i = 0; i < cvBG.numChildren;i++)
+				{
+					if (cvBG.getChildAt(i) is Canvas)
+					{
+						cv = cvBG.getChildAt(i) as Canvas;
+						cv.visible = false;
+						cv.includeInLayout = false;
+					}
+				}
+				
+				for(i = 0; i < cvBG.numChildren;i++)
+				{
+					if (cvBG.getChildAt(i) is Label)
+					{
+						label = cvBG.getChildAt(i) as Label;
+						label.visible = false;
+						label.includeInLayout = false;
+					}
+				}
+				
+				cvNavi.visible = false;
+				cvNavi.includeInLayout = false;
+			}
+			
+			private function showInfo():void
+			{	
+				userList = GameManager.gameMgr.userList.getListByCity(cityID);
+				if (userList == null) return;
+				
+				cvNavi.visible = true;
+				cvNavi.includeInLayout = true;
+				
+				var i:int = 0;
+				var lblName:Label = null;
+				var cvWubao:Canvas = null;
+				
+				for (i = 1; i <= pageNum; i++)
+				{
+					cvWubao = this["cvWubao" + i.toString()] as Canvas;
+					cvWubao.removeAllChildren();
+					cvWubao.useHandCursor = false;
+					cvWubao.buttonMode = false;
+					cvWubao.toolTip = "";
+				}
+				
+				for (i = 0; i < nameList.length; i++)
+				{
+					lblName = nameList[i] as Label;
+					lblName.text = "";
+				}
+				
+				totalNum = userList.length; 
+				totalPage = Math.ceil(totalNum / pageNum);
+				curPage = 1;
+				showPageData(curPage);
+				
+				menuArea.visible = false;
+				menuArea.includeInLayout = false;
+				
+				setToolTip();
+			}
+			
+			/**
+			 * 转到首页
+			 * 
+			 */ 
+			private function gotoFirstPage(evt:MouseEvent):void
+			{
+				if (curPage == 1) return;
+				
+				curPage = 1;
+				showPageData(curPage);
+			}
+			
+			/**
+			 * 转到上一页
+			 * 
+			 */ 
+			private function gotoPriorPage(evt:MouseEvent):void
+			{
+				if (curPage == 1) return;
+				
+				curPage --;
+				showPageData(curPage);
+			}
+			
+			/**
+			 * 转到下一页
+			 * 
+			 */ 
+			private function gotoNextPage(evt:MouseEvent):void
+			{
+				if (curPage == totalPage) return;
+				
+				curPage ++;
+				showPageData(curPage);
+			}
+			
+			/**
+			 * 转到末页
+			 * 
+			 */ 
+			private function gotoLastPage(evt:MouseEvent):void
+			{
+				if (curPage == totalPage) return;
+				
+				curPage = totalPage;
+				showPageData(curPage);
+			}
+			
+			/**
+			 * 转到指定页
+			 * 
+			 */ 
+			private function gotoPage(evt:MouseEvent):void
+			{
+				curPage = int(tiPage.text);
+				if (curPage > totalPage) return;
+				
+				showPageData(curPage);
+			}
+			
+			private function showPageData(page:int = 1):void
+			{
+				var startNum:int = 0;
+				startNum = (page - 1) * pageNum + 1;
+				
+				showList = userList.getPageObj(startNum, pageNum);
+				var cvWubao:Canvas = null;
+				var i:int = 0;
+				var lblName:Label = null;
+				
+				for (i = 0; i < pageNum; i++)
+				{
+					var gameUser:User = showList[i] as User;
+					if (gameUser != null)
+					{
+						lblName = nameList[i];
+						if (lblName != null)
+						{
+							lblName.visible = true;
+							lblName.includeInLayout = true;
+							lblName.text = gameUser.userName;
+							if (gameUser.isOnline)
+								lblName.setStyle("color", PubUnit.GREEN);
+							else
+								lblName.setStyle("color", PubUnit.WHITE);
+						}
+							
+						cvWubao = this["cvWubao" + (i + 1).toString()] as Canvas;
+						if (cvWubao != null)
+						{
+							cvWubao.visible = true;
+							cvWubao.includeInLayout = true;
+							cvWubao.useHandCursor = true;
+							cvWubao.buttonMode = true;
+							cvWubao.data = gameUser;
+							cvWubao.toolTip = "名称 " + gameUser.userName + "\n" +
+							                  "势力 " + gameUser.sphereName + "\n" +
+							                  "声望 " + gameUser.prestige.toString() + "\n" +
+							                  "爵位 " + gameUser.digName + "\n" +
+							                  "官位 " + gameUser.offName;
+							
+						}
+					}
+					else
+					{
+						cvWubao = this["cvWubao" + (i + 1).toString()] as Canvas;
+						if (cvWubao != null)
+						{
+							cvWubao.visible = true;
+							cvWubao.includeInLayout = true;
+							cvWubao.toolTip = "";
+							cvWubao.data = null;
+						}
+					}
+				}
+				
+				for(i = showList.length; i < pageNum; i++)
+				{
+					cvWubao = this["cvWubao" + (i + 1).toString()] as Canvas;
+					if (cvWubao != null)
+					{
+						cvWubao.visible = true;
+						cvWubao.includeInLayout = true;
+					}
+					
+					lblName = nameList[i];
+					if (lblName != null)
+					{
+						lblName.visible = false;
+						lblName.includeInLayout = false;
+					}
+				}
+				
+				if (totalNum == 0)
+				{
+					tiPage.text = "1";
+					lblPage.text = "/1"
+				}
+				else
+				{
+					tiPage.text = curPage.toString();
+					lblPage.text = "/" + totalPage.toString();
+				}
+			}
+			
+			private function setToolTip():void
+			{
+			}
+			
+			private function onClick(evt:MouseEvent):void
+			{
+				if (evt.target is Canvas)
+				{
+					var cvWubao:Canvas = evt.target as Canvas;
+					if (cvWubao.id.substr(0, 7) == "cvWubao")
+					{
+						if (cvWubao.data != null)
+						{
+							menuArea.visible = true;
+							menuArea.includeInLayout = true;
+							menuArea.x = cvWubao.x + cvWubao.width - 1;
+							menuArea.y = cvWubao.y + 16;
+							
+							var index:int = int(cvWubao.id.substr(7, 2));
+							selUser = showList[index - 1] as User;
+						}
+					}
+					else
+					{
+						menuArea.visible = false;
+						menuArea.includeInLayout = false;
+					}
+				}
+				else
+				{
+					menuArea.visible = false;
+					menuArea.includeInLayout = false;
+				}
+			}
+			
+			private function onKeyUp():void
+			{
+				var num:int = int(tiPage.text);
+				if (num > totalPage)
+					tiPage.text = totalPage.toString();
+			}
+			
+			private function onRob(evt:AreaEvent):void
+			{
+				if (selUser == null) return;
+				
+				var gameUser:User = GameManager.gameMgr.user;
+				
+				if (selUser.uniqID == gameUser.uniqID)
+				{
+					WinManager.winMgr.showResult("无法掠夺自己");
+					return;
+				}
+				
+				if (gameUser.digID == 0)
+				{
+					WinManager.winMgr.showResult("您的爵位等级不够，无法掠夺\n掠夺的前提爵位为男爵");
+					return;
+				}
+				
+				if (selUser.digID != gameUser.digID)
+				{
+					WinManager.winMgr.showResult("爵位不同，无法掠夺");
+					return;
+				}
+				
+				if (selUser.sphereID > 0 && selUser.sphereID == gameUser.sphereID)
+				{
+					WinManager.winMgr.showResult("无法掠夺同一势力的成员");
+					return;
+				}
+				
+				var dipList:DipList = GameManager.gameMgr.dipList;
+				if (dipList.isAlli(gameUser.sphereID, selUser.sphereID))
+				{
+					WinManager.winMgr.showResult("无法掠夺同盟势力的成员");
+					return;
+				}
+				
+				WinManager.winMgr.showRobSet(selUser);
+			}
+			
+			private function onMail(evt:AreaEvent):void
+			{
+				if (selUser == null) return;
+				WinManager.winMgr.writeMail(selUser.userName);
+			}
+			
+			public function get cityID():int
+			{
+				return _cityID;
+			}
+			
+			public function set cityID(param:int):void
+			{
+				_cityID = param;
+				
+				gameCity = GameManager.gameMgr.cityList.getObjByID(_cityID) as City;
+			}
+			
+			public function get gameCity():City
+			{
+				return _gameCity;
+			}
+			
+			public function set gameCity(param:City):void
+			{
+				_gameCity = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<ns2:GameImage id="cvBG" x="0" y="0" width="1000" height="600">
+		<mx:Canvas id="cvWubao1" x="275" y="149" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao2" x="345" y="114" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao3" x="485" y="114" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao4" x="275" y="289" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao5" x="555" y="359" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao6" x="485" y="254" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao7" x="695" y="289" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao8" x="555" y="219" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao9" x="695" y="219" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao10" x="415" y="149" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao11" x="625" y="324" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao12" x="485" y="324" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao13" x="345" y="254" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao14" x="205" y="184" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao15" x="555" y="149" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao16" x="625" y="184" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao17" x="415" y="359" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao18" x="275" y="219" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao19" x="555" y="289" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao20" x="205" y="254" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao21" x="415" y="289" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao22" x="345" y="324" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao23" x="485" y="184" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao24" x="415" y="219" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao25" x="625" y="254" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+		<mx:Canvas id="cvWubao26" x="345" y="184" width="100" height="55">
+			<mx:backgroundImage>@Embed(source='../../images/assets/area/wubao.png')</mx:backgroundImage>
+		</mx:Canvas>
+
+
+	</ns2:GameImage>
+	
+	<mx:Canvas id="cvNavi" width="418" height="46" horizontalCenter="10" bottom="10" borderStyle="solid" borderThickness="3" cornerRadius="7" backgroundColor="#434A0C" backgroundAlpha="0.7" borderColor="#E3D71F" >
+		<ns2:GameButton x="10" y="8" label="首页" click="gotoFirstPage(event);" btnType="off"/>
+		<ns2:GameButton x="82" y="8" label="上一页" click="gotoPriorPage(event);" btnType="off"/>
+		<ns2:GameButton x="154" y="8" label="下一页" click="gotoNextPage(event);" btnType="off"/>
+		<ns2:GameButton x="226" y="8" label="末页" click="gotoLastPage(event);" btnType="off"/>
+		<ns2:GameTextInput id="tiPage" x="300" y="11" width="26" isNUM="true" text="1" height="18" textAlign="right" keyUp="onKeyUp();"/>
+		<mx:Label id="lblPage" x="328" y="10" width="35" text="/4"/>
+		<ns2:GameButton x="365" y="8" label="跳转" width="39" click="gotoPage(event);" btnType="off"/>
+	</mx:Canvas>
+	
+</mx:Canvas>

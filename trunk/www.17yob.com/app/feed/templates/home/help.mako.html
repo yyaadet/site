@@ -1,0 +1,68 @@
+#-*- encoding: utf-8 -*-
+<%inherit file="/home/base.mako.html" />
+
+<%def name="get_title()">帮助中心</%def>
+
+<%def name="get_content()">
+<div id="content">
+
+    <div id="left">
+      
+    </div>
+
+
+    <div id="mid">
+       <div class="table">
+            <div class="row"><div class="col"><h1 id="#1">如何订阅？</h1></div></div>
+            <div class="row">
+               <div class="col">
+                <p>
+                	如果您已经知道要订阅的供稿的地址，只需点击<b>添加订阅</b>链接。<br />
+                	1. 将该地址粘贴至出现的<b>链接输入框</b> <br />
+                	2. 在<b>名字输入框</b>中输入你想要的名称 <br />
+                	3. 选择相应的类别 <br />
+                	4. 点击<b>提交</b>即可 <br />
+                </p>
+               </div>
+             </div>
+             
+            <div class="row"><div class="col"><h1 id="#2">什么是 RSS 和 Atom？</h1></div></div>
+            <div class="row">
+               <div class="col">
+                <p>
+                	RSS 和 Atom 是两种最常见的供稿格式。与大多数阅读器一样，悦读汇支持这两种格式。还可以查看 <a href="http://baike.baidu.com/view/1644.htm">百度百科</a> 获取更详细的解释。<br />
+                	<strong>温馨提示：</strong>
+                	<ul>
+                	    <li>获取其他网站频道(RSS)地址的简单方法就是将在其他网站中的类似<img src="/home/xml.gif" />或者<img src="/home/rss.gif" />图标上单击鼠标右键， 选择 "复制快捷方式"，然后回到这里，把地址粘贴在"链接"里，点击订阅。</li>
+                	    <li>例如地址：</li>
+                	    <li>秦晖个人博客 http://qinhui.blog.sohu.com/rss</li>
+                	    <li>优米 http://app.umiwi.com/rss.php</li>
+                	    <!--
+                	    <li>或者直接把包含频道(RSS)的URL直接复制到"添加频道"的输入框中，悦读汇会尽量帮你分析出这个页面的所有频道(RSS)，准确率在99％以上。</li>
+                	    -->
+                	</ul>
+                </p>
+               </div>
+             </div>         
+       </div>
+       
+    </div>
+
+<div id="right">
+   <div class="rss_section">
+        <div class="rss_section_title">帮助索引</div>
+        <%
+        menus=[
+            {'name': u'如何订阅？', 'id': '1'},
+            {'name': u'什么是 RSS 和 Atom？', 'id': '2'},
+        ]
+        %>
+   	%for m in menus:
+   	    <div class="rss_section_line"><a href="#${m['id']}">${m['name']}</a></div>
+   	%endfor
+   </div>  
+
+</div>
+
+</div>
+</%def>

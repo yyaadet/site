@@ -1,0 +1,28 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_title()">找回密码</%def>
+
+<%def name="get_content()">
+  <div id="content">
+    <div id="left">
+    	
+    </div>
+    
+    <div id="mid">
+      <form action="/user/do_find_passwd" method="post">
+    	<div class="table">
+            <div class="row">
+            	<div class="col">密保邮箱： <input class="url" name="email" value="" /></div>
+                <div class="col"><input class="button" type="submit" value="提交" /></div>
+            </div>
+        </div>
+    	</form>
+    </div>
+    
+    <div id="right">
+        
+    </div>
+</div>
+</%def>

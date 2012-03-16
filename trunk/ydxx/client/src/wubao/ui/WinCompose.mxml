@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="350" height="178" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import wubao.model.Tech;
+			import wubao.model.User;
+			import utils.TipInfo;
+			import net.tcp.model.wubao.TcpCompose;
+			import net.tcp.TcpManager;
+			import utils.WinManager;
+			import utils.PubUnit;
+			import utils.FormatText;
+			import wubao.model.Weapon;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var _weaponID:int = 0;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var gameWeapon:Weapon = null;
+			
+			private var max:int = 0;
+			
+			private function init():void
+			{
+				setTitle("强　化");
+				taInfo.htmlText = TipInfo.getComposeInfo();
+				helpID = 15;
+				
+				refresh();
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				if (gameWubao != null)
+				{
+					var len:int = gameWubao.store.weaponList.getWpnList().length;
+					if (len < 1)
+						lblTip.htmlText = FormatText.packegText("当前没有装备，无法强化", FormatText.RED);
+						
+					showInfo();
+				}
+			}
+			
+			private function showInfo():void
+			{
+				gameWeapon = gameWubao.store.weaponList.getObjByID(weaponID) as Weapon;
+				if (gameWeapon != null)
+				{
+					lblName.text = gameWeapon.levelName;
+					
+					if (gameWeapon.level >= 10)
+					{
+						lblTip.htmlText = "已强化至最高等级";
+						tiCompose.text = "0";
+						btnMax.enabled = false;
+						btnCompose.enabled = false;
+						
+						return;
+					}
+					
+					btnMax.enabled = true;
+					btnCompose.enabled = true;
+					max = gameWeapon.num / 2;
+					lblTip.htmlText = "可强化为 " + FormatText.packegText((gameWeapon.level + 1).toString() + PubUnit.wpLevelUnit + gameWeapon.name) + 
+					                  FormatText.packegText(" × ", FormatText.WHITE, "9") + max.toString();
+					
+					tiCompose.text = "0";
+				}
+			}
+			
+			private function onKeyUp():void
+			{
+				var num:int = int(tiCompose.text);
+				if (num > max)
+				{
+					num = max;
+					tiCompose.text = num.toString();
+				}
+			}
+			
+			private function getMax():void
+			{
+				tiCompose.text = max.toString();
+			}
+			
+			private function compose():void
+			{
+				if (gameWeapon == null)
+				{
+					WinManager.winMgr.showResult("请选择装备");
+					return;
+				}
+				
+				if (int(tiCompose.text) < 1)
+				{
+					WinManager.winMgr.showResult("强化数量不能为0");
+					return;
+				}
+				
+				if (gameWubao.store.left < 1)
+				{
+					WinManager.winMgr.showResult("库房空间不够");
+					return;
+				}
+				
+				var tech:Tech = gameWubao.techList.getObjByID(gameWeapon.type) as Tech;
+				if (gameWeapon.type <= 9 && tech.level <= gameWeapon.level)
+				{
+					var str:String = "需要" + (tech.level + 1).toString() + "级" + tech.name + "科技，请到书院升级科技";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				var compose:TcpCompose = new TcpCompose();
+				compose.wbID = gameWubao.uniqID;
+				compose.type = gameWeapon.type;
+				compose.level = gameWeapon.level;
+				compose.num = int(tiCompose.text) * 2;
+				
+				TcpManager.tcpMgr.sendCompose(compose);
+			}
+			
+			public function get weaponID():int
+			{
+				return _weaponID;
+			}
+			
+			public function set weaponID(param:int):void
+			{
+				_weaponID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="330" height="55">
+		<mx:Label x="5" y="5" text="装备：" height="20" width="45"/>
+		<mx:Label id="lblName" x="50" y="5" height="20" width="60"/>
+		
+		<mx:Label id="lblTip" x="145" y="5" height="20" width="180" textAlign="right"/>
+		
+		<mx:Label x="5" y="30" text="数量：" height="20" width="45"/>
+		<GameTextInput id="tiCompose" x="45" y="29" width="45" height="20" isNUM="true" keyUp="onKeyUp();" text="0" textAlign="right"/>
+		<GameButton id="btnMax" x="95" y="29" label="Max" btnType="max" height="20" width="40" click="getMax();"/>
+		
+		<GameButton id="btnCompose" x="261" y="30" label="强　化" click="compose();"/>
+	</mx:Canvas>
+	
+	<mx:TextArea id="taInfo" x="10" y="96" width="330" height="72"/>
+	
+</GameWindow>

@@ -1,0 +1,110 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+<%namespace name="flash_game" file="/flash_game/func.mako.html" />
+
+<%def name="get_title()">${c.fg.name}</%def>
+
+<%def name="get_description()">${c.fg.operate_info}	</%def>
+
+<%def name="get_content()">
+<%
+from zuan.lib.helpers import fmt_time
+from zuan.lib.helpers import short_text
+from zuan.lib.helpers import static_flash_game_detail_url
+from zuan.controllers.flash_game import get_flash_game_pic_url
+from zuan.controllers.flash_game import get_flash_game_file_url
+from zuan.controllers.flash_game import get_group
+
+group = get_group(c.fg.group_id)
+%>
+
+<script type="text/javascript">
+function fullscreen(id)
+{
+    window.open("/flash_game/show?id="+id, "", "fullscreen=1, menubar=no, toolbar=no, status=no, scrollbars=no, location=no, resizable=no");
+}
+
+function screen(id, width, height)
+{
+    window.open("/flash_game/show?id="+id+"&width="+width+"&height="+height, "", "fullscreen=1, menubar=no, toolbar=no, status=no, scrollbars=no, location=no, resizable=no");
+}
+
+
+</script>
+
+<div id="content">
+    <div id="content_left">
+    	${flash_game.get_left_rank_list(c.fg.group_id)}
+    </div>
+    <div id="content_right">
+        <div class="table" style="margin-left: 5px; border: dotted 1px green; height: 500px;">
+            <iframe width="100%" height="100%" src="/flash_game/show?id=${c.fg._id}&height=500&width=700" scrolling="no" frameborder="0"></iframe>
+        </div>
+
+        <!-- end -->
+      <div class="table" style="margin-left: 5px;">
+          <div class="row">
+              <div class="col">
+                    <input value="全屏游戏" onclick="fullscreen('${c.fg._id}')" type="button" style="width: auto; height: 35px;" />
+              </div>
+              <div class="col">
+                    <input value="1024*768" onclick="screen('${c.fg._id}', 800, 600)" type="button" style="width: auto; height: 35px;" />
+              </div>
+              <div class="col">
+                    <input value="1440*900" onclick="screen('${c.fg._id}', 1000, 800)" type="button" style="width: auto; height: 35px;" />
+              </div>
+              <div class="col">
+                    <!-- JiaThis Button BEGIN -->
+                    <script type="text/javascript">
+					var jiathis_config = {
+						shareImg:{
+							"showType":"ALL",
+							"bgColor":"",
+							"txtColor":"",
+							"text":"",
+							"services":"",
+							"position":"",
+							"imgwidth":"",
+							"imgheight":"",
+							"divname":""
+						}
+					}
+					</script>
+                    <div id="jiathis_style_32x32">
+                        <a class="jiathis_button_qzone"></a>
+                        <a class="jiathis_button_tsina"></a>
+                        <a class="jiathis_button_tqq"></a>
+                        <a class="jiathis_button_renren"></a>
+                        <a class="jiathis_button_kaixin001"></a>
+                        <a href="http://www.jiathis.com/share?uid=1501989" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+                        <a class="jiathis_counter_style"></a>
+                    </div>
+                    <script type="text/javascript">var jiathis_config = {data_track_clickback:true};</script>
+                    <script type="text/javascript" src="http://v2.jiathis.com/code/jia.js?uid=1501989" charset="utf-8"></script>
+                    <!-- JiaThis Button END -->
+               </div>
+          </div>
+
+      </div>
+           
+     <div class="table" style="margin-left: 5px;">
+         <div class="row" style="border-bottom: dotted 1px #ccc;">
+              <strong><a href="${h.static_flash_game_detail_url(c.fg._id)}">${c.fg.name}</a> 游戏介绍</strong>
+          </div>
+          <div class="row">
+            <p>${c.fg.info}</p>
+          </div>
+        <div class="row" style="border-bottom: dotted 1px #ccc;"><strong>操作说明</strong></div>
+        <div class="row">
+        	<p>${c.fg.operate_info}</p>
+	    </div>
+        <!-- PingLun.La Begin -->
+		<div id="pinglunla_here"></div><a href="http://pinglun.la/" id="logo-pinglunla">评论啦</a><script type="text/javascript" src="http://static.pinglun.la/md/pinglun.la.js" charset="utf-8"></script>
+		<!-- PingLun.La End -->
+     </div>
+           
+    </div>
+</div>
+
+</%def>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="190" height="22" fontSize="12" color="0xFFFFFF" creationComplete="init();" xmlns:ns1="utils.components.*" styleName="winCanvas">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+			import utils.FormatText;
+			import map.MapManager;
+			import net.tcp.TcpManager;
+			import net.tcp.model.map.TcpZhen;
+			import general.model.Zhen;
+			import utils.GameManager;
+			import general.model.General;
+		
+			import utils.SceneManager;
+			import utils.WinManager;
+			import army.model.Army;
+			
+			//1--刷新基本信息  2--刷新阵型  
+			private var _type:int = 0;
+			
+			private var _gameArmy:Army = null;
+			
+			private var gameGeneral:General = null;
+			
+			[Bindable]
+			private var zhenList:Array = [];
+			
+			private function init():void
+			{
+				lblNum.toolTip = "健卒";
+				lblLand.toolTip = "军团所处地形";
+				cbZhen.toolTip = "阵型列表，可以改变军团的当前阵型" + "\n" + "提示： 5分钟可更改一次阵型";
+			} 
+			
+			private function changeZhen():void
+			{
+				var zhenID:int = 0;
+				var gameZhen:Zhen = null;
+				
+				gameZhen = zhenList[cbZhen.selectedIndex];
+				if (gameZhen != null)
+					zhenID = gameZhen.uniqID;
+				
+				if (zhenID == gameGeneral.useZhen) return;
+				
+				var tcpZhen:TcpZhen = new TcpZhen();
+				tcpZhen.armyID = gameArmy.uniqID;
+				tcpZhen.zhenID = zhenID;
+				
+				TcpManager.tcpMgr.sendZhen(tcpZhen);
+			}
+			
+			private function posArmy():void
+			{
+				SceneManager.sceneMgr.enterMap(false, gameArmy.mapX, gameArmy.mapY);
+			}
+			
+			private function onOver():void
+			{
+				setTooTip();
+			}
+			
+			private function setTooTip():void
+			{
+				if (gameGeneral == null) return;
+				
+				var ary:Array = [];
+				var tip:String = "";
+				
+				ary = PubUnit.getGeneralInfo(gameGeneral);
+				
+				tip = FormatText.packegText("武将 ") + FormatText.packegText(gameGeneral.generalName, FormatText.GREEN) + "\n" +
+				      FormatText.packegText("等级 ") + FormatText.packegText(gameGeneral.soliderTrain.toString(), FormatText.GREEN) + "\n" +
+				      FormatText.packegText("部曲 ") + FormatText.packegText(gameGeneral.soliderName, FormatText.GREEN) + "\n" +
+				      FormatText.packegText("阵型 ") + FormatText.packegText(gameGeneral.useZhenName, FormatText.GREEN) + "\n" +
+				      FormatText.packegText("士卒 ") + FormatText.packegText(gameGeneral.soliderTotal.toString(), FormatText.GREEN) + "\n" +
+				      FormatText.packegText("伤兵 ") + FormatText.packegText(gameGeneral.hurtNum.toString(), FormatText.GREEN) + "\n" +
+				      FormatText.packegText("士气 ") + FormatText.packegText(gameGeneral.soliderSpirit.toString(), FormatText.GREEN) + "\n" +
+				      FormatText.packegText("攻击 ") + FormatText.packegText(ary[0], FormatText.GREEN) + "\n" +
+				      FormatText.packegText("防御 ") + FormatText.packegText(ary[1], FormatText.GREEN) + "\n" +
+				      FormatText.packegText("机动 ") + FormatText.packegText(ary[2], FormatText.GREEN) + "\n" +
+				      FormatText.packegText("钱 ") + FormatText.packegText(gameArmy.money.toString(), FormatText.GREEN) + "\n" +
+				      FormatText.packegText("粮 ") + FormatText.packegText(gameArmy.food.toString(), FormatText.GREEN) + "\n" +
+				      FormatText.packegText("单击可定位军团");
+				
+				lblName.toolTip = tip;
+			}
+			
+			public function get type():int
+			{
+				return _type;
+			}
+			
+			public function set type(param:int):void
+			{
+				_type = param;
+			}
+			
+			public function get gameArmy():Army
+			{
+				return _gameArmy;
+			}
+			
+			public function set gameArmy(param:Army):void
+			{
+				_gameArmy = param;
+				
+				if (_gameArmy != null)
+				{
+					lblName.text = _gameArmy.armyName;
+					lblNum.text = _gameArmy.num.toString();
+					lblLand.text = _gameArmy.landStr;
+					
+					if (type != 2) return;
+					
+					gameGeneral = GameManager.gameMgr.wubao.generalList.getObjByID(_gameArmy.generalID) as General;
+					if (gameGeneral != null)
+					{
+						zhenList = gameGeneral.getZhenBySolider().list;
+						var gameZhen:Zhen = GameManager.gameMgr.zhenList.getObjByID(gameGeneral.useZhen) as Zhen;
+						if (gameZhen != null)
+							cbZhen.selectedIndex = zhenList.indexOf(gameZhen);
+					}
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label id="lblName" x="10" y="0" width="55" height="20" useHandCursor="true" buttonMode="true" mouseChildren="false" click="posArmy();" textDecoration="underline" mouseOver="onOver();"/>
+	<mx:Label id="lblNum" x="65" y="0" width="40" height="20"/>
+	<mx:Label id="lblLand" x="105" y="0" width="30" height="20"/>
+	<mx:ComboBox id="cbZhen" x="135" y="0" height="20" width="53" dataProvider="{zhenList}" labelField="zhenName" change="changeZhen();" paddingLeft="0" paddingRight="0"></mx:ComboBox>
+	
+</mx:Canvas>

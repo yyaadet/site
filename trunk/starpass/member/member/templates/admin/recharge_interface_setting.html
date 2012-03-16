@@ -1,0 +1,57 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">其他平台支付设置</span>
+</div>
+
+<div class="content_content">
+<form action="/admin/recharge_interface_setting" method="post">
+    <input type="hidden" name="act" value="edit" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="interface_key">充值密钥</label>
+    <input type="text" id="interface_key" name="interface_key" value="${c.interface_key}"/>
+    </p>
+    
+    <p>
+    <label for="interface_ip">&nbsp;&nbsp;IP地址</label>
+    <input size="60" type="text" id="interface_ip" name="interface_ip" value="${c.interface_ip}"/>
+    </p>
+    
+    <p />
+    <p>
+        接口地址为:http://用户中心主机/api/recharge_interface<br />
+    </p>
+    <p>
+        参数:<br />
+        uid:用户ID<br />
+        rmb:充值人民币<br />
+        gold:充值人民币对应的金币<br />
+        sign:MD5加密校验字符串
+    </p>
+    
+    <p>
+        说明：<br />
+        对uid,rmb,gold按字母排序后得到的querystring，加上约定的密钥，获得MD5散列值<br />
+        此MD5散列值即sign所要传递过来的值。
+    </p>
+    
+    <p>
+        返回：<br />
+        返回字符串true则成功<br />
+        返回其他字符串则失败
+    </p>
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+</div>
+
+</%def>

@@ -1,0 +1,128 @@
+## -*- coding: utf-8 -*-
+<%def name="qq_login_button()">
+<!-- <a onclick="toQzoneLogin();" href="#"><img border="0" src="/user/qq.png" alt="qq登陆" /></a> -->
+<a onclick="toQzoneLogin();" href="/user/qq_login"><img border="0" src="/user/qq.png" alt="qq登陆" /></a>
+</%def>
+
+<%def name="user_left_menu()">
+<%
+menus=[
+{'name': u'回到首页', 'url': '/'},
+{'name': u'我的主页', 'url': '/user/index'},
+{'name': u'我的订阅', 'url': '/rss/index'},
+{'name': u'添加订阅', 'url': '/rss/add'},
+{'name': u'查看帮助', 'url': '/home/help'},
+]
+%>
+%for m in menus:
+<div class="menu"><a href="${m['url']}">${m['name']}</a></div>
+%endfor
+%if c.user.is_admin == 1:
+<div class="menu"><a href="/admin/index">管理员</a></div>
+%endif
+</%def>
+
+<%def name="get_news_list(objs, start_page, page, end_page)">
+<script type="text/javascript">
+function rem_news(id)
+{
+    var code = window.confirm("您确定要删除吗？");
+	if (code == true) {
+                $.getJSON("/news/rem", {"id": id}, function(result) {
+                    if (result.is_ok) {
+                        $("#" + id).remove();
+                    }
+                });
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function add_share(id)
+{
+    $.getJSON("/news/add_share", {"id": id}, function(result) {
+        if (result.ret == 0) {
+            $("#add_share_result_" + id).html("成功分享");
+        }
+        else {
+            $("#add_share_result_" + id).html(result.msg);
+        }
+    });
+}
+</script>
+<% 
+from feed.model.group import SubGroups 
+import time
+
+now = int(time.time())
+%>
+%for obj in objs:
+<div class="table" style="width: 98%;" id="${obj._id}">
+    <div class="row title"><h2><a href="/news/go?id=${obj._id}" target="_blank">${obj.title}</h2></a></div>
+    <div class="row tip_text">
+       ${obj.url} 
+       <a href="${h.static_news_detail_url(obj._id)}" target="_blank">内容快照</a>
+       <a href="javascript:void(0)" onclick="add_share('${obj._id}')">分享到QQ</a>
+       <div id="add_share_result_${obj._id}" class="error"></div>
+    </div>
+    <div class="row tip_text">
+        更新于${h.diff_time(obj.timestamp, now)}前  来自订阅：${obj.feed_name} 类型：${SubGroups[obj.group_id]['name']} 订阅者：${obj.uname} 人气：${obj.view_num} 围观：${obj.go_num}  
+        发布时间：${h.fmt_time(obj.pub_timestamp)} <a href="javascript:void(0)" onclick="return rem_news('${obj._id}')">不好看，删掉</a>
+    </div>
+    <div class="row article"><p>${obj.cnt|n}</p></div>
+</div>
+%endfor
+
+<!-- page -->
+<div class="table" style="font-size: 14px;">
+    <div class="row">
+        %if start_page != 1:
+        <div class="col" style="width: 50px;"><a href="/user/index?page=${start_page - 1}&rss_id=${c.rss_id}">上10页</a></div>
+        %endif
+        %for i in range(start_page, end_page + 1):
+        <div class="col" style="min-width: 0;width: 25px; text-align: center;">
+            %if i == page:
+            <strong><a href="/user/index?page=${i}&rss_id=${c.rss_id}">[${i}]</a></strong>
+            %else:
+            <a href="/user/index?page=${i}&rss_id=${c.rss_id}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col" style="width: 50px;"><a href="/user/index?page=${end_page + 1}&rss_id=${c.rss_id}">下10页</a></div>
+    </div>
+</div>
+</%def>
+
+<%def name="get_today_update_rss_list(uid)" cached="True" cache_timeout="600" cache_type="file" cache_key="${uid}">
+<%
+from feed.model.rss import Rss
+import pymongo
+
+limit = 20
+objs = Rss.query({'uid': uid, 'today_fetch_num': {'$gt': 0}, 'is_del': 0}, limit=limit, sort=[('today_fetch_num', pymongo.DESCENDING)])
+recommand_objs = Rss.query({'today_fetch_num': {'$gt': 0}, 'is_del': 0}, limit=5, sort=[('today_fetch_num', pymongo.DESCENDING)])
+%>
+%if len(objs) > 0:
+<div class="rss_section" style="height: auto;">
+    <div class="rss_section_title">今日订阅更新榜</div>
+    %for obj in objs:
+       <div class="rss_section_line">
+           <a href="/user/index?rss_id=${obj._id}">${h.short_text(obj.name, 10)}</a> 
+           <label class="tip_text">${obj.today_fetch_num}</label>
+       </div>
+    %endfor
+</div>
+%else:
+<div class="rss_section" style="height: auto;">
+    <div class="rss_section_title">今日订阅推荐榜</div>
+    %for obj in recommand_objs:
+       <div class="rss_section_line">
+           <a href="/user/index?rss_id=${obj._id}">${h.short_text(obj.name, 10)}</a> 
+           <label class="tip_text"> ++ <a href="/user/join_rss?rss_id=${obj._id}">点击订阅</a></label>
+       </div>
+    %endfor
+</div>
+%endif
+</%def>

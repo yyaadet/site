@@ -1,0 +1,68 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+<div id="content" >
+	${self.get_menu()}
+    
+    ${self.get_feed_list(c.objs,c.start_page, c.page, c.end_page)}
+</div>
+</%def>
+
+<%def name="get_menu(name='')">
+<%
+menus = [{'name': u'添加', 'url': '/admin/feed_add'},
+]
+%>
+<div class="table">
+	<div class="row">
+    	%for menu in menus:
+        <a href="${menu['url']}">${menu['name']}</a> | 
+        %endfor
+    </div>
+</div>
+</%def>
+
+<%def name="get_feed_list(objs, start_page, page, end_page)">
+
+<table id="mytable">
+<tr>
+  <th>名称</th>
+  <th>链接</th>
+  <th>单次获取数目</th>
+  <th>编辑</th>
+  <th>删除</th>
+</tr>
+%for obj in objs:
+<tr>
+   <td>${obj.name}</td>
+   <td><a href="${obj.url}" target="_blank">${obj.url}</a></td>
+   <td>${obj.num}</td>
+   <td><a href="/admin/feed_edit?id=${obj._id}">编辑</a></td>
+   <td><a href="/admin/feed_rem?id=${obj._id}">删除</a></td>
+</tr>
+%endfor
+</table>
+
+%if show_page:
+<!-- page -->
+<div class="table">
+    <div class="row">
+        %if c.start_page != 1:
+        <div class="col" style="width: 50px;"><a href="/admin/feed?page=${start_page - 1}">上一页</a></div>
+        %endif
+        %for i in range(start_page, end_page + 1):
+        <div class="col" style="min-width: 0;width: 20px;">
+            %if i == c.page:
+            <strong><a href="/admin/feed?page=${i}">[${i}]</a></strong>
+            %else:
+            <a href="/admin/feed?page=${i}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col" style="width: 50px;"><a href="/admin/feed?page=${end_page + 1}">下一页</a></div>
+    </div>
+</div>
+%endif
+</%def>

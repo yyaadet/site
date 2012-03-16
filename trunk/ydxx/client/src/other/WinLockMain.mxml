@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="290" height="124" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.WinManager;
+			
+			private function init():void
+			{
+				setTitle("密保操作");
+			}
+			
+			private function showModify():void
+			{
+				WinManager.winMgr.showModiLock();
+			}
+			
+			private function showFind():void
+			{
+				WinManager.winMgr.showFindLock();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="34" width="270" height="80" styleName="lowCanvas">
+		<mx:Label x="8" y="10" text="如果你想修改密码，请点击这里" height="20"/>
+		<GameButton x="191" y="6" label="修改密码" click="showModify();"/>
+		
+		<mx:Label x="10" y="45" text="如果你忘记了密码，请点击这里" height="20"/>
+		<GameButton x="191" y="43" label="重置密码" click="showFind();"/>
+	</mx:Canvas>
+	
+</GameWindow>

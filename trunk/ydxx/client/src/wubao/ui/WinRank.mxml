@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="480" height="392" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.FormatText;
+			import utils.PubUnit;
+			import net.tcp.TcpManager;
+			import net.tcp.model.wubao.TcpFightUser;
+			import utils.events.ConfirmEvent;
+			import wubao.model.User;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import wubao.ui.events.FightUserEvent;
+			import sphere.list.SphereList;
+			import wubao.model.WuBao;
+			import mx.utils.StringUtil;
+		
+			import wubao.list.UserList;
+			import utils.GameManager;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var winAsk:WinAsk = null;
+			
+			private function init():void
+			{
+				setTitle("排行榜");
+				helpID = 3;
+				
+				this.addEventListener(FightUserEvent.FIGHT_USER, fightUser);
+			}
+			
+			override public function refresh():void
+			{
+				list1.selectedIndex = 0;
+				showUserRank();
+			}
+			
+			private function onChange():void
+			{
+				var index:int = list1.selectedIndex;
+				if (index == 0)
+					showUserRank();
+				if (index == 1)
+					showUserRank1();
+				else if (index == 2)
+					showSphereRank();
+			}
+			
+			//实力榜
+			private var userList:UserList = null;
+			private function showUserRank():void
+			{
+				userList = GameManager.gameMgr.userList.getRank(100);
+				
+				lblTotal.text = "总人数 " +  GameManager.gameMgr.userList.getUserTotal().toString();
+				
+				pagination.dataSource = userList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgUser;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+				tiName.text = "";
+			}
+			
+			private function searchUser():void 
+			{
+				if (StringUtil.trim(tiName.text).length == 0)
+				{
+					showUserRank();
+					return;
+				}
+				
+				var resultList:UserList = userList.getSearch(StringUtil.trim(tiName.text));
+				
+				pagination.dataSource = resultList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgUser;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+			}
+			
+			private function fightUser(evt:FightUserEvent):void
+			{
+				var self:User = GameManager.gameMgr.user;
+				var gameUser:User = evt.user as User;
+				var str:String = "";
+				
+				if (self.orderCD > 0 && self.orderCD > GameManager.gameMgr.gameTime)
+				{
+					WinManager.winMgr.showResult("征战等待中");
+					return;
+				}
+				else
+				{
+					str = "确定要挑战【" + gameUser.userName + "】吗?\n" + FormatText.packegText("注：挑战不损失真实步卒，胜利后可取代对方的排名", FormatText.RED);
+				}
+				
+				winAsk = WinManager.winMgr.showAsk(str);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmFight);
+				
+				function confirmFight(evt:ConfirmEvent):void
+				{
+					var tcpFight:TcpFightUser = new TcpFightUser();
+					tcpFight.userID = gameUser.uniqID;
+					TcpManager.tcpMgr.sendFightUser(tcpFight);
+				}
+			}
+			
+			//声望榜
+			private var userList1:UserList = null;
+			private function showUserRank1():void
+			{
+				userList1 = GameManager.gameMgr.userList.getRank1(100);
+				
+				lblTotal1.text = "总人数 " +  GameManager.gameMgr.userList.getUserTotal().toString();
+				
+				pagination1.dataSource = userList1;
+				pagination1.pageNum = 10;
+				pagination1.dataUI = dgUser1;
+				pagination1.dataUIProvider = "dataProvider";
+				
+				pagination1.refresh();
+				tiName1.text = "";
+			}
+			
+			private function searchUser1():void 
+			{
+				if (StringUtil.trim(tiName1.text).length == 0)
+				{
+					showUserRank1();
+					return;
+				}
+				
+				var resultList:UserList = userList1.getSearch(StringUtil.trim(tiName1.text));
+				
+				pagination1.dataSource = resultList;
+				pagination1.pageNum = 10;
+				pagination1.dataUI = dgUser1;
+				pagination1.dataUIProvider = "dataProvider";
+				
+				pagination1.refresh();
+			}
+			
+			//势力排行
+			private var sphereList:SphereList = null;
+			private function showSphereRank():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				sphereList = GameManager.gameMgr.sphereList.getUserRank();
+				lblTotal2.text = "总数 " + sphereList.length.toString();
+				
+				pagination2.dataSource = sphereList;
+				pagination2.pageNum = 10;
+				pagination2.dataUI = dgSphere;
+				pagination2.dataUIProvider = "dataProvider";
+				
+				pagination2.refresh();
+				
+				tiName2.text = "";
+			}
+			
+			private function searchSphere():void
+			{
+				if (StringUtil.trim(tiName2.text).length == 0)
+				{
+					showSphereRank();
+					return;
+				}
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				sphereList = GameManager.gameMgr.sphereList.getSearch(StringUtil.trim(tiName2.text));
+				lblTotal2.text = "总数 " + sphereList.length.toString();
+				
+				pagination2.dataSource = sphereList;
+				pagination2.pageNum = 10;
+				pagination2.dataUI = dgSphere;
+				pagination2.dataUIProvider = "dataProvider";
+				
+				pagination2.refresh();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<GameToggleButtonBar id="list1" x="10" y="34" height="22" dataProvider="{vs1}" width="460">
+	</GameToggleButtonBar>
+	
+	<mx:ViewStack id="vs1" x="10" y="55" width="460" height="327" change="onChange();" styleName="lowCanvas">
+		<mx:Canvas label="实力榜" width="100%" height="100%">
+			<mx:DataGrid id="dgUser" x="8" y="8" width="440" height="277" headerHeight="25" rowHeight="25" textAlign="center">
+				<mx:columns>
+					<mx:DataGridColumn headerText="排名" dataField="rankName" width="40" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+									<mx:Script>
+										<![CDATA[
+											override public function set data(value:Object):void
+											{
+												super.data = value;
+												this.setStyle("color", value.rankColor);
+											}
+										]]>
+									</mx:Script>								
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="玩家" dataField="userName" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="等级" dataField="level" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="声望" dataField="prestige" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="势力" dataField="sphereName" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="爵位" dataField="digName" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="官位" dataField="offName" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					
+					<mx:DataGridColumn width="50" sortable="false" draggable="false" resizable="false" itemRenderer="wubao.ui.item.ItemFight">
+					</mx:DataGridColumn>
+				
+				</mx:columns>
+			</mx:DataGrid>
+			<GameTextInput id="tiName" x="8" y="293" width="80" height="22" isCH="true"/>
+			<GameButton x="93" y="293" label="搜　索" btnType="off" click="searchUser();" height="22"/>
+			<Pagination id="pagination" x="330" y="293">
+			</Pagination>
+			<mx:Label id="lblTotal" width="100" height="20" textAlign="center" horizontalCenter="0" y="293"/>
+		</mx:Canvas>
+		
+		<mx:Canvas label="声望榜" width="100%" height="100%">
+			<mx:DataGrid id="dgUser1" x="8" y="8" width="440" height="277" headerHeight="25" rowHeight="25" textAlign="center">
+				<mx:columns>
+					<mx:DataGridColumn headerText="排名" dataField="rank1" width="40" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="玩家" dataField="userName" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="等级" dataField="level" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="声望" dataField="prestige" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="势力" dataField="sphereName" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="爵位" dataField="digName" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="官位" dataField="offName" width="60" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					
+				</mx:columns>
+			</mx:DataGrid>
+			<GameTextInput id="tiName1" x="8" y="293" width="80" height="22" isCH="true"/>
+			<GameButton x="93" y="293" label="搜　索" btnType="off" click="searchUser1();" height="22"/>
+			<Pagination id="pagination1" x="330" y="293">
+			</Pagination>
+			<mx:Label id="lblTotal1" width="100" height="20" textAlign="center" horizontalCenter="0" y="293"/>
+		</mx:Canvas>
+				
+		<mx:Canvas label="势力榜" width="100%" height="100%">
+			<mx:DataGrid id="dgSphere" x="8" y="8" width="440" height="277" headerHeight="25" rowHeight="25" textAlign="center">
+				<mx:columns>
+					<mx:DataGridColumn headerText="排名" dataField="rank" width="40" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="势力" dataField="sphereName" width="80" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="君主" dataField="userName" width="80" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="威望" dataField="prestige" width="80" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="职位" dataField="levelName" width="50" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="城池" dataField="cityNum" width="50" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="成员" dataField="showNum" width="50" sortable="false" draggable="false" resizable="false">
+						<mx:headerRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:headerRenderer>
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label paddingTop="2">
+								</mx:Label>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+			<Pagination id="pagination2" y="293" x="330">
+			</Pagination>
+			<mx:Label id="lblTotal2" text="Label" width="100" height="20" textAlign="center" y="293" horizontalCenter="0"/>
+			<GameTextInput id="tiName2" x="8" y="293" width="80" isCH="true" height="22"/>
+			<GameButton x="93" y="293" label="搜　索" btnType="off" click="searchSphere();" height="22"/>
+		</mx:Canvas>
+	</mx:ViewStack>
+</GameWindow>

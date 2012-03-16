@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="440" height="351" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.WinManager;
+			import wubao.model.User;
+			import rob.events.RobEvent;
+			import mx.utils.StringUtil;
+		
+			import wubao.list.UserList;
+			import utils.GameManager;
+			
+			private var userList:UserList = null;
+			
+			private function init():void
+			{
+				helpID = 20;
+				setTitle("掠　夺");
+				addEventListener(RobEvent.ROB_USER, robUser);
+			}
+			
+			override public function refresh():void
+			{
+				userList = GameManager.gameMgr.userList.getRobUser();
+				
+				lblTotal.text = "总条数 " + userList.length.toString();
+				
+				pagination.dataSource = userList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgRank;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+			}
+			
+			private function search():void 
+			{
+				if (StringUtil.trim(tiName.text).length == 0)
+				{
+					refresh();
+					return;
+				}
+				
+				userList = userList.getSearch(StringUtil.trim(tiName.text));
+				lblTotal.text = "总条数 " + userList.length.toString();
+				
+				pagination.dataSource = userList;
+				pagination.pageNum = 10;
+				pagination.dataUI = dgRank;
+				pagination.dataUIProvider = "dataProvider";
+				
+				pagination.refresh();
+			}
+			
+			private function robUser(evt:RobEvent):void
+			{
+				var gameUser:User = evt.user as User;
+				if (gameUser == null) return;
+				
+				var selfUser:User = GameManager.gameMgr.user;
+				if (selfUser.orderCD > 0 && selfUser.orderCD > GameManager.gameMgr.gameTime)
+				{
+					WinManager.winMgr.showResult("征战等待中");
+					return;
+				}
+				
+				WinManager.winMgr.showRobSet(gameUser);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:DataGrid id="dgRank" x="10" y="34" width="420" height="277" headerHeight="25" rowHeight="25" textAlign="center">
+		<mx:columns>
+			<mx:DataGridColumn headerText="玩家" dataField="userName" width="70" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="声望" dataField="prestige" width="80" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="势力" dataField="sphereName" width="70" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="所在" dataField="place" width="70" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="被掠夺" dataField="robCount" width="50" sortable="false" draggable="false" resizable="false">
+				<mx:headerRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:headerRenderer>
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label paddingTop="2">
+						</mx:Label>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+
+			<mx:DataGridColumn headerText="" width="80" itemRenderer="rob.ui.item.ItemRob" sortable="false" draggable="false" resizable="false">
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<GameTextInput id="tiName" x="10" y="319" width="80" height="22" isCH="true"/>
+	<GameButton x="98" y="319" label="搜　索" btnType="off" click="search();" height="22"/>
+	
+	<Pagination id="pagination" x="312" y="319">
+	</Pagination>
+	<mx:Label id="lblTotal" x="170" y="319" text="Label" width="100" height="20" textAlign="center"/>
+</GameWindow>

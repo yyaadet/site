@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="226" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import net.tcp.TcpManager;
+			import net.tcp.model.sphere.TcpModify;
+			import utils.GameManager;
+			import sphere.model.Sphere;
+			import sphere.list.SphereList;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			private var sphereList:SphereList = null;
+			
+			private var _sphereID:int = 0;
+			
+			private var gameSphere:Sphere = null;
+			
+			private function init():void
+			{
+				setTitle("修改势力简介");
+				helpID = 11;
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				sphereList = GameManager.gameMgr.sphereList;
+				gameSphere = sphereList.getObjByID(sphereID) as Sphere;
+				
+				if (gameSphere != null)
+					taContent.text = gameSphere.description;
+			}
+			
+			private function modifyDes():void
+			{
+				var modify:TcpModify = new TcpModify();
+				modify.sphereID = gameSphere.uniqID;
+				modify.content = taContent.text;
+				TcpManager.tcpMgr.sendModify(modify);
+			}
+			
+			public function get sphereID():int
+			{
+				return _sphereID;
+			}
+			
+			public function set sphereID(param:int):void
+			{
+				_sphereID = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea id="taContent" x="10" y="34" width="380" height="149" maxChars="200"/>
+	<mx:Label x="11" y="190" text="最多可输入200个字符"/>
+	<GameButton x="168" y="192" label="提　交" click="modifyDes();"/>
+	
+</GameWindow>

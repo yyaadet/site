@@ -1,0 +1,54 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+
+<div id="content" >
+        <form method="get" action="/admin/setting_edit">
+        	<table>
+                <tr>
+                	<td>上传文件目录</td>
+                    <td><input type="text" name="upload_dir"  class="text"
+                    	value="${c.setting.upload_dir}" /></td>
+                </tr>
+                <tr>
+                	<td>静态文件HTTP服务器地址：</td>
+                    <td><input type="text" name="static_addr" class="text" 
+                    	value="${c.setting.static_addr}" /></td>
+                </tr>
+                <tr>
+                	<td>是否静态化URL：</td>
+                    <td><input type="text" name="is_use_static_url" class="text" value="${c.setting.is_use_static_url}" /></td>
+                </tr>
+                <tr>
+                	<td>seo标题：</td>
+                    <td><input type="text" name="seo_title" value="${c.setting.seo_title}" class="text" /></td>
+                </tr>
+                <tr>
+                	<td>seo关键字：</td>
+                    <td><input type="text" name="seo_keywords" value="${c.setting.seo_keywords}" class="text" /></td>
+                </tr>
+                <tr>
+                	<td>seo描述：</td>
+                    <td><textarea name="seo_desc" class="text" >${c.setting.seo_desc}</textarea></td>
+                </tr>
+                <tr>
+                	<td></td>
+                    <td><input type="submit" value="保存" class="button" /></td>
+                </tr>
+            </table>
+        </form>
+        <div class="table">
+        	<div class="row">nginx rewrite rule:</div>
+        	<div class="row">
+            <p>
+            rewrite "^/webgame/detail/([0-9a-z]+)\.html$" /webgame/detail?id=$1 break; <br  /> 
+            rewrite "^/webgame/([a-z]+)/([0-9]+)/([0-9]+)\.html$" /webgame/$1?page=$3&group_id=$2 break;<br  />
+            rewrite "^/webgame_news/detail/([0-9a-z]+)/([0-9a-z]+)\.html$" /webgame_news/detail?page=$2&id=$1 break;<br  />
+            rewrite "^/webgame_news/([a-z]+)/([0-9]+)/([0-9]+)\.html$" /webgame_news/$1?page=$3&group_id=$2 break;<br  />
+            </p>
+        	</div>
+       </div>
+</div>
+</%def>

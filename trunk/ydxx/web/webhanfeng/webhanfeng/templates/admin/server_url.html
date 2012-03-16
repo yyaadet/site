@@ -1,0 +1,52 @@
+<!--服务器URL设置　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <input type="hidden" id="error" value="${c.error}" />
+    <tr>
+      <td width="9%" height="40" align="right" bgcolor="#f9f0e1" class="gray">　资源服务器地址：</td>
+      <td align="left" valign="middle" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray" style="WIDTH: 450px " name="res_url" id="res_url" value="${c.res_url}"/></td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　跳转地址：</td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray"  style="WIDTH: 450px " name="redirect_url" id="redirect_url" value="${c.redirect_url}" /></td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　认证服务器地址：</td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray"  style="WIDTH: 450px " name="starpass_check" id="starpass_check" value="${c.starpass_check}" /></td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">游戏帮助URL：</td>
+      <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray" style="WIDTH: 450px " name="help_url" id="help_url" value="${c.help_url}" /></td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">兑换金币URL：</td>
+      <td height="35" align="left" bgcolor="#f9f0e1" class="gray">　
+        <input class="gray" style="WIDTH: 450px " name="convert_money" id="convert_money" value="${c.convert_money}" /></td>
+    </tr>
+    
+    <tr>
+      <td height="40" colspan="2" align="left" bgcolor="#f9f0e1" class="gray">　　　　　　　　　　　 
+        <a href="#"
+            onclick="selectTab('/admin/server_url?action=edit'
+            +'&res_url='+$('#res_url').val()
+            +'&redirect_url='+$('#redirect_url').val()
+            +'&starpass_check='+$('#starpass_check').val()
+            +'&help_url='+$('#help_url').val()
+            +'&convert_money='+$('#convert_money').val()
+            )"><img src="/images/pic_24.gif" width="54" height="25" border="0" /></a>
+            </td>
+    </tr>
+</table>
+<script type="text/javascript">
+    error = document.getElementById("error").value;
+    if(error==""){}else{alert(error);}
+</script>
+<!--服务器URL设置 end-->
+

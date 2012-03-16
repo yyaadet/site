@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="490" height="250" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import guid.GuidManager;
+			import utils.events.ConfirmEvent;
+			import utils.WinManager;
+			import utils.ui.WinAsk;
+			import net.tcp.model.wubao.TcpGrant;
+			import wubao.model.UserTreasure;
+			import utils.TipInfo;
+			import mx.events.FlexEvent;
+			import general.model.General;
+			import net.tcp.model.wubao.TcpCure;
+			import net.tcp.TcpManager;
+			import wubao.model.Build;
+			import utils.PubUnit;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			[Bindable]
+			private var generalList:Array = [];
+			
+			private var selGeneral:General = null;
+			
+			private var isInit:Boolean = false;
+			
+			private function init():void
+			{
+				helpID = 30;
+				taInfo.htmlText = TipInfo.getHospitalInfo();
+				isInit = true;
+				refresh();
+			}
+			
+			private function onComp(evt:FlexEvent):void
+			{
+				lblLevel.removeEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+				
+				lblLevel.x = cvImage.width - lblLevel.width - 5;
+				lblLevel.y = 5;
+				
+				PubUnit.drawBackground(lblLevel);
+			}
+			
+			override public function refresh():void
+			{
+				var type:int = Build.HOSPITAL;
+				
+				gameWubao = GameManager.gameMgr.wubao;
+				if (gameWubao != null)
+				{
+					var build:Build = gameWubao.buildList.getObjByID(type) as Build;
+					if (build != null)
+					{
+						lblLevel.addEventListener(FlexEvent.UPDATE_COMPLETE, onComp);
+						lblLevel.text = build.level.toString();
+						
+						var total:int = PubUnit.getCureMax(build.level);
+						var cure:int = gameWubao.cureSol;
+						
+						lblCure.text = (total - cure).toString() + " / " + total.toString() + " 人";
+						
+						if (isInit)
+							setTitle(build.title);
+					}
+						
+					generalList = gameWubao.generalList.getHurtList().list;
+					if (generalList.length < 1) 
+					{
+						btnCure.enabled = false;
+						btnRecover.enabled = false;
+						lblHurt.text = "";
+					}
+					else
+					{
+						btnCure.enabled = true;
+						btnRecover.enabled = true;
+						cbGeneral.selectedIndex = 0;
+						onChange();
+					}
+				}
+				
+				lu1.type = type;
+				lu1.refresh();
+			}
+			
+			private function onChange():void
+			{
+				selGeneral = generalList[cbGeneral.selectedIndex] as General;
+				if (selGeneral != null)
+					lblHurt.text = selGeneral.hurtNum.toString();
+			}
+			
+			private function cure():void
+			{
+				if (selGeneral == null) return;
+				
+				var cure:TcpCure = new TcpCure();
+				cure.wbID = gameWubao.uniqID;
+				cure.generalID = selGeneral.uniqID;
+				
+				TcpManager.tcpMgr.sendCure(cure);
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+			private var winAsk:WinAsk = null;
+			private function cureAll():void
+			{
+				var str:String = "";
+				var userTreasure:UserTreasure = GameManager.gameMgr.userTsList.getOneTreasure(9, 84);
+				
+				if (userTreasure != null)
+				{
+					str = "确定要使用治疗包来恢复所有的武将的伤兵吗？";
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmCureAll);
+				}
+				else
+				{
+					str = "当前没有治疗包，请到商城去购买";
+					WinManager.winMgr.showResult(str);
+					return;
+				}
+				
+				function confirmCureAll(evt:ConfirmEvent):void
+				{
+					var grant:TcpGrant = new TcpGrant();
+					grant.wbID = GameManager.gameMgr.wubao.uniqID;
+					grant.type = 3;
+					grant.generalID = 0;
+					grant.treasureID = userTreasure.uniqID;
+					TcpManager.tcpMgr.sendGrant(grant);
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvImage" x="10" y="34" width="128" height="128">
+		<mx:backgroundImage>@Embed(source='../../images/assets/wubao/win/hospital.swf')</mx:backgroundImage>
+		<mx:Label id="lblLevel" fontSize="16" fontWeight="bold" fontFamily="Arial" textAlign="center"/>
+	</mx:Canvas>
+	
+	<mx:Canvas x="146" y="34" width="334" height="60">
+		<mx:Label x="5" y="5" text="可治疗伤兵：" height="20" width="77" textAlign="left"/>
+		<mx:Label id="lblCure" x="80" y="4" height="20" width="120" styleName="number"/>
+			
+		<mx:Label x="5" y="30" text="武将" height="20" width="30" textAlign="left"/>
+		<mx:ComboBox id="cbGeneral" x="35" y="30" width="80" dataProvider="{generalList}" labelField="generalName" change="onChange();" height="20" text="选择武将" paddingRight="0"></mx:ComboBox>
+			
+		<mx:Label x="120" y="30" text="伤兵：" height="20" width="41" textAlign="left"/>
+		<mx:Label id="lblHurt" x="160" y="30" text="0" height="20" width="40"/>
+			
+		<GameButton id="btnCure" x="265" y="5" label="治　疗" click="cure();" height="24" width="64"/>
+		<GameButton id="btnRecover" x="265" y="30" label="恢　复" click="cureAll();" height="24" width="64" toolTip="治疗全部武将的伤兵"/>
+	</mx:Canvas>
+	<mx:TextArea id="taInfo" x="146" y="97" width="334" height="65" editable="false"/>
+	
+	<LevelUp id="lu1" x="10" y="170">
+	</LevelUp>
+	
+</GameWindow>

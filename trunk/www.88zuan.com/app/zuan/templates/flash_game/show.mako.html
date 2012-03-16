@@ -1,0 +1,84 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+<%namespace name="flash_game" file="/flash_game/func.mako.html" />
+
+<%def name="get_title()">${c.fg.name}</%def>
+
+<%def name="get_description()">${c.fg.operate_info}</%def>
+
+<%def name="get_top()"></%def>
+
+<%def name="get_search_box()"></%def>
+
+<%def name="get_tail()"></%def>
+
+<%def name="get_content()">
+<%
+from zuan.lib.helpers import fmt_time
+from zuan.lib.helpers import short_text
+from zuan.lib.helpers import static_flash_game_detail_url
+from zuan.controllers.flash_game import get_flash_game_pic_url
+from zuan.controllers.flash_game import get_flash_game_file_url
+from zuan.controllers.flash_game import get_group
+
+group = get_group(c.fg.group_id)
+%>
+        <div class="table" style="background-color: #000;">
+            <div class="row" style="height: ${c.height}; width: ${c.width}; text-align:center; ">
+                <div id="flash_game_file" style="margin: 0 auto; height: ${c.height}; width: ${c.width}; text-align:center; ">
+                </div>
+            </div>
+        </div>
+
+<script type="text/javascript">
+var g_logo_time = 10000;
+var g_log_interval = 10000;
+
+function get_logo()
+{
+	if (g_logo_time <= 0) {
+		show_swf();
+		return;
+	}
+	g_logo_time = g_logo_time - 1000;
+	$("#left_time").html("都有${c.fg.total_play}人玩过了！加载游戏中，剩余时间：" + (g_logo_time/1000) + "秒");
+	setTimeout("get_logo()", 1000);
+}
+
+function show_swf()
+{
+	$("#pre_play").remove();
+	$("#left_time").remove();
+        get_swf();
+}
+
+function log_play_time()
+{
+    $.getJSON("/flash_game/log_play_time", {'id': '${c.fg._id}'}, function(data) {
+        setTimeout("log_play_time()", g_log_interval);
+	return;
+     });
+}
+
+function get_swf()
+{
+    var flashvars={};
+    var params = {"menu": "false", "allowFullScreen": true, 'quality': 'high'};
+    var attrs={};
+	swfobject.embedSWF("${get_flash_game_file_url(c.fg, c.setting)}", "flash_game_file", "${c.width}", "${c.height}", "9.0.0", "expressInstall.swf", flashvars, params, attrs);
+	$.getJSON("/flash_game/playing", {'id': '${c.fg._id}'}, function(data) {
+            setTimeout("log_play_time()", g_log_interval);
+	    return;
+	});
+}
+
+$(document).ready(function() {
+	var ad = "<div id='pre_play' style='width: 100%;height: 500px; margin: 10px auto; padding-left: 180px;'><iframe align=\"center\" width=\"100%\" height=\"100%\" src=\"/ad/play_top_336_280.html\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\"></iframe></div>";
+	var left = "<div id=\"left_time\" style=\"margin: 5px auto; width: 100%; height: 25px; color: #fff; font-size: 14px;\"></div>";
+	$("#flash_game_file").append(left);
+	$("#flash_game_file").append(ad);
+	get_logo();
+});
+</script>
+</%def>

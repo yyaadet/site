@@ -1,0 +1,55 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+        <div>
+        <form method="post" action="/admin/do_setting">
+        <table id="mytable">
+                <tr>
+                <td>上传文件目录</td>
+                    <td><input type="text" name="upload_dir" 
+                    	value="${c.setting.upload_dir}" /></td>
+                </tr>
+                <tr>
+                	<td>静态文件HTTP服务器地址：</td>
+                    <td><input type="text" name="static_addr" 
+                    	value="${c.setting.static_addr}" /></td>
+                </tr>
+                <tr>
+                	<td>是否静态化URL：</td>
+                    <td><input type="text" name="is_use_static_url" 
+                    	value="${c.setting.is_use_static_url}" /></td>
+                </tr>
+                <tr>
+                	<td>seo标题：</td>
+                    <td><input type="text" name="seo_title" value="${c.setting.seo_title}" class="longtext" /></td>
+                </tr>
+                <tr>
+                	<td>seo关键字：</td>
+                    <td><input type="text" name="seo_keywords" value="${c.setting.seo_keywords}" class="longtext" /></td>
+                </tr>
+                <tr>
+                	<td>seo描述：</td>
+                    <td><textarea name="seo_desc" class="text" >${c.setting.seo_desc}</textarea></td>
+                </tr>
+                <tr>
+                	<td></td>
+                    <td><input type="submit" value="保存"  /></td>
+                </tr>
+            </table>
+        </form>
+        </div>
+        <div class="table">
+        	<div class="row">nginx rewrite rule:</div>
+        	<div class="row">
+            <p>
+            rewrite "^/flash_game/detail/([0-9a-z]+)\.html$" /flash_game/detail?id=$1 break; <br  /> 
+            rewrite "^/flash_game/play/flash_game_([0-9a-z]+)\.html$" /flash_game/play?id=$1 break;<br  />
+            rewrite "^/flash_game/all/flash_game_([0-9a-z]+)/([0-9a-z]+)\.html$" /flash_game/all?group_id=$1&page=$2 break;<br  />
+            rewrite "^/news/([0-9]+)\.html$" /news/detail?id=$1 break;<br  />
+            rewrite "^/flash_game_topic/detail/([0-9a-z]+)\.html$" /flash_game_topic/detail?id=$1 break;<br  />
+            </p>
+            </div>
+        </div>
+</%def>

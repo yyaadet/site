@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="136" creationComplete="init();">
+
+	<mx:Script>
+		<![CDATA[
+			import utils.WinManager;
+			import utils.FormatText;
+			import wubao.model.Build;
+			import utils.GameManager;
+			import wubao.model.WuBao;
+			
+			private var gameWubao:WuBao = null;
+			
+			private function init():void
+			{
+				setTitle("势　力");
+			}
+			
+			override public function refresh():void
+			{
+				var gameWubao:WuBao = GameManager.gameMgr.wubao;
+				var build:Build = null;
+				var str:String = "";
+				
+				helpID = 10;
+				build = gameWubao.buildList.getObjByID(Build.YST) as Build;
+				if (build == null) return;
+				
+				str += FormatText.packegText("您当前没有加入任何势力") + "\n";
+				
+				if (build.level < 10)
+				{
+                	str += FormatText.packegText("议事堂到达") + FormatText.packegText(" 10 ", FormatText.RED) + FormatText.packegText("级可加入势力") + "\n";
+                	btnJoin.enabled = false;
+    			}
+                else
+                {
+                	str += FormatText.packegText("议事堂到达") + FormatText.packegText(" 10 ", FormatText.GREEN) + FormatText.packegText("级可加入势力") + "\n";
+                	btnJoin.enabled = true;
+                }
+                	
+				if (build.level < 30)
+				{
+                	str += FormatText.packegText("议事堂到达") + FormatText.packegText(" 30 ", FormatText.RED) + FormatText.packegText("级可创建势力");
+                	btnCreate.enabled = false;
+    			}
+                else
+                {
+                	str += FormatText.packegText("议事堂到达") + FormatText.packegText(" 30 ", FormatText.GREEN) + FormatText.packegText("级可创建势力");
+                	btnCreate.enabled = true;
+                }
+                	
+				taInfo.htmlText = str;
+			}                 
+			
+			private function showSphereDis():void
+			{
+				WinManager.winMgr.showSphereDis();
+			}
+			
+			private function showSphereList():void
+			{
+				WinManager.winMgr.showSphereList();
+			}
+			
+			private function showCreateSphere():void
+			{
+				WinManager.winMgr.showCreateSph();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea id="taInfo" x="10" y="34" width="280" height="60" editable="false" textAlign="center"/>
+	
+	<GameButton x="46" y="102" width="64" height="24" label="势力分布" click="showSphereDis();"/>
+	<GameButton id="btnJoin" x="118" y="102" width="64" height="24" label="加入势力" click="showSphereList();"/>
+	<GameButton id="btnCreate" x="190" width="64" height="24" label="创建势力" click="showCreateSphere();" y="102"/>
+	
+</GameWindow>

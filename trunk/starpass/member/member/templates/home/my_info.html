@@ -1,0 +1,31 @@
+<%inherit file="index.html" />
+
+
+
+<%def name="html_content_title()">
+我的资料
+</%def>
+
+
+
+
+<%def name="html_content()">
+
+<div class="zhiliao">
+<ul>
+<li class="red">您的账号余额：${c.user.gold}</li>
+<li>通行证账号：${c.user.name}</li>
+<li>积分：${c.user.score}</li>
+%if c.user.sex == 1:
+<li>性 别：男</li>
+%else:
+<li>性 别：女</li>
+%endif
+<li>电子邮箱：${c.user.email}</li>
+%if False:
+<li>您的邮箱<span class="red">120***@qq.com</span>尚未激活。请登录该邮箱查收激活邮件并进行激活。如果未收到激活邮件，请点击 <span class="red">“重<a href="#" class="red">新</a></span><a href="#" class="red">发送激活邮件”</a>。如多次未接收邮件，请联系客服。 </li>
+%endif
+</ul>
+</div>
+
+</%def>

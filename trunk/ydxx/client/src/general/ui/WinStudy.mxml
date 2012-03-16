@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="480" height="250" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.TipInfo;
+			import utils.ui.WinAsk;
+			import utils.GameManager;
+			import net.tcp.TcpManager;
+			import net.tcp.model.wubao.TcpStudy;
+			import general.model.Zhen;
+			import utils.events.ConfirmEvent;
+			import utils.WinManager;
+			import general.model.General;
+			import general.model.Skill;
+			import wubao.model.User;
+			
+			private var _gameGeneral:General = null; 
+			
+			private var selItem:Object = null;
+			
+			private var winAsk:WinAsk = null;
+			
+			private function init():void
+			{
+				setTitle("学　习");
+				
+				gs1.addEventListener(GameStudy.ITEM_CLICK, onItemClick);
+				taInfo.htmlText = TipInfo.getStudyInfo();
+			}
+			
+			override public function refresh():void
+			{
+				gs1.gameGeneral = gameGeneral;
+				var gameUser:User = GameManager.gameMgr.user;
+				lblGong.text = "剩余功勋：" + gameUser.gong.toString();
+			}
+			
+			private function onItemClick(evt:Event):void
+			{
+				selItem = gs1.selItem;
+				var str:String = "";
+				
+				var gameUser:User = GameManager.gameMgr.user;
+				
+				if (selItem is Skill)
+				{
+					var gameSkill:Skill = selItem as Skill;
+					if (gameSkill == null) return;
+					if (gameGeneral.hasSkill(gameSkill.uniqID) || !gameGeneral.canSkill(gameSkill.uniqID)) return;
+					
+					if (gameUser.gong < gameSkill.pre)
+					{
+						WinManager.winMgr.showResult("您的功勋值不足，无法学习");
+						return;
+					}
+					
+					str = "学习 " + gameSkill.skillName + " 技能要扣除您" + gameSkill.pre.toString() + "功勋值，确定要学习吗？"
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmStudy); 
+				}
+				else if (selItem is Zhen)
+				{
+					var gameZhen:Zhen = selItem as Zhen;
+					if (gameZhen == null) return;
+					if (gameGeneral.hasZhen(gameZhen.uniqID) || !gameGeneral.canZhen(gameZhen.uniqID)) return;
+					
+					if (gameUser.gong < gameZhen.pre)
+					{
+						WinManager.winMgr.showResult("您的功勋值不足，无法学习");
+						return;
+					}
+					
+					str = "学习 " + gameZhen.zhenName + " 阵法要扣除您" + gameZhen.pre.toString() + "功勋值，确定要学习吗？"
+					winAsk = WinManager.winMgr.showAsk(str);
+					winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmStudy); 
+				}
+			}
+			
+			private function confirmStudy(evt:ConfirmEvent):void
+			{
+				if (selItem == null) return;
+				
+				var tcpStudy:TcpStudy = new TcpStudy();
+				tcpStudy.generalID = gameGeneral.uniqID;
+				if (selItem is Skill)
+				{
+					var gameSkill:Skill = selItem as Skill;
+					if (gameSkill == null) return;
+					
+					tcpStudy.type = 1;
+					tcpStudy.typeID = gameSkill.uniqID; 
+				}
+				else if (selItem is Zhen)
+				{
+					var gameZhen:Zhen = selItem as Zhen;
+					if (gameZhen == null) return;
+					
+					tcpStudy.type = 2;
+					tcpStudy.typeID = gameZhen.uniqID; 
+				}
+				
+				TcpManager.tcpMgr.sendStudy(tcpStudy);
+			}
+			
+			public function get gameGeneral():General
+			{
+				return _gameGeneral;
+			}
+			
+			public function set gameGeneral(param:General):void
+			{
+				_gameGeneral = param;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<GameStudy id="gs1" x="10" y="54">
+	</GameStudy>
+	
+	<mx:TextArea id="taInfo" x="10" width="460" height="72" editable="false" y="168"/>
+	<mx:Label id="lblGong" x="10" y="34" height="20" fontFamily="新宋体"/>
+	
+</GameWindow>

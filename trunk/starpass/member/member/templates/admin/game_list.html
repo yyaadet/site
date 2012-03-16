@@ -1,0 +1,35 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">游戏管理</span>
+</div>
+
+<div class="div_table">
+<table>
+    <tr>
+        <th><span>游戏ID</span></th>
+        <th><span>游戏名称</span></th>
+        <th><span>开发公司</span></th>
+        <th><span>接入时间</span></th>
+        <th><span>主页</span></th>
+        <th><span>基本操作</span></th>
+    </tr>
+    
+    %for item in c.data:
+    <tr>
+        <td>${item.id}</td>
+        <td>${item.name}</td>
+        <td>${item.developer}</td>
+        <td>${readable_time(item.access_time)}</td>
+        <td>${item.website}</td>
+        <td><a href="#" onclick="$.post('/admin/game_list',{id:'${item.id}', act:'del'},function(data){window.location.href='${c.self_url}';});">删除</a>|<a href="/admin/edit_game?game_id=${item.id}">编辑</a></td>
+    %endfor
+</table>
+</div>
+
+<%namespace file="/admin/pager.html" import="*" />
+${pager("/admin/game_list?page=")}
+
+</%def>

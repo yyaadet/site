@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="450" height="64" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.SceneManager;
+			import net.tcp.TcpManager;
+			import net.tcp.model.war.TcpJoinAttack;
+			import images.AssetsManager;
+			import utils.PubUnit;
+			import mx.controls.Label;
+			import city.model.AttackCity;
+			import utils.GameManager;
+			import city.list.AttackCityList;
+			
+			private var timer1:Timer = new Timer(1000);
+			
+			private var cvList:Array = [];
+			private var lblList:Array = [];
+			
+			private function init():void
+			{
+				timer1.addEventListener(TimerEvent.TIMER, onTimer);
+				timer1.stop();
+			}
+			
+			private function onTimer(evt:TimerEvent):void
+			{
+				var i:int = 0;
+				var label1:Label = null;
+				var attackCity:AttackCity = null;
+				
+				for (i = 0; i < lblList.length; i++)
+				{
+					label1 = lblList[i] as Label;
+					if (label1.data > 0)
+					{
+						var leftTime:int = int(label1.data);
+						leftTime --;
+						label1.data = leftTime;
+						label1.text = PubUnit.getActGameDate(leftTime);
+					}
+				} 
+				
+			}
+			
+			public function refresh():void
+			{
+				cvMain.removeAllChildren();
+				cvList.length = 0;
+				
+				var atkCityList:AttackCityList = GameManager.gameMgr.atkCityList.getSelfList();
+				var len:int = atkCityList.length;
+				if (len <= 0)
+				{
+					this.visible = false;
+					this.includeInLayout = false;
+					return;
+				}
+				
+				this.visible = true;
+				this.includeInLayout = true;
+				
+				var i:int = 0;
+				var attackCity:AttackCity = null;
+				
+				for (i = 0; i < atkCityList.length; i++)
+				{
+					attackCity = atkCityList.getObjByIndex(i) as AttackCity;
+					if (attackCity != null)
+					{
+						var cv1:Canvas = new Canvas();
+						cv1.width = 64;
+						cv1.height = 64;
+						cv1.x = i * cv1.width;
+						cv1.y = 0;
+						cv1.data = attackCity;
+						cv1.buttonMode = true;
+						cv1.useHandCursor = true;
+						cv1.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_ATTACK);
+						
+						var label1:Label = new Label();
+						
+						label1.width = cv1.width;
+						label1.height = 20;
+						label1.x = 0;
+						label1.y = 10;
+						cv1.addChild(label1);
+						label1.text = attackCity.cityName;
+						label1.setStyle("fontSize", 12);
+						label1.setStyle("textAlign", "center");
+						label1.setStyle("fontFamily", "新宋体");
+						label1.setStyle("color", PubUnit.WHITE);
+						label1.buttonMode = true;
+						label1.useHandCursor = true;
+						label1.mouseChildren = false;
+						
+						var tip:String = "";
+						if (GameManager.gameMgr.user.sphereID == attackCity.atkSphereID)
+							tip += "攻城战";
+						else
+							tip += "守城战";
+						
+						tip += "\n";
+						tip += "城池： " + attackCity.cityName + "\n";
+						tip += "攻方： " + attackCity.atkSphereName + "\n";
+						tip += "守方： " + attackCity.dfsSphereName + "\n";
+						tip += "时间： " + PubUnit.getDateStr(attackCity.warTime);
+							
+						cv1.toolTip = tip;
+						cvMain.addChild(cv1);
+						cvList.push(cv1);
+						cv1.addEventListener(MouseEvent.CLICK, cvClick);
+					} 
+				}
+				
+				refreshTime();
+			}
+			
+			private function cvClick(evt:MouseEvent):void
+			{
+				if (evt.currentTarget is Canvas)
+				{
+					var cv1:Canvas = evt.currentTarget as Canvas;
+					var attackCity:AttackCity = null;
+					
+					if (cv1 != null)
+					{
+						attackCity = cv1.data as AttackCity;
+						if (attackCity != null)
+						{
+							var tcpJoin:TcpJoinAttack = new TcpJoinAttack();
+							tcpJoin.warID = attackCity.uniqID;
+							TcpManager.tcpMgr.sendJoinAttack(tcpJoin); 
+						}
+					}
+				}
+			}
+			
+			public function refreshTime():void
+			{
+				var i:int = 0;
+				var cv1:Canvas = null;
+				var attackCity:AttackCity = null;
+				
+				lblList.length = 0;
+				
+				for (i = 0; i < cvList.length; i++)
+				{
+					cv1 = cvList[i] as Canvas;
+					attackCity = cv1.data as AttackCity;
+					cv1.removeAllChildren();
+					
+					var labelName:Label = new Label();
+					
+					labelName.width = cv1.width;
+					labelName.height = 20;
+					labelName.x = 0;
+					labelName.y = 10;
+					cv1.addChild(labelName);
+					labelName.text = attackCity.cityName;
+					labelName.setStyle("fontSize", 12);
+					labelName.setStyle("textAlign", "center");
+					labelName.setStyle("fontFamily", "新宋体");
+					labelName.setStyle("color", PubUnit.WHITE);
+					labelName.buttonMode = true;
+					labelName.useHandCursor = true;
+					labelName.mouseChildren = false;
+						
+					var leftTime:int = attackCity.warTime - GameManager.gameMgr.gameTime;
+					var label1:Label = new Label();
+					
+					label1.width = cv1.width;
+					label1.height = 20;
+					label1.x = 0;
+					label1.y = 25;
+					cv1.addChild(label1);
+					label1.setStyle("fontSize", 12);
+					label1.setStyle("textAlign", "center");
+					label1.setStyle("color", PubUnit.WHITE);
+					label1.buttonMode = true;
+					label1.useHandCursor = true;
+					label1.mouseChildren = false;
+					
+					if (leftTime <= 60)
+					{
+						label1.setStyle("fontFamily", "Arial");
+						label1.data = leftTime * 20;
+						label1.text = PubUnit.getActGameDate(leftTime * 20);
+						lblList.push(label1);
+					}
+					else
+					{
+						label1.text = "未开始";
+						label1.setStyle("fontFamily", "新宋体");
+					}
+				} 
+				
+				if (!timer1.running)
+					timer1.start();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="cvMain" x="0" y="0" width="100%" height="100%">
+	</mx:Canvas>
+	
+</mx:Canvas>

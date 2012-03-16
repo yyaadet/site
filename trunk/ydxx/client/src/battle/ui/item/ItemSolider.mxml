@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:UIComponent xmlns:mx="http://www.adobe.com/2006/mxml" width="30" height="30">
+	<mx:Script>
+		<![CDATA[
+		
+			private var _position:int = 0;
+			
+			private var _rowIndex:int = 0;
+			
+			private var _colIndex:int = 0;
+			
+			private var _isDel:Boolean = false;
+			
+			public function get position():int
+			{
+				return _position;
+			} 
+			
+			public function set position(param:int):void
+			{
+				_position = param;
+			}
+			
+			public function get isDel():Boolean
+			{
+				return _isDel;
+			} 
+			
+			public function set isDel(param:Boolean):void
+			{
+				_isDel = param;
+			}
+			
+			public function get rowIndex():int
+			{
+				return _rowIndex;
+			} 
+			
+			public function set rowIndex(param:int):void
+			{
+				_rowIndex = param;
+			}
+			
+			public function get colIndex():int
+			{
+				return _colIndex;
+			} 
+			
+			public function set colIndex(param:int):void
+			{
+				_colIndex = param;
+			}
+			
+		]]>
+	</mx:Script>
+</mx:UIComponent>

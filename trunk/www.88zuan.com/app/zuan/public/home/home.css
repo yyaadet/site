@@ -1,0 +1,63 @@
+body{ font: normal 12px/1.6em simsun, Verdana, Lucida, Arial, Helvetica, sans-serif; margin: 0 auto;text-align: center;padding: 0;}
+img { border: 0;}
+table tr td { font-size: 12px;}
+a:link, a:visited { text-decoration: none; color: #999999; }
+a:hover { text-decoration: none; color: #d70034; }
+a:active { text-decoration: none; color: #999999; }
+a.underline { text-decoration: underline; }
+ul, li { list-style: none outside none; margin: 0px; padding: 0px;}
+input { text-align: left;}
+input.text { width: 160px; height: 20px;}
+input.button{ width: 60px; height: 25px; text-align: center;}
+h1 {font-size: 1.6em;}
+
+#top {width: 970px; margin: 0 auto; text-align:center; color: #999999; background: url("/home/bodyer_top.gif") repeat-x center top transparent;}
+#top_tip { width: 970px; height: 25px; margin: 0 auto; height: 100%;}
+#top_left {margin: 6px auto; width: 200px; text-align: left; padding-left: 10px; float: left; height: 100%;}
+#top_right {margin: 6px auto; width: 750px; float: right; text-align: right;}
+#top_logo { width: 970px; height: 30px; margin: 5px auto; color: #000000; background: #fdacaf; border-radius: 3px;  -moz-border-radius: 3px;-webkit-border-radius: 3px; overflow: hidden;}
+#top_logo .col { float: left; width: 100px; font-size: 14px; font-weight: bolder; color: #ffffff; margin-top: 5px;}
+#top_logo .col_sp { float: left; width: 2px; font-size: 14px; font-weight: bolder; color: #ffffff; margin-top: 5px;}
+#top_logo a { color: #ffffff;}
+
+#top_banner {background: url("/home/top_banner.jpg") repeat-x center top transparent; width: 970px; height: 300px; margin: 0 auto; padding: 0;}
+
+#content {width: 970px; margin: 0 auto; padding: 0;}
+#content_left { border-right: solid 1px #cccccc; width: 240px; float: left; min-height: 400px;}
+#content_right { float: left; width: 720px;}
+
+#tail {width: 970px; clear: both; margin: 20px auto; border-top: solid 1px #ccc;}
+
+.search_box {width: 970px; clear: both; margin: 0px auto; text-align:center;}
+
+#page_banner { width: 100%; float: left; margin-top: 10px;}
+#page_banner ul { width: 380px; margin-left: 5px;}
+#page_banner ul li { float: left; margin: auto auto auto 5px; line-height: 20px; height: 20px;}
+#page_banner a { color: #fcadac;}
+
+#error_tip { color: red;}
+
+.title { width: 100%; border-bottom: dotted 1px #ccc; text-align: center;}
+.cnt { width: 100%; margin: 5px; text-align: left; min-height: 400px;}
+
+.fg_logo { width: 80px; height: 70px;}
+.fg_logo_big { width: 260px; height: 220px;}
+
+.hot{ color: red;}
+
+.table {width: 100%; margin: 5px auto; text-align: center; clear: both; display: block; min-height: 30px; height: auto;}
+.row { width: 100%; text-align: left; display: block; height: auto; min-height: 30px; clear:both; line-height: 28px;}
+.col { float: left; margin-left: 5px; min-width: 60px; text-align: left;}
+.col_line { margin: 0 auto; width: 100%; text-align: left;}
+
+.hidden { display: none;}
+.show { color: red;}
+
+.mini_head_img {width: 60px; height: 60px;}
+
+.tip_text {color: #777;font-size: 12px;}
+.interval {
+width: 100%;
+height: 5px;
+clear: left;
+}

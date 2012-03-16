@@ -1,0 +1,69 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">用户管理</span>
+</div>
+
+<div class="div_table">
+
+<div class="div_search">
+    <form method="post" action="/admin/user_list">
+    &nbsp;&nbsp;
+    <input type="hidden" name="act" value="search" />
+    <input type="txt" name="s_name" id="s_name" value="${c.s_name}">&nbsp;&nbsp;
+    <input type="radio" name="way" value="0" checked="checked"/>名称
+    <input type="radio" name="way" value="1" />ID
+    <input type="submit" value="搜索用户" />
+    </form>
+</div>
+
+<table>
+    <tr>
+        <th><span>用户名</span></th>
+        <th><span>邮箱</span></th>
+        <th><span>姓名</span></th>
+        <th><span>身份证</span></th>
+        <th><span>注册时间</span></th>
+        <th><span>注册IP</span></th>
+        <th><span>来源</span></th>
+        <th><span>星币</span></th>
+        <th><span>累计充值</span></th>
+        <th><span>积分</span></th>
+        <th><span>基本操作</span></th>
+    </tr>
+    
+    %for item in c.data:
+    <tr>
+        <td>${item.name}</td>
+        <td>${item.email}</td>
+        <td>${item.real_name}</td>
+        <td>${item.id_card}</td>
+        <td>${readable_time(item.reg_time)}</td>
+        <td>${item.reg_ip}</td>
+        <td>${item.referer}</td>
+        <td>${item.gold}</td>
+        <td>${item.total_rmb}</td>
+        <td>${item.score}</td>
+        <td>
+            %if item.state == 1:
+                <a href="#" onclick="$.post('/admin/lock_user',{id:'${item.id}', act:'lock'},function(data){window.location.href='${c.self_url}';});">解锁用户</a>
+            %else:
+                <a href="#" onclick="$.post('/admin/lock_user',{id:'${item.id}', act:'lock'},function(data){window.location.href='${c.self_url}';});">锁定用户</a>
+            %endif
+        </td>
+    </tr>
+    %endfor
+</table>
+</div>
+
+%if c.flag == "s":
+    <%namespace file="/admin/pager.html" import="*" />
+    ${pager("/admin/user_list?act=search&s_name="+c.s_name+"&way="+c.way+"&page=")}
+%else:
+    <%namespace file="/admin/pager.html" import="*" />
+    ${pager("/admin/user_list?page=")}
+%endif
+
+</%def>

@@ -1,0 +1,35 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">兑换记录</span>
+</div>
+
+<div class="div_table">
+<table>
+    <tr>
+        <th><span>用户ID</span></th>
+        <th><span>游戏ID</span></th>
+        <th><span>游戏服ID</span></th>
+        <th><span>星币</span></th>
+        <th><span>游戏币</span></th>
+        <th><span>兑换时间</span></th>
+    </tr>
+    
+    %for item in c.data:
+    <tr>
+        <td>${item.uid}</td>
+        <td>${item.game_id}</td>
+        <td>${item.server_id}</td>
+        <td>${item.gold}</td>
+        <td>${item.game_money}</td>
+        <td>${readable_time(item.time)}</td>
+    %endfor
+</table>
+</div>
+
+<%namespace file="/admin/pager.html" import="*" />
+${pager("/admin/exchange_log?page=")}
+
+</%def>

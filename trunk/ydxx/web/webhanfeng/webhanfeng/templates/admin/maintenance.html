@@ -1,0 +1,39 @@
+<!--系统维护　start-->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#ddc08f">
+    <input type="hidden" id="error" value="${c.error}" />
+    <tr>
+      <td width="10%" height="35" align="right" bgcolor="#f9f0e1" class="gray">　是否停机维护：</td>
+      <td width="93%" align="left" valign="middle" bgcolor="#f9f0e1" class="gray">　
+        %if c.is_maintenance == "1":
+        是
+        <input type="radio" name="is_maintenance" value="1" checked="checked" />
+        否
+        <input type="radio" name="is_maintenance" value="0" />
+        %else:
+        是
+        <input type="radio" name="is_maintenance" value="1" />
+        否
+        <input type="radio" name="is_maintenance" value="0" checked="checked" />
+        %endif
+        </td>
+    </tr>
+    
+    <tr>
+      <td height="40" align="right" bgcolor="#f9f0e1" class="gray">　维护信息：</td>
+      <td align="left" bgcolor="#f9f0e1" class="gray">　
+        <textarea class="gray"  rows="3" cols="50" name="maintenance_text" id="maintenance_text" >${c.maintenance_text}</textarea></td>
+    </tr>
+    
+    <tr>
+      <td height="35" colspan="2" align="left" bgcolor="#f9f0e1" class="gray">　　　　　　　　　　　　 
+        <a href="#" onclick="selectTab('/admin/maintenance?action=edit'
+            +'&is_maintenance='+$('input[name=\'is_maintenance\']:checked').val()
+            +'&maintenance_text='+$('#maintenance_text').val().replace(new RegExp(' ', 'g'),'&nbsp;')
+            )"><img src="/images/pic_24.gif" width="54" height="25" border="0" /></a></td>
+    </tr>
+</table>
+<script type="text/javascript">
+    error = document.getElementById("error").value;
+    if(error==""){}else{alert(error);}
+</script>
+ <!--系统维护 end-->

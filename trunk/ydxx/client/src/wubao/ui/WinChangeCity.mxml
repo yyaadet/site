@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="utils.components.*" width="820" height="540" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import net.tcp.model.wubao.TcpChangeCity;
+			import utils.events.ConfirmEvent;
+			import utils.ui.WinAsk;
+			import sphere.list.DipList;
+			import utils.WinManager;
+			import net.tcp.TcpManager;
+			import net.tcp.model.wubao.TcpTrans;
+			import city.ui.events.SendEvent;
+			import city.ui.menu.MenuSend;
+			import map.MapUtil;
+			import utils.FormatText;
+			import wubao.model.WuBao;
+			import sphere.list.SphereList;
+			import sphere.model.Sphere;
+			import map.list.CityPointList;
+			import map.model.CityPoint;
+			import mx.core.ScrollPolicy;
+		
+			import utils.PubUnit;
+			import city.model.City;
+			import utils.GameManager;
+			import city.list.CityList;
+			
+			private var gameWubao:WuBao = null;
+			private var selCity:City = null;
+			private var cityList:CityList = null;
+			private var cityPointList:CityPointList = new CityPointList();
+			private var dipList:DipList = null;
+			
+			private var winAsk:WinAsk = null;
+			
+			private function init():void
+			{
+				setTitle("城池选择");
+			}
+			
+			override public function refresh():void
+			{
+				gameWubao = GameManager.gameMgr.wubao;
+				cityList = GameManager.gameMgr.cityList;
+				dipList = GameManager.gameMgr.dipList;
+				
+				var i:int = 0;
+				var gameCity:City = null;
+				var len:int = cityList.length;
+				var r:int = 0;
+				var pX:int = 0;
+				var pY:int = 0;
+				var pColor:uint = 0;
+				var point:Point = null;
+				
+				for (i = 0; i < len; i++)
+				{
+					gameCity = cityList.getObjByIndex(i) as City;
+					if (gameCity.isAlloted == 0) continue;
+					
+					r = 4 * gameCity.level;
+					var cityPoint:CityPoint = new CityPoint();
+					cityPoint.uniqID = gameCity.uniqID;
+					cityPoint.gameCity = gameCity;
+					cityPoint.pWidth = r;
+					cityPoint.pHeight = r;
+					
+					point = MapUtil.transCoor(gameCity.mapX, gameCity.mapY);
+					cityPoint.x = int(point.x / 2.5 - r / 2);
+					cityPoint.y = int(point.y / 2.5 - r / 2);
+					
+					if (gameCity.isAlloted == 0 || gameCity.wubaoNum < 1)
+					{
+						cityPoint.pColor = PubUnit.WHITE;
+						cityPoint.draw();
+					}
+					else
+					{
+						cityPoint.pColor = PubUnit.GREEN;
+						cityPoint.draw1(PubUnit.GREEN, PubUnit.WHITE);
+					}
+						
+					mapSel.addChild(cityPoint);
+					cityPointList.add(cityPoint);
+					
+					cityPoint.addEventListener(MouseEvent.MOUSE_OVER, onOver);
+					cityPoint.addEventListener(MouseEvent.CLICK, cityClick);
+				}
+			}
+			
+			private function onOver(evt:MouseEvent):void
+			{
+				var cityPoint:CityPoint = evt.target as CityPoint;
+				if (cityPoint == null) return;
+				
+				var gameCity:City = cityPoint.gameCity;
+				if (gameCity == null) return;
+				
+				var tip:String = "";
+				
+				tip += FormatText.packegText("城池 ") + FormatText.packegText(gameCity.cityName, FormatText.GREEN) + "\n";
+				tip += FormatText.packegText("所在 ") + FormatText.packegText(gameCity.upName, FormatText.GREEN) + "\n";
+				tip += FormatText.packegText("势力 ") + FormatText.packegText(gameCity.sphereName, FormatText.GREEN) + "\n";
+				
+				if (gameCity.isAlloted == 1)
+					tip += FormatText.packegText("可分配坞堡 ") + FormatText.packegText(gameCity.wubaoNum.toString(), FormatText.GREEN);
+				else
+					tip += FormatText.packegText("NPC城，不可分配");
+				
+				cityPoint.toolTip = tip;
+			}
+			
+			private function cityClick(evt:MouseEvent):void
+			{
+				var cityPoint:CityPoint = evt.target as CityPoint;
+				if (cityPoint == null) return;
+				
+				var gameCity:City = cityPoint.gameCity;
+				if (gameCity == null) return;
+				
+				selCity = gameCity;
+				
+				if (selCity.wubaoNum < 1)
+				{
+					WinManager.winMgr.showResult("没有可分配坞堡，无法迁城");
+					return;
+				}
+				
+				if (gameCity.uniqID == gameWubao.cityID)
+				{
+					WinManager.winMgr.showResult("你已经在【" + gameCity.cityName + "】城内");
+					return;
+				}
+				
+				var info:String = "迁城需要花费" + FormatText.packegText("100") + "金币，确定要迁至【" + selCity.cityName + "】吗？"; 
+				winAsk = WinManager.winMgr.showAsk(info);
+				winAsk.addEventListener(ConfirmEvent.CONFIRM, confirmChange);
+				
+				function confirmChange(evt:ConfirmEvent):void
+				{
+					var tcpChange:TcpChangeCity = new TcpChangeCity();
+					tcpChange.cityID = selCity.uniqID;
+					TcpManager.tcpMgr.sendChangeCity(tcpChange);
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="mapSel" x="8" y="32" width="804" height="500" styleName="lowCanvas" backgroundAlpha="1.0">
+	</mx:Canvas>
+	
+</GameWindow>

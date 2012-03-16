@@ -1,0 +1,47 @@
+#-*- coding:utf-8 -*-
+<%def name="pager(urls)">
+
+<% 
+first = 1
+last = c.total / c.per_pages
+if c.total > c.per_pages * last:
+    last = last + 1
+total = c.total
+pages = last
+cur = c.page_num
+prev = c.page_num >= 1 and c.page_num - 1 or 0
+next = c.page_num <= last-1 and c.page_num+1 or None
+import urllib
+param = request.params
+param_keys = param.keys()
+request_data = ''
+for key in param_keys:  
+    request_data += urllib.urlencode({key: param[key].encode('utf8')})
+    request_data += '&'  
+%>
+
+<div class="pager">
+
+<span class="red">${total}</span>条记录，总页数：<span class="red">${pages}</span>，
+页条目：<span class="red">${c.per_pages}</span>，当前页：<span class="red">${cur}</span>&lt;&lt;
+%if first:
+<a href="${urls}${first}" >第一页</a> 
+%endif
+%if prev:
+| <a href="${urls}${prev}" >上一页</a> 
+%endif
+%if next:
+| <a href="${urls}${next}" >下一页</a>
+%endif
+%if last:
+| <a href="${urls}${last}" >最后一页</a>
+%endif
+&gt;&gt;
+%if pages > 1:
+<input name="${urls}" type="text" id="jump"  style="WIDTH: 20px " onkeydown="javascript: if(event.keyCode==13){ window.location.href=(this.name+this.value)}"/>
+<input type="button" name="${urls}" value="跳转" onclick="window.location.href=(this.name+$('#jump').val());">
+%endif
+
+</div>
+
+</%def>

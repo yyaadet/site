@@ -1,0 +1,54 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+<script charset="utf-8" src="/editor/kindeditor.js"></script>
+<script>
+        KE.show({
+                id : 'cnt', 
+				resizeMode: 0,
+				filterMode: true,
+				cssPath : '/editor/index.css'
+        });
+</script>
+<div id="content" >
+    <div id="content_left">
+    	<div id="content_left_head"><a href="/admin/send_sys_msg">发送系统留言</a></div>
+        <div id="content_left_head"><a href="/admin/send_sys_mail">发送系统邮件</a></div>
+    </div>
+    <div id="content_right">
+    	
+        <form method="post" action="/admin/do_send_sys_mail">
+        <div class="row">
+        	<div class="col">接收人名称：</div>
+        	<div class="col"><input type="text" class="longtext" name="to"></textarea></div>
+        </div>
+        <div class="row">
+        	<div class="col">标题：</div>
+        	<div class="col"><input type="text" class="longtext" name="title"></textarea></div>
+        </div>
+        <div class="row">
+        	<div class="col">内容：</div>
+        	<div class="col"><textarea id="cnt" name="cnt" class="textarea"></textarea></div>
+        </div>
+        
+        <div class="row">
+        	<div class="col">是否广播：</div>
+        	<div class="col">
+            	<input type="radio" name="is_broadcast" value="1" /><label>是</label>
+            	<input type="radio" name="is_broadcast" value="0" checked="checked"/><label>否</label>
+            </div>
+        </div>
+        <div class="row">
+        	<div class="col"></div>
+        	<div class="col">
+            	<input type="submit" value="发送"  class="button" />
+            </div>
+        </div>
+        </form>
+        
+     <!-- content right end -->
+    </div>
+</div>
+</%def>

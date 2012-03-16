@@ -1,0 +1,35 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">充值折扣</span>
+</div>
+
+<div class="div_table">
+
+<table>
+    <tr>
+        <th><span>ID</span></th>
+        <th><span>一次充值金额</span></th>
+        <th><span>折扣</span></th>
+        <th><span>基本操作</span></th>
+    </tr>
+    
+    %for item in c.data:
+    <tr>
+        <td>${item.id}</td>
+        <td>${item.rmb}</td>
+        <td>${item.rate}</td>
+        <td>
+            <a href="/admin/edit_recharge_rate?id=${item.id}">编辑</a>
+        </td>
+    </tr>
+    %endfor
+</table>
+</div>
+
+<%namespace file="/admin/pager.html" import="*" />
+${pager("/admin/recharge_rate?page=")}
+
+</%def>

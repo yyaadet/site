@@ -1,0 +1,40 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">管理员管理</span>
+</div>
+
+<div class="div_table">
+<table>
+    <tr>
+        <th><span>管理员名称</span></th>
+        <th><span>管理等级</span></th>
+        <th><span>基本操作</span></th>
+    </tr>
+    
+    %for item in c.data:
+    <tr>
+        <td>${item.name}</td>
+        <td>${item.level}</td>
+        <td>
+            %if item.name == "admin":
+                超级管理员
+            %elif c.admin_name == item.name:
+                自己
+            %elif c.admin_level < item.level or c.admin_name == "admin":
+               <a href="/admin/admin_list?act=del&id=${item.id}">删除管理员</a>
+            %else:
+                无操作权限
+            %endif
+        </td>
+    </tr>
+    %endfor
+</table>
+</div>
+
+<%namespace file="/admin/pager.html" import="*" />
+${pager("/admin/admin_list?page=")}
+
+</%def>

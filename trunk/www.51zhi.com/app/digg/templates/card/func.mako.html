@@ -1,0 +1,147 @@
+## -*- coding: utf-8 -*-
+
+<!-- 最新发卡 -->
+<%def name="get_card_new()">
+<%
+from digg.model.card import Card
+import pymongo
+
+objs = Card.query({}, limit = 10, sort = [("add_timestamp", pymongo.DESCENDING)])
+%>
+<div class="table" style="border-bottom: solid 1px #CEE3F8;">
+    <div class="row">
+        <div class="col" style="font-size: 1.3em; background: #EFF7FF;">
+        最新发卡
+        </div>
+    </div>
+</div>
+
+<div class="table">
+%for obj in objs:
+    <div class="row">
+        <div class="col" style="width: 300px; ">
+        	<%
+            url = h.static_card_detail_url(obj._id)
+            %>
+            <div class="col_line"><a href="${url}" title="${obj.title}" target="_blank">${h.short_text(obj.title, 50)}</a></div>
+        </div>
+    </div>
+%endfor
+</div>
+
+</%def>
+<!-- end -->
+
+<%def name="get_list(tag, objs, webgame_id, start_page, page, end_page, show_menu = True, show_page = True, show_all = False)">
+<script type="text/javascript">
+function get_city(id, e)
+{
+	/* type: 0, bad; 1, good; */
+	$.getJSON("/card/get_city", {"id": id}, function(result) {
+		if (result.city) {
+            $("#city_" + id).html(result.city);
+		}
+	});
+}
+
+</script>
+
+%if show_menu:
+<%
+from digg.model.webgame_group import WebgameGroup
+menus = [
+		{'name': u"高成功率", 'url': "/card/hotest?webgame_id=" + webgame_id},
+        {'name': u"最新", 'url': "/card/newest?webgame_id=" + webgame_id},
+]
+link_style = "text_button"
+%>
+<div class="table">
+    <div class="row">
+        %for menu in menus:
+        <%
+        if menu['name'] == c.menu_name:
+            link_style = "link_button"
+        else:
+            link_style = "text_button"
+        %>
+        <div class="col ${link_style}" style="text-align: center;"><a href="${menu['url']}">${menu['name']}</a></div>
+        %endfor
+    </div>
+</div>
+%endif
+
+%for obj in objs:
+<div class="table">
+    <div class="row">
+        <div class="col" style="width: 60px; min-width: 0;">
+            <div class="col_line rank">${h.fmt_float(obj.score)}%</div>
+        </div>
+        <div class="col" style="width: 520px;">
+        	<%
+            url = h.static_card_detail_url(obj._id)
+            %>
+            <div class="col_line"><a href="${url}" target="_blank" class="title">${obj.title}</a></div>
+            <%
+            from digg.model.webgame_group import get_webgame_group
+            import urllib
+            group = get_webgame_group(obj.group_id)
+            query = urllib.urlencode({'q': obj.title.encode("gbk")})
+            %>
+            <div class="col_line tip_text">
+                ${h.fmt_time(obj.add_timestamp)} 发布到【<a href='${h.static_webgame_detail_url(obj.webgame_id)}'>${obj.webgame_name}</a>】，
+                <a href="http://s.taobao.com/search?${query}" target="_blank">查看淘宝价</a>
+            </div>
+            <div class="col_line tip_text">
+            	领卡成功人数：<label class="hot">${obj.succ_num} (在：${h.fmt_time(obj.last_succ_timestamp)})</label> | 领卡失败人数：${obj.fail_num} (在：${h.fmt_time(obj.last_fail_timestamp)})
+            </div>
+            <div class="col_line">
+                %if not show_all:
+            	${h.short_text(obj.cnt, 100)}
+                %else:
+                ${obj.cnt}
+                %endif
+            </div>
+
+            %if c.is_admin:
+            <div class="col_line tip_text">
+                作者：${obj.uname} |
+                %if obj.city:
+                城市：${obj.city} |
+                %else:
+                城市：<a onclick="get_city('${obj._id}')" id="city_${obj._id}">++获取来源城市++</a> |
+                %endif
+                得分：${obj.score}
+            </div>
+            %endif
+            %if (obj.uid and c.uid == obj.uid) or c.is_admin == 1:
+            <div class="col_line">
+                <a href="/card/rem?id=${obj._id}" onclick="return is_confirm()">删除</a>
+            </div>
+            %endif
+        </div>
+    </div>
+</div>
+<div class="interval"></div>
+%endfor
+
+%if show_page:
+<!-- page -->
+<div class="table">
+    <div class="row">
+        %if start_page > 1:
+        <div class="col"><a href="${h.static_card_page_url(tag, webgame_id, start_page - 1)}">前10页</a></div>
+        %endif
+        %for i in range(start_page + 1, end_page):
+        <div class="col" style="min-width: 20px;">
+            %if i == page:
+            <strong><a href="${h.static_card_page_url(tag, webgame_id, i)}">[${i}]</a></strong>
+            %else:
+            <a href="${h.static_card_page_url(tag, webgame_id, i)}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col"><a href="${h.static_card_page_url(tag, webgame_id, end_page)}">后10页</a></div>
+    </div>
+</div>
+%endif
+</%def>

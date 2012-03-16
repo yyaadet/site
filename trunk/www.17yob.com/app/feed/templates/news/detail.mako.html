@@ -1,0 +1,61 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/home/base.mako.html" />
+
+
+<%def name="get_title()">${c.obj.title} - </%def>
+
+<%def name="get_description()">${h.short_text(c.obj.cnt, 50)}</%def>
+
+
+<%def name="get_content()">
+<%namespace file="/news/func.mako.html" name="news" />
+<script type="text/javascript">
+function add_share(id)
+{
+    $.getJSON("/news/add_share", {"id": id}, function(result) {
+        if (result.ret == 0) {
+            $("#add_share_result_" + id).html("成功分享");
+        }
+        else {
+            $("#add_share_result_" + id).html(result.msg);
+        }
+    });
+}
+</script>
+<div id="content">
+   <div id="left">
+       <script type="text/javascript">/*17yob_左侧_120*600*/ var cpro_id = 'u801635';</script><script src="http://cpro.baidu.com/cpro/ui/c.js" type="text/javascript"></script>
+    </div>
+    
+    <div id="mid">
+        <% 
+        from feed.model.group import SubGroups
+        import time
+        obj = c.obj 
+        now = int(time.time())
+        %>
+        <div class="table" style="width: 98%;">
+            <div class="row title"><h2><a href="/news/go?id=${obj._id}" target="_blank">${obj.title}</h2></a></div>
+            <div class="row tip_text">
+               ${obj.url}
+               <a href="javascript:void(0)" onclick="add_share('${obj._id}')">分享到QQ</a>
+               <div id="add_share_result_${obj._id}" class="error"></div>
+            </div>
+            <div class="row tip_text">类型： ${SubGroups[obj.group_id]['name']} 订阅者：${obj.uname} 来自订阅：${obj.feed_name} 人气： ${obj.view_num} 围观： ${obj.go_num} 发布时间：${h.fmt_time(obj.pub_timestamp)}  更新于： ${h.diff_time(now, obj.timestamp)}前 </div>
+            <div class="row article"><p>${obj.cnt|n}</p></div>
+        </div>
+        <div class="table" style="width: 98%;">
+            <!-- PingLun.La Begin -->
+            <div id="pinglunla_here"></div><a href="http://pinglun.la/" id="logo-pinglunla">评论啦</a><script type="text/javascript" src="http://static.pinglun.la/md/pinglun.la.js" charset="utf-8"></script>
+            <!-- PingLun.La End -->
+        </div>
+    </div>
+    
+    <div id="right">
+	    ${news.get_news_recommand(c.obj)}
+	    <%namespace file="/home/func.mako.html" name="home" />
+	    ${home.get_today_update_rss_list()}
+    </div>
+</div>
+</%def>

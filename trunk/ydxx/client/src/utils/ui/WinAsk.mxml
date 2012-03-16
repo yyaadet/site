@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="128" fontSize="12" creationComplete="init()" >
+
+	<mx:Script>
+		<![CDATA[
+			import guid.GuidManager;
+			import utils.events.ConfirmEvent;
+			
+			//提示信息
+			private var _tipInfo:String = "";
+			
+			private function init():void
+			{
+				setTitle("询　问");	
+				isShowHelp(false);
+				btnOK.enabled = true;
+				
+			}
+			
+			private function okClick(evt:MouseEvent):void
+			{
+				var confirmEvent:ConfirmEvent = new ConfirmEvent(ConfirmEvent.CONFIRM);
+				dispatchEvent(confirmEvent);
+				
+				super.closeWin(null);
+				
+				GuidManager.guidMgr.gotoNext();
+			}
+			
+			public function get tipInfo():String
+			{
+				return _tipInfo;
+			}
+			
+			public function set tipInfo(param:String):void
+			{
+				_tipInfo = param;
+				
+				if (tip != null)
+					tip.htmlText = _tipInfo;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea id="tip" x="10" y="34" width="280" height="50" editable="false"/>
+	<OKButton id="btnOK" x="82" y="94" click="okClick(event);"/>
+	<CloseButton x="154" y="94" click="closeWin(event);"/>
+	
+</GameWindow>

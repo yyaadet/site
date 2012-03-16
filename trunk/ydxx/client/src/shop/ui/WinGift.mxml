@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameWindow xmlns="utils.components.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="280" height="168" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import utils.WinManager;
+			import net.http.HttpManager;
+			import mx.utils.StringUtil;
+		
+			private function init():void
+			{
+				setTitle("领取礼包");	
+				
+				btnOK.enabled = false;
+			}
+			
+			override public function refresh():void
+			{
+				tiCode.text = "";
+				onChange();
+				tiCode.setFocus();
+			}
+			
+			private function onChange():void
+			{
+				if (StringUtil.trim(tiCode.text) != "")
+					btnOK.enabled = true;
+				else
+					btnOK.enabled = false;
+			}
+			
+			private function okClick(evt:MouseEvent):void
+			{
+				if (StringUtil.trim(tiCode.text) == "") return;
+				
+				HttpManager.httpMgr.getGift(StringUtil.trim(tiCode.text));
+			}
+			
+			override protected function closeWin(evt:MouseEvent):void
+			{
+				super.closeWin(evt);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea x="10" y="34" width="260" text="欢迎使用礼品兑换系统！输入正确的兑换码，您就可以收到对应的礼品" height="40"/>
+	<mx:Label x="10" y="84" text="请在下面输入兑换码" width="133" fontSize="12"/>
+	<mx:TextInput id="tiCode" x="10" y="104" width="260" change="onChange();"/>
+	<OKButton id="btnOK" x="72" y="134" click="okClick(event);"/>
+	<CloseButton x="144" y="134" click="closeWin(event);"/>
+	
+</GameWindow>

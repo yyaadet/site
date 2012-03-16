@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="48" height="240" verticalGap="0" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import utils.PubUnit;
+			import images.AssetsManager;
+			import utils.SceneManager;
+			import wubao.model.Build;
+			import utils.TipInfo;
+			import task.model.Task;
+			import wubao.model.User;
+			import wubao.model.WuBao;
+			import utils.GameManager;
+			import utils.WinManager;
+			
+			private var build:Build = null;
+			
+			private var gameWubao:WuBao = null;
+			
+			private function init():void
+			{
+			}
+			
+			private function exchange():void
+			{
+				var str:String = GameManager.gameMgr.exchangeURL;
+				var urlRequest:URLRequest = new URLRequest(str);
+				
+				navigateToURL(urlRequest, "_blank");
+			}
+			
+			private function showMarch():void
+			{
+				if (build.level < PubUnit.WorldLimit) return;
+				
+				WinManager.winMgr.showMarch();
+			}
+			
+			private function showRob():void
+			{
+				if (build.level < PubUnit.AreaLimit) return;
+				
+				WinManager.winMgr.showRob();
+			}
+			
+			private function showDuanlian():void
+			{
+				WinManager.winMgr.showTrain();
+			}
+			
+			private function showFind():void
+			{
+				if (build.level < PubUnit.FindLimit) return;
+				
+				WinManager.winMgr.showFind();
+			}
+			
+			private function showDeal():void
+			{
+				WinManager.winMgr.showDeal();
+			}
+			
+			public function refreshMenu():void
+			{
+				var gameWubao:WuBao = GameManager.gameMgr.wubao;
+				build = gameWubao.buildList.getObjByID(Build.YST) as Build;
+				
+				if (build.level < PubUnit.AreaLimit)
+				{
+					cvLD.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_LD_D);
+					cvLD.toolTip = "需要议事堂" + PubUnit.AreaLimit.toString() + "级";
+				}
+				else
+				{
+					cvLD.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_LD);
+					cvLD.toolTip = "";
+				}
+					
+				if (build.level < PubUnit.FindLimit)
+				{
+					cvFind.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_XF_D);
+					cvFind.toolTip = "需要议事堂" + PubUnit.FindLimit.toString() + "级";
+				}
+				else
+				{
+					cvFind.setStyle("backgroundImage", AssetsManager.assetsMgr.MAIN_XF);
+					cvFind.toolTip = "";
+				}
+					
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas width="48" height="48" backgroundImage="@Embed(source='../../images/assets/main/cq.png')" buttonMode="true" useHandCursor="true" click="exchange();">
+	</mx:Canvas>
+	<mx:Canvas id="cvLD" width="48" height="48" backgroundImage="@Embed(source='../../images/assets/main/ld.png')" buttonMode="true" useHandCursor="true" click="showRob();">
+	</mx:Canvas>
+	<mx:Canvas id="cvFind" width="48" height="48" backgroundImage="@Embed(source='../../images/assets/main/xf.png')" buttonMode="true" useHandCursor="true" click="showFind();">
+	</mx:Canvas>
+	<mx:Canvas width="48" height="48" backgroundImage="@Embed(source='../../images/assets/main/xl.png')" buttonMode="true" useHandCursor="true" click="showDuanlian();">
+	</mx:Canvas>
+	<mx:Canvas width="48" height="48" backgroundImage="@Embed(source='../../images/assets/main/jy.png')" buttonMode="true" useHandCursor="true" click="showDeal();">
+	</mx:Canvas>
+	
+</mx:VBox>

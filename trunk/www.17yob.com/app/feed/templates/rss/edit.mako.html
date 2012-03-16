@@ -1,0 +1,41 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+<%def name="get_content()">
+<div id="content" >
+   <div id="left">
+        <%namespace file="/user/func.mako.html" name="user" />
+        ${user.user_left_menu()}
+    </div>
+    <div id="mid">
+       <form action="/rss/do_edit" method="post">
+       <div class="table">
+           <div class="row">
+            	<div class="col">名称：</div>
+                <div class="col"><input type="text" class="text" name="name" value="${c.obj.name}" /></div>
+            </div>
+            <div class="row">
+            	<div class="col">链接：</div>
+                <div class="col"><input type="text" class="url" name="url" value="${c.obj.url}" /></div>
+            </div>
+            <div class="row">
+                 <div class="col">类别：</div>
+                 <div class="col">
+                     <%namespace file="/rss/func.mako.html" name="rss" />
+                     ${rss.get_groups(c.obj.group_id)}
+                 </div>
+            </div>
+            
+            <div class="row">
+            	<div class="col"><input type="hidden" name="id" value="${c.obj._id}"  /></div>
+                <div class="col"><input type="submit" class="button" value="编辑" /></div>
+            </div>
+       </div>
+       </form>
+    </div>
+    
+    <div id="right"></div>
+   
+</div>
+</%def>

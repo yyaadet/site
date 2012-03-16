@@ -1,0 +1,76 @@
+<%inherit file="index.html" />
+
+<%def name="foot_js()">
+<script>
+function get_servers(){
+//    异步获取JSON，将数据存在本地。key用的是game_id__server_id
+    $("#server_id").empty();
+    $("#server_id").prepend("<option value='0'>请选择服务器</option>");
+    $.getJSON(
+        "/home/get_game_servers?game_id="+$("#game_id").val(),
+        function(objs){
+            for(i=0;i<objs.length;i++){
+                $("#server_id").append("<option value='"+objs[i]["id"]+"'>"+objs[i]["name"]+"</option>");
+            }
+        }
+    );
+}
+
+
+</script>
+</%def>
+
+
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">添加新手卡</span>
+</div>
+
+<div class="content_content">
+
+<form action="/admin/game_gift" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="act" value="add" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="game_id">&nbsp;&nbsp;选择游戏</label>
+    <select id="game_id" name="game_id" onchange="get_servers();">
+        <option selected="selected" value="0">请选择游戏</option>
+        %for game in c.games:
+            <option value=${game.id}>${game.name}</option>
+        %endfor
+    </select>
+    </p>
+    
+    <p>
+    <label for="server_id">选择服务器</label>
+    <select id="server_id" name="server_id">
+        <option value='0'>请选择服务器</option
+    </select>
+    </p>
+    
+    
+    <p>
+    <label for="game_gift">上传礼品码</label>
+    <input type="file" name="game_gift" />
+    </p>
+    
+    <p>
+    <label for="is_oneoff">类型</label>
+        <input type="radio" name="is_oneoff" value="1" checked="checked"/>新手卡
+        <input type="radio" name="is_oneoff" value="3" />黄金新手卡
+    </p>
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+
+</div>
+
+</%def>

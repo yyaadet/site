@@ -1,0 +1,250 @@
+## -*- coding: utf-8 -*-
+
+<!-- 最新游戏 -->
+<%def name="get_webgame_new_list(group_id)">
+<%
+from digg.model.webgame import Webgame
+import pymongo
+
+objs = Webgame.query({'group_id': group_id}, limit = 10, sort=[('add_timestamp', pymongo.DESCENDING)])
+if not objs:
+    objs = Webgame.query({}, limit = 10, sort=[('add_timestamp', pymongo.DESCENDING)])
+%>
+<div class="table" style="border-bottom: solid 1px #CEE3F8;">
+    <div class="row">
+        <div class="col" style="font-size: 1.3em; background: #EFF7FF;">
+        最新游戏TOP 10
+        </div>
+    </div>
+</div>
+
+<div class="table">
+%for obj in objs:
+    <div class="row">
+        <div class="col" style="width: 100px;">
+            <a href="${ h.static_webgame_detail_url(obj._id)}" title="${obj.name}" target="_blank">${h.short_text(obj.name, 10)}</a>
+        </div>
+        <div class="col tip_text" style="width: 220px; margin-left: 10px;">
+            新闻数： ${obj.news_num}, 评论：${obj.comment_num}，人气：${obj.view_num}
+        </div>
+    </div>
+%endfor
+</div>
+
+</%def>
+<!-- end -->
+
+
+<!-- 玩家最爱游戏 -->
+<%def name="get_webgame_hot_list(group_id)">
+<%
+from digg.model.webgame import Webgame
+import pymongo
+
+objs = Webgame.query({'group_id': group_id}, limit = 10, sort=[('score', pymongo.DESCENDING)])
+if not objs:
+    objs = Webgame.query({}, limit = 10, sort=[('score', pymongo.DESCENDING)])
+%>
+<div class="table" style="border-bottom: solid 1px #CEE3F8;">
+    <div class="row">
+        <div class="col" style="font-size: 1.3em; background: #EFF7FF;">
+        游戏TOP 10
+        </div>
+    </div>
+</div>
+
+<div class="table">
+<% i = 0 %>
+%for obj in objs:
+    <%
+    hot = ""
+    if i < 3:
+        hot = "color: red;"
+    %>
+    <div class="row">
+        <div class="col" style="width: 100px;">
+            <a href="${ h.static_webgame_detail_url(obj._id)}" title="${obj.name}" style="${hot}" target="_blank">${h.short_text(obj.name, 10)}</a>
+        </div>
+        <div class="col tip_text" style="width: 220px; margin-left: 10px;">
+            新闻数： ${obj.news_num}, 评论：${obj.comment_num}，人气：${obj.view_num}
+        </div>
+    </div>
+    <% i += 1 %>
+%endfor
+</div>
+
+</%def>
+<!-- end -->
+
+
+<!-- 今日最热游戏 -->
+<%def name="get_webgame_today_hot_list(group_id)">
+<%
+from digg.model.webgame import Webgame
+import pymongo
+
+limit = 20
+objs = Webgame.query({'group_id': group_id}, limit = limit, sort=[('today_hot', pymongo.DESCENDING)])
+if not objs:
+    objs = Webgame.query({}, limit = limit, sort=[('today_hot', pymongo.DESCENDING)])
+%>
+<div class="table" style="border-bottom: solid 1px #CEE3F8;">
+    <div class="row">
+        <div class="col" style="font-size: 1.3em; background: #EFF7FF;">
+        今日最热游戏
+        </div>
+    </div>
+</div>
+
+<div class="table">
+<% i = 0 %>
+%for obj in objs:
+    <%
+    hot = ""
+    if i < 3:
+        hot = "color: red;"
+    %>
+    <div class="row">
+        <div class="col" style="width: 100px;">
+            <a href="${ h.static_webgame_detail_url(obj._id)}" title="${obj.name}" style="${hot}" target="_blank">${h.short_text(obj.name, 10)}</a>
+        </div>
+        <div class="col tip_text" style="width: 220px; margin-left: 10px;">
+            ${obj.today_hot}，
+            新闻数： ${obj.news_num},
+            评论：${obj.comment_num}
+        </div>
+    </div>
+    <% i += 1 %>
+%endfor
+</div>
+
+</%def>
+<!-- end -->
+
+
+<%def name="get_webgame_list(tag, objs, group_id, start_page, page, end_page, show_menu = True, show_page = True, limit=25)">
+%if show_menu:
+<%
+from digg.model.webgame_group import WebgameGroup
+menus = [
+		{'name': u"最热", 'url': "/webgame/hot"},
+                {'name': u"最新", 'url': "/webgame/newest"},
+]
+link_style = "text_button"
+%>
+<div class="table">
+    <div class="row">
+        %for menu in menus:
+        <%
+        if menu['name'] == c.menu_name:
+            link_style = "link_button"
+        else:
+            link_style = "text_button"
+        %>
+        <div class="col ${link_style}" style="text-align: center;"><a href="${menu['url']}">${menu['name']}</a></div>
+        %endfor
+    </div>
+</div>
+<div class="table" >
+    <div class="row">
+        <div class="col" style="width: 80px;"><a href="${h.static_webgame_page_url(tag, 0, 1)}">全部类型</a></div>
+    %for info in WebgameGroup:
+        <div class="col" style="width: 80px;"><a href="${h.static_webgame_page_url(tag, info['id'], 1)}">${info['name']}</a></div>
+    %endfor
+    </div>
+    <div class="row" style="border-bottom: solid 1px #CEE3F8; height: 2px; min-height: 0;"></div>
+</div>
+%endif
+        
+<%
+offset = page - 1
+if offset < 0:
+    offset = 0
+rank = 0 + offset * limit
+%>
+%for obj in objs:
+<% rank += 1 %>
+<div class="table" style="margin-top: 10px;">
+    <div class="row">
+        <div class="col" style="width: 30px; min-width: 0;">
+            <div class="col_line rank">${rank}</div>
+        </div>
+        <div class="col" style="width: 40px; min-width: 0;">
+            <div class="score col_line" style="text-align: center;">${obj.good_num - obj.bad_num}人</div>
+            <div class="score col_line"><img src="/user/love.jpg" alt="很喜欢" /></div>
+        </div>
+                <%
+                name = obj.name
+                try:
+                    name = h.urlencode(obj.name.encode('gbk'))
+                except:
+                    name = obj.name
+                %>
+        <div class="col" style="width: 530px;">
+            <div class="col_line"><a href="${h.static_webgame_detail_url(obj._id)}" class="title">${obj.name}</a> 
+            <label class="tip_text">(开发者：${obj.author}， 
+            %if obj.site:
+            <a target="_blank" href="${obj.site}">官方网站</a>
+            %else:
+            官方网站： <a target="_blank" style="color: red;" href="http://s8.taobao.com/search?commend=all&style=grid&q=${name}&pid=mm_12972016_2669395_9666412&mode=66&rdid=1328407946_3t1_1205531069">找找看</a>
+            %endif
+            )
+            </label></div>
+            <%
+            from digg.model.webgame_group import get_webgame_group
+            import time
+            now = int(time.time())
+            group = get_webgame_group(obj.group_id)
+            %>
+            <div class="col_line tip_text">
+                在${h.diff_time(obj.add_timestamp, now)} 前发布到 【${group['name']}】，
+                今日热度：${obj.today_hot}，
+                新闻数： ${obj.news_num},
+                评论：${obj.comment_num}，
+                人气：${obj.view_num}，
+                卡数：${obj.card_num}
+            </div>
+            <div class="col_line tip_text">
+
+                <a target="_blank" style="color: red;" href="http://s8.taobao.com/search?commend=all&style=grid&q=${name}&pid=mm_12972016_2669395_9666412&mode=66&rdid=1328407946_3t1_1205531069">买装备</a> |
+                <a target="_blank" href="http://video.baidu.com/v?word=${name}">看视频</a> |
+                <a target="_blank" href="http://www.jdyou.com/user/scriptFind.aspx?word=${name}">找脚本</a> |
+                <a target="_blank" href="${h.static_card_page_url('newest', obj._id)}">去领卡</a>
+            </div>
+            <div class="col_line">${obj.info}</div>
+            %if c.is_admin:
+            <div class="col_line tip_text">作者：${obj.uname}, 得分：${round(obj.score, 2)}</div>
+            %endif
+            %if (obj.uid and c.uid == obj.uid) or c.is_admin == 1:
+            <div class="col_line">
+                <a href="/webgame/edit?id=${obj._id}">编辑</a> | 
+                <a href="/webgame/rem?id=${obj._id}" onclick="return is_confirm()">删除</a>
+            </div>
+            %endif
+        </div>
+    </div>
+</div>
+<div class="interval"></div>
+%endfor
+
+%if show_page:
+<!-- page -->
+<div class="table">
+    <div class="row">
+        %if start_page > 1:
+        <div class="col" style="width: 50px;"><a href="${h.static_webgame_page_url(tag, group_id, start_page - 1)}">上10页</a></div>
+        %endif
+        %for i in range(start_page + 1, end_page):
+        <div class="col" style="min-width: 0;width: 20px;">
+            %if i == page:
+            <strong><a href="${h.static_webgame_page_url(tag, group_id, i)}">[${i}]</a></strong>
+            %else:
+            <a href="${h.static_webgame_page_url(tag, group_id, i)}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col" style="width: 50px;"><a href="${h.static_webgame_page_url(tag, group_id, end_page)}">下10页</a></div>
+    </div>
+</div>
+%endif
+</%def>

@@ -1,0 +1,67 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/user/base.mako.html" />
+
+
+<%def name="get_title()">${c.obj.title}</%def>
+
+<%def name="get_description()">
+%if c.obj.type == 0:
+	${c.obj.title}
+%else:
+	${h.short_text(c.obj.cnt, 100)}
+%endif
+</%def>
+
+
+<%def name="get_content()">
+
+<div id="content">
+	<div id="content_left">
+
+
+        <%namespace name="webgame_news" file="/webgame_news/func.mako.html" />
+        ${webgame_news.get_webgame_news_list('', [c.obj], 0, 0, 0, 0, False, False, True, is_short = False)}
+
+        ${webgame_news.get_webgame_news_recommand(c.obj)}
+        
+        <div class="table" style="border-bottom: solid 1px #CEE3F8;">
+        	<div class="row">
+            	<div class="col" style="font-size: 1.3em; background: #EFF7FF;">网友评论</div>
+            </div>
+        </div>
+        
+        <%namespace name="webgame_comment" file="/webgame_comment/func.mako.html" />
+        ${webgame_comment.get_webgame_comment_list(c.obj._id, c.comments, c.start_page, c.page, c.end_page)}
+        
+        <div class="table" style="border-bottom: solid 1px #CEE3F8;">
+        	<div class="row">
+            	<div class="col" style="font-size: 1.3em; background: #EFF7FF;">发表评论</div>
+            </div>
+        </div>
+        
+        <form action="/webgame_news/comment" method="post">
+        <div class="table" style="height: 170px;">
+        	<div class="row">
+            	<div class="col"><textarea name="cnt" class="text"></textarea><label class="tip_text">最多200字</label></div>
+            </div>
+            <div class="row">
+            	<div class="col">
+                <input type="hidden" name="id" value="${c.obj._id}" />
+                <input type="submit" value="评论" class="button" />
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+    
+    <div id="content_right">
+    	<%namespace file="/home/index.mako.html" name="home" />
+        ${home.get_content_right_add_link()}
+        
+        ${home.get_youxi_big_ads()}
+	
+    </div>
+</div>
+
+</%def>

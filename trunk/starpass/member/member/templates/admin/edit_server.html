@@ -1,0 +1,107 @@
+<%inherit file="index.html" />
+
+<%def name="html_content()">
+
+<div class="content_header">
+    <span class="tt">编辑游戏服务器</span>
+</div>
+
+<div class="content_content">
+<form action="/admin/edit_server" method="post">
+    <input type="hidden" name="act" value="edit" />
+    <input type="hidden" name="server_id" value="${c.server.id}" />
+    
+    <p>
+    <span class="err">${c.err}</span>
+    </p>
+    
+    <p>
+    <label for="server_name">&nbsp;&nbsp;&nbsp;服务器名</label>
+    <input type="text" id="server_name" name="server_name" value="${c.server.name}"/>
+    </p>
+    
+    <p>
+    <label for="game_id">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;游戏ID</label>
+    <select id="game_id" name="game_id">
+        <option value="0">请选择服务器</option>
+        %for game in c.games:
+            %if game.id == c.server.game_id:
+                <option value=${game.id} selected="selected">${game.name}</option>
+            %else:
+                <option value=${game.id}>${game.name}</option>
+            %endif
+        %endfor
+    </select>
+    </p>
+    
+    <p>
+    <label for="url">&nbsp;&nbsp;&nbsp;&nbsp;游戏URL</label>
+    <input size="60" type="text" id="url" name="url" value="${c.server.url}"/>
+    </p>
+    
+    <p>
+    <label for="recharge_url">游戏兑换URL</label>
+    <input size="60" type="text" id="recharge_url" name="recharge_url" value="${c.server.recharge_url}"/>
+    </p>
+    
+    <p>
+    <label for="rate">&nbsp;&nbsp;&nbsp;充值比率</label>
+    <input type="text" id="rate" name="rate" value="${c.server.rate}"/>
+    </p>
+    
+    <p>
+    <label for="pay_key">&nbsp;&nbsp;&nbsp;充值密钥</label>
+    <input type="text" id="pay_key" name="pay_key" value="${c.server.pay_key}"/>
+    </p>
+    
+    <p>
+    <label for="line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;线路</label>
+    <select id="line" name="line">
+    </select>
+    </p>
+    
+    
+    <p>
+    <input type="submit"  value="提交" />
+    </p>
+</form>
+
+</div>
+
+</%def>
+
+
+<%def name="foot_js()">
+<script>
+$(document).ready(function(){
+$("#line").prepend("<option value='0'>请选择线路</option>");
+$.getJSON(
+    "/home/get_game_lines?game_id="+$("#game_id").val(),
+    function(objs){
+        for(i=0;i<objs.length;i++){
+            if (objs[i]["id"] == ${c.server.line}){
+                $("#line").append("<option value='"+objs[i]["id"]+"' selected='selected'>"+objs[i]["name"]+"</option>");
+            }
+            else{
+                $("#line").append("<option value='"+objs[i]["id"]+"'>"+objs[i]["name"]+"</option>");
+            }
+        }
+    }
+);
+    
+$("#game_id").change(function(){
+    $("#line").empty();
+    $("#line").prepend("<option value='0'>请选择线路</option>");
+    $.getJSON(
+        "/home/get_game_lines?game_id="+$("#game_id").val(),
+        function(objs){
+            for(i=0;i<objs.length;i++){
+                $("#line").append("<option value='"+objs[i]["id"]+"'>"+objs[i]["name"]+"</option>");
+            }
+        }
+    );
+});
+
+})
+</script>
+</%def>

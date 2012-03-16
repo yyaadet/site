@@ -1,0 +1,75 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/admin/base.mako.html" />
+
+<%def name="get_content()">
+<div id="content" >
+	${self.get_menu()}
+    
+    ${self.get_friendlink_list(c.objs, c.is_in_home, c.start_page, c.page, c.end_page)}
+</div>
+</%def>
+
+<%def name="get_menu(name='')">
+<%
+menus = [{'name': u'添加链接', 'url': '/admin/friendlink_add'}, 
+		 {'name': u'显示外链', 'url': '/admin/friendlink?is_in_home=1'},
+                {'name': u'显示内链', 'url': '/admin/friendlink?is_in_home=0'},
+                ]
+%>
+<div class="table">
+	<div class="row">
+    	%for menu in menus:
+        <a href="${menu['url']}">${menu['name']}</a> | 
+        %endfor
+    </div>
+</div>
+</%def>
+
+<%def name="get_friendlink_list(objs, is_in_home, start_page, page, end_page)">
+
+<table id="mytable">
+<tr>
+    <th>在首页</th>
+    <th>重点显示</th>
+    <th>顺序</th>
+    <th>友链名称</th>
+    <th>URL</th>
+    <th>编辑</th>
+    <th>删除</th>
+</tr>
+
+%for obj in objs:
+<tr>
+    <td>${obj.is_in_home}</td>
+    <td>${obj.is_hot}</td>
+    <td>${obj.order}</td>
+    <td>${obj.name}</td>
+    <td>${obj.url}</td>
+    <td><a href="/admin/friendlink_edit?id=${obj._id}">编辑</a></td>
+    <td><a href="/admin/friendlink_rem?id=${obj._id}">删除</a></td>
+</tr>
+%endfor
+</table>
+
+%if show_page:
+<!-- page -->
+<div class="table">
+    <div class="row">
+        %if c.start_page != 1:
+        <div class="col" style="width: 50px;"><a href="/admin/friendlink?is_in_home=${is_in_home}&page=${start_page - 1}">上一页</a></div>
+        %endif
+        %for i in range(start_page, end_page + 1):
+        <div class="col" style="min-width: 0;width: 20px;">
+            %if i == c.page:
+            <strong><a href="/admin/friendlink?is_in_home=${is_in_home}&page=${i}">[${i}]</a></strong>
+            %else:
+            <a href="/admin/friendlink?is_in_home=${is_in_home}&page=${i}">${i}</a>
+            %endif
+        </div>
+        %endfor
+        <div class="col" style="width: 50px;"><a href="/admin/friendlink?is_in_home=${is_in_home}&page=${end_page + 1}">下一页</a></div>
+    </div>
+</div>
+%endif
+</%def>
